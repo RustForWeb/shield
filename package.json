@@ -1,0 +1,15 @@
+{
+    "name": "@rustforweb/auth",
+    "description": "Web authentication for Rust.",
+    "author": "Rust For Web <info@rustforweb.org>",
+    "repository": "github:RustForWeb/auth",
+    "license": "MIT",
+    "private": true,
+    "scripts": {},
+    "devDependencies": {
+        "prettier": "^3.4.2"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}
