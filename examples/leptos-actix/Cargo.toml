@@ -1,0 +1,41 @@
+[package]
+name = "auth-examples-leptos-actix"
+description = "Example with Leptos and Actix."
+publish = false
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+actix-files = { workspace = true, optional = true }
+actix-web = { workspace = true, optional = true }
+console_error_panic_hook.workspace = true
+leptos.workspace = true
+leptos_actix = { workspace = true, optional = true }
+leptos_meta.workspace = true
+leptos_router.workspace = true
+wasm-bindgen.workspace = true
+
+[features]
+hydrate = ["leptos/hydrate"]
+ssr = [
+    "dep:actix-files",
+    "dep:actix-web",
+    "dep:leptos_actix",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+]
+
+[package.metadata.leptos]
+bin-features = ["ssr"]
+bin-default-features = false
+
+lib-features = ["hydrate"]
+lib-default-features = false
