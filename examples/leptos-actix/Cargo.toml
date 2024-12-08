@@ -1,5 +1,5 @@
 [package]
-name = "auth-examples-leptos-actix"
+name = "shield-examples-leptos-actix"
 description = "Example with Leptos and Actix."
 publish = false
 

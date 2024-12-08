@@ -1,6 +1,6 @@
 [package]
-name = "auth-axum"
-description = "Axum integration for Auth."
+name = "shield-disel"
+description = "Diesel storage for Shield."
 
 authors.workspace = true
 edition.workspace = true

@@ -1,6 +1,6 @@
 [package]
-name = "auth-webauthn"
-description = "WebAuthn authentication provider for Auth."
+name = "shield-webauthn"
+description = "WebAuthn provider for Shield."
 
 authors.workspace = true
 edition.workspace = true

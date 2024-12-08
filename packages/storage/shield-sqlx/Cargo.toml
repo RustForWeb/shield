@@ -1,6 +1,6 @@
 [package]
-name = "auth-oidc"
-description = "OpenID Connect authentication provider for Auth."
+name = "shield-sqlx"
+description = "SQLx storage for Shield."
 
 authors.workspace = true
 edition.workspace = true

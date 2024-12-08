@@ -1,8 +1,8 @@
 {
-    "name": "@rustforweb/auth",
+    "name": "@rustforweb/shield",
     "description": "Web authentication for Rust.",
     "author": "Rust For Web <info@rustforweb.org>",
-    "repository": "github:RustForWeb/auth",
+    "repository": "github:RustForWeb/shield",
     "license": "MIT",
     "private": true,
     "scripts": {},

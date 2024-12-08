@@ -1,6 +1,6 @@
 [package]
-name = "auth-disel"
-description = "Diesel storage for Auth."
+name = "shield-oauth"
+description = "OAuth provider for Shield."
 
 authors.workspace = true
 edition.workspace = true

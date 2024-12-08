@@ -1,11 +1,11 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use auth_examples_leptos_axum::app::*;
     use axum::Router;
     use leptos::config::get_configuration;
     use leptos::logging::log;
     use leptos_axum::{generate_route_list, LeptosRoutes};
+    use shield_examples_leptos_axum::app::*;
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;

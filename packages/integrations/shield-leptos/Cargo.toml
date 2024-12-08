@@ -1,6 +1,6 @@
 [package]
-name = "auth-email"
-description = "Email authentication provider for Auth."
+name = "shield-leptos"
+description = "Leptos integration for Shield."
 
 authors.workspace = true
 edition.workspace = true

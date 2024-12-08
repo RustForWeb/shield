@@ -1,10 +1,10 @@
-# Introduction
+<h1 align="center">Shield Axum</h1>
 
-Web authentication for Rust.
+[Axum](https://github.com/tokio-rs/axum) integration for Shield.
 
-## License
+## Documentation
 
-This project is available under the [MIT license](https://github.com/RustForWeb/shield/blob/main/LICENSE.md).
+See [the Shield book](https://shield.rustforweb.org/) for documentation.
 
 ## Rust For Web
 

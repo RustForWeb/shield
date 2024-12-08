@@ -1,6 +1,6 @@
 [package]
-name = "auth-credentials"
-description = "Credentials authentication provider for Auth."
+name = "shield-actix"
+description = "Actix integration for Shield."
 
 authors.workspace = true
 edition.workspace = true

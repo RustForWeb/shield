@@ -1,5 +1,5 @@
 [package]
-name = "auth-examples-leptos-axum"
+name = "shield-examples-leptos-axum"
 description = "Example with Leptos and Axum."
 publish = false
 

@@ -1,6 +1,6 @@
 [package]
-name = "auth-leptos"
-description = "Leptos integration for Auth."
+name = "shield-oidc"
+description = "OpenID Connect provider for Shield."
 
 authors.workspace = true
 edition.workspace = true

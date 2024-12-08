@@ -1,6 +1,6 @@
 [package]
-name = "auth-actix"
-description = "Actix integration for Auth."
+name = "shield-axum"
+description = "Axum integration for Shield."
 
 authors.workspace = true
 edition.workspace = true

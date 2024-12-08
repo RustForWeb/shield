@@ -1,6 +1,6 @@
 [package]
-name = "auth-oauth"
-description = "OAuth authentication provider for Auth."
+name = "shield"
+description = "Web authentication for Rust."
 
 authors.workspace = true
 edition.workspace = true

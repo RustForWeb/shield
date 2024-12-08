@@ -1,6 +1,6 @@
 [package]
-name = "auth-sqlx"
-description = "SQLx storage for Auth."
+name = "shield-seaorm"
+description = "SeaORM storage for Shield."
 
 authors.workspace = true
 edition.workspace = true

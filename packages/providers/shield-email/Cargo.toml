@@ -1,6 +1,6 @@
 [package]
-name = "auth-seaorm"
-description = "SeaORM storage for Auth."
+name = "shield-email"
+description = "Email provider for Shield."
 
 authors.workspace = true
 edition.workspace = true

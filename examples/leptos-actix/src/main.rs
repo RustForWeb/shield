@@ -3,9 +3,9 @@
 async fn main() -> std::io::Result<()> {
     use actix_files::Files;
     use actix_web::*;
-    use auth_examples_leptos_actix::app::*;
     use leptos::config::get_configuration;
     use leptos_actix::{generate_route_list, LeptosRoutes};
+    use shield_examples_leptos_actix::app::*;
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;

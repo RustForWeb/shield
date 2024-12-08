@@ -331,82 +331,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "auth"
-version = "0.0.1"
-
-[[package]]
-name = "auth-actix"
-version = "0.0.1"
-
-[[package]]
-name = "auth-axum"
-version = "0.0.1"
-
-[[package]]
-name = "auth-credentials"
-version = "0.0.1"
-
-[[package]]
-name = "auth-disel"
-version = "0.0.1"
-
-[[package]]
-name = "auth-email"
-version = "0.0.1"
-
-[[package]]
-name = "auth-examples-leptos-actix"
-version = "0.0.1"
-dependencies = [
- "actix-files",
- "actix-web",
- "console_error_panic_hook",
- "leptos",
- "leptos_actix",
- "leptos_meta",
- "leptos_router",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "auth-examples-leptos-axum"
-version = "0.0.1"
-dependencies = [
- "axum",
- "console_error_panic_hook",
- "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "tokio",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "auth-leptos"
-version = "0.0.1"
-
-[[package]]
-name = "auth-oauth"
-version = "0.0.1"
-
-[[package]]
-name = "auth-oidc"
-version = "0.0.1"
-
-[[package]]
-name = "auth-seaorm"
-version = "0.0.1"
-
-[[package]]
-name = "auth-sqlx"
-version = "0.0.1"
-
-[[package]]
-name = "auth-webauthn"
-version = "0.0.1"
-
-[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2406,6 +2330,82 @@ dependencies = [
  "cpufeatures",
  "digest",
 ]
+
+[[package]]
+name = "shield"
+version = "0.0.1"
+
+[[package]]
+name = "shield-actix"
+version = "0.0.1"
+
+[[package]]
+name = "shield-axum"
+version = "0.0.1"
+
+[[package]]
+name = "shield-credentials"
+version = "0.0.1"
+
+[[package]]
+name = "shield-disel"
+version = "0.0.1"
+
+[[package]]
+name = "shield-email"
+version = "0.0.1"
+
+[[package]]
+name = "shield-examples-leptos-actix"
+version = "0.0.1"
+dependencies = [
+ "actix-files",
+ "actix-web",
+ "console_error_panic_hook",
+ "leptos",
+ "leptos_actix",
+ "leptos_meta",
+ "leptos_router",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "shield-examples-leptos-axum"
+version = "0.0.1"
+dependencies = [
+ "axum",
+ "console_error_panic_hook",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
+ "tokio",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "shield-leptos"
+version = "0.0.1"
+
+[[package]]
+name = "shield-oauth"
+version = "0.0.1"
+
+[[package]]
+name = "shield-oidc"
+version = "0.0.1"
+
+[[package]]
+name = "shield-seaorm"
+version = "0.0.1"
+
+[[package]]
+name = "shield-sqlx"
+version = "0.0.1"
+
+[[package]]
+name = "shield-webauthn"
+version = "0.0.1"
 
 [[package]]
 name = "shlex"

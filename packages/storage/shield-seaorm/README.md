@@ -1,10 +1,10 @@
-# Introduction
+<h1 align="center">Shield SeaORM</h1>
 
-Web authentication for Rust.
+[SeaORM](https://www.sea-ql.org/SeaORM/) storage for Shield.
 
-## License
+## Documentation
 
-This project is available under the [MIT license](https://github.com/RustForWeb/shield/blob/main/LICENSE.md).
+See [the Shield book](https://shield.rustforweb.org/) for documentation.
 
 ## Rust For Web
 
