@@ -1,0 +1,11 @@
+[package]
+name = "auth-leptos"
+description = "Leptos integration for Auth."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]

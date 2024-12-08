@@ -1,0 +1,11 @@
+[package]
+name = "auth-webauthn"
+description = "WebAuthn authentication provider for Auth."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
