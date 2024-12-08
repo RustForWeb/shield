@@ -6,6 +6,10 @@ Web authentication for Rust.
 
 TODO
 
+## Credits
+
+Inspired by [Auth.js](https://authjs.dev/).
+
 ## License
 
 This project is available under the [MIT license](LICENSE.md).
