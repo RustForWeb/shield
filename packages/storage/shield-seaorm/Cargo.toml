@@ -9,3 +9,11 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+async-trait.workspace = true
+sea-orm.workspace = true
+sea-orm-migration.workspace = true
+serde.workspace = true
+
+[features]
+default = []
+entity = []

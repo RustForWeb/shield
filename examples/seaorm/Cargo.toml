@@ -1,0 +1,23 @@
+[package]
+name = "shield-examples-seaorm"
+description = "Example with SeaORM."
+publish = false
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
+async-std = { workspace = true, features = ["attributes", "tokio1"] }
+sea-orm = { workspace = true, features = [
+    "macros",
+    "runtime-tokio-native-tls",
+    "sqlx-sqlite",
+] }
+sea-orm-migration = { workspace = true, features = [
+    "runtime-tokio-native-tls",
+    "sqlx-sqlite",
+] }
+shield-seaorm = { path = "../../packages/storage/shield-seaorm" }

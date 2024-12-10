@@ -1,0 +1,11 @@
+[package]
+name = "shield-tower"
+description = "Tower integration for Shield."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
