@@ -9,3 +9,4 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+openidconnect = "3.5.0"
