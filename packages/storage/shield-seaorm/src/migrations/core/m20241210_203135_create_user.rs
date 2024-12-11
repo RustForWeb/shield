@@ -57,7 +57,7 @@ impl MigrationTrait for Migration {
                                 .default(false),
                         )
                         .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
-                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiresAt).timestamp())
+                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiredAt).timestamp())
                         .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp())
                         .col(ColumnDef::new(EmailAddress::EntityId).uuid().not_null())
                         .foreign_key(
@@ -105,7 +105,7 @@ impl MigrationTrait for Migration {
                                 .default(false),
                         )
                         .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
-                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiresAt).timestamp())
+                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiredAt).timestamp())
                         .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp())
                         .col(ColumnDef::new(EmailAddress::UserId).uuid().not_null())
                         .foreign_key(
@@ -174,7 +174,7 @@ enum EmailAddress {
     IsPrimary,
     IsVerified,
     VerificationToken,
-    VerificationTokenExpiresAt,
+    VerificationTokenExpiredAt,
     VerifiedAt,
 
     #[cfg(feature = "entity")]

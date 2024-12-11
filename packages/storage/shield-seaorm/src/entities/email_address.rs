@@ -15,7 +15,7 @@ pub struct Model {
     pub is_primary: bool,
     pub is_verified: bool,
     pub verification_token: Option<String>,
-    pub verification_token_expires_at: Option<DateTimeUtc>,
+    pub verification_token_expired_at: Option<DateTimeUtc>,
     pub verified_at: Option<DateTimeUtc>,
     #[cfg(feature = "entity")]
     pub entity_id: Uuid,

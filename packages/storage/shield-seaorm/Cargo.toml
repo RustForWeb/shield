@@ -17,3 +17,13 @@ serde.workspace = true
 [features]
 default = []
 entity = []
+all-providers = [
+    "provider-email",
+    "provider-oauth",
+    "provider-oidc",
+    "provider-webauthn",
+]
+provider-email = []
+provider-oauth = []
+provider-oidc = []
+provider-webauthn = []

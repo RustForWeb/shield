@@ -20,4 +20,6 @@ sea-orm-migration = { workspace = true, features = [
     "runtime-tokio-native-tls",
     "sqlx-sqlite",
 ] }
-shield-seaorm = { path = "../../packages/storage/shield-seaorm" }
+shield-seaorm = { path = "../../packages/storage/shield-seaorm", features = [
+    "all-providers",
+] }
