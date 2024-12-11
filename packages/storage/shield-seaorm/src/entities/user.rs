@@ -31,6 +31,12 @@ pub enum Relation {
     #[cfg(not(feature = "entity"))]
     #[sea_orm(has_many = "super::email_address::Entity")]
     EmailAddress,
+    #[cfg(feature = "provider-oauth")]
+    #[sea_orm(has_many = "super::oauth_provider_connection::Entity")]
+    OauthProviderConnection,
+    #[cfg(feature = "provider-oidc")]
+    #[sea_orm(has_many = "super::oidc_provider_connection::Entity")]
+    OidcProviderConnection,
 }
 
 #[cfg(feature = "entity")]
@@ -44,6 +50,20 @@ impl Related<super::entity::Entity> for Entity {
 impl Related<super::email_address::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::EmailAddress.def()
+    }
+}
+
+#[cfg(feature = "provider-oauth")]
+impl Related<super::oauth_provider_connection::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::OauthProviderConnection.def()
+    }
+}
+
+#[cfg(feature = "provider-oidc")]
+impl Related<super::oidc_provider_connection::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::OidcProviderConnection.def()
     }
 }
 
