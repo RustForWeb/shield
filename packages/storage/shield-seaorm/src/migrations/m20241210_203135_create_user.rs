@@ -13,7 +13,7 @@ impl MigrationTrait for Migration {
         {
             manager
                 .create_table(
-                    BaseTable::create(Entity::Table)
+                    BaseTable::create(Entity::Table, manager)
                         .col(ColumnDef::new(Entity::Name).text().not_null())
                         .to_owned(),
                 )

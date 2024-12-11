@@ -17,11 +17,24 @@ pub struct Model {
     pub verification_token: Option<String>,
     pub verification_token_expires_at: Option<DateTimeUtc>,
     pub verified_at: Option<DateTimeUtc>,
+    #[cfg(feature = "entity")]
+    pub entity_id: Uuid,
+    #[cfg(not(feature = "entity"))]
     pub user_id: Uuid,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[cfg(feature = "entity")]
+    #[sea_orm(
+        belongs_to = "super::entity::Entity",
+        from = "Column::EntityId",
+        to = "super::entity::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Entity,
+    #[cfg(not(feature = "entity"))]
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
@@ -32,6 +45,14 @@ pub enum Relation {
     User,
 }
 
+#[cfg(feature = "entity")]
+impl Related<super::entity::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Entity.def()
+    }
+}
+
+#[cfg(not(feature = "entity"))]
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::User.def()
