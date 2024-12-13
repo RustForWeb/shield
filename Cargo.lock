@@ -4204,22 +4204,37 @@ version = "0.0.1"
 [[package]]
 name = "shield-actix"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-axum"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-credentials"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-disel"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-email"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-examples-leptos-actix"
@@ -4262,12 +4277,16 @@ dependencies = [
 [[package]]
 name = "shield-leptos"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-oauth"
 version = "0.0.1"
 dependencies = [
  "oauth2",
+ "shield",
 ]
 
 [[package]]
@@ -4275,6 +4294,7 @@ name = "shield-oidc"
 version = "0.0.1"
 dependencies = [
  "openidconnect",
+ "shield",
 ]
 
 [[package]]
@@ -4285,19 +4305,29 @@ dependencies = [
  "sea-orm",
  "sea-orm-migration",
  "serde",
+ "shield",
 ]
 
 [[package]]
 name = "shield-sqlx"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-tower"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shield-webauthn"
 version = "0.0.1"
+dependencies = [
+ "shield",
+]
 
 [[package]]
 name = "shlex"

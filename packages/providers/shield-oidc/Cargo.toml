@@ -10,3 +10,4 @@ version.workspace = true
 
 [dependencies]
 openidconnect = "3.5.0"
+shield = { path = "../../core/shield"}

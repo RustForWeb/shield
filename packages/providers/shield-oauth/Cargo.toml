@@ -10,3 +10,4 @@ version.workspace = true
 
 [dependencies]
 oauth2 = "4.4.2"
+shield = { path = "../../core/shield"}
