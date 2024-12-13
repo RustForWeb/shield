@@ -10,3 +10,4 @@ version.workspace = true
 
 [dependencies]
 shield = { path = "../../core/shield"}
+tower-sessions.workspace = true

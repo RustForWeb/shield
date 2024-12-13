@@ -9,4 +9,5 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+actix-session.workspace = true
 shield = { path = "../../core/shield"}

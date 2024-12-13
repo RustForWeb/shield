@@ -2,13 +2,16 @@
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use actix_files::Files;
-    use actix_web::*;
+    use actix_session::{storage::CookieSessionStore, SessionMiddleware};
+    use actix_web::{cookie::Key, web::Data, App, HttpServer};
     use leptos::config::get_configuration;
     use leptos_actix::{generate_route_list, LeptosRoutes};
     use shield_examples_leptos_actix::app::*;
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
+
+    let session_secret_key = Key::generate();
 
     HttpServer::new(move || {
         let routes = generate_route_list(App);
@@ -23,8 +26,11 @@ async fn main() -> std::io::Result<()> {
                 let leptos_options = leptos_options.clone();
                 move || shell(leptos_options.clone())
             })
-            .app_data(web::Data::new(leptos_options.to_owned()))
-        //.wrap(middleware::Compress::default())
+            .app_data(Data::new(leptos_options.to_owned()))
+            .wrap(SessionMiddleware::new(
+                CookieSessionStore::default(),
+                session_secret_key.clone(),
+            ))
     })
     .bind(&addr)?
     .run()
