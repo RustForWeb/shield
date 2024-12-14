@@ -9,5 +9,6 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+async-trait.workspace = true
 oauth2 = "4.4.2"
 shield = { path = "../../core/shield"}

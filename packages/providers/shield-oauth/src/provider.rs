@@ -1,41 +1,59 @@
-use std::any::Any;
+use async_trait::async_trait;
+use shield::{Provider, SignInRequest, SignOutRequest, StorageError, Subprovider, Value};
 
-use shield::{Provider, Shield, SignInRequest, SignOutRequest, Subprovider};
-
-use crate::OauthStorage;
+use crate::storage::OauthStorage;
 
 pub const OAUTH_PROVIDER_ID: &str = "oauth";
 
-pub struct OauthProvider {}
-
-impl OauthProvider {
-    // pub fn new() -> Self {
-    //     Self {}
-    // }
+pub struct OauthProvider<'a> {
+    storage: &'a dyn OauthStorage,
 }
 
-impl Provider for OauthProvider {
+impl<'a> OauthProvider<'a> {
+    pub fn new<S: OauthStorage + 'static>(storage: &'a S) -> Self {
+        Self { storage }
+    }
+}
+
+#[async_trait]
+impl Provider for OauthProvider<'_> {
     fn id(&self) -> &'static str {
         OAUTH_PROVIDER_ID
     }
 
-    fn subproviders(&self, shield: &Shield) -> Vec<Subprovider> {
-        let storage = shield.storage_as::<&dyn OauthStorage>();
-
-        println!("storage {:?}", storage.is_some());
-
-        // let storage = storage
-        //     .downcast_ref::<Box<dyn OauthStorage>>()
-        //     .expect("Shield storage should implement `OauthStorage` to use `OauthProvider`.");
-
-        vec![]
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+        self.storage.oauth_subproviders().await.map(|subproviders| {
+            subproviders
+                .into_iter()
+                .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
+                .collect()
+        })
     }
 
-    fn sign_in(&self, _shield: &Shield, _request: SignInRequest) {
+    async fn sign_in(&self, _request: SignInRequest) {
         todo!()
     }
 
-    fn sign_out(&self, _shield: &Shield, _request: SignOutRequest) {
+    async fn sign_out(&self, _request: SignOutRequest) {
         todo!()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct OauthSubprovider {
+    id: String,
+}
+
+impl Subprovider for OauthSubprovider {
+    fn id(&self) -> Option<String> {
+        Some(self.id.clone())
+    }
+
+    fn data(&self) -> Option<Value> {
+        None
+    }
+
+    fn form(&self) -> Option<shield::Form> {
+        None
     }
 }

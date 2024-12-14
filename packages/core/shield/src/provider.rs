@@ -1,22 +1,25 @@
-use serde_json::Value;
+use async_trait::async_trait;
+pub use serde_json::Value;
 
-use crate::{form::Form, shield::Shield};
+use crate::{form::Form, StorageError};
 
+#[async_trait]
 pub trait Provider {
     fn id(&self) -> &'static str;
 
-    fn subproviders(&self, shield: &Shield) -> Vec<Subprovider>;
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError>;
 
-    fn sign_in(&self, shield: &Shield, option: SignInRequest);
+    async fn sign_in(&self, option: SignInRequest);
 
-    fn sign_out(&self, shield: &Shield, option: SignOutRequest);
+    async fn sign_out(&self, option: SignOutRequest);
 }
 
-#[derive(Clone, Debug)]
-pub struct Subprovider {
-    pub subprovider_id: Option<String>,
-    pub data: Option<Value>,
-    pub form: Option<Form>,
+pub trait Subprovider {
+    fn id(&self) -> Option<String>;
+
+    fn data(&self) -> Option<Value>;
+
+    fn form(&self) -> Option<Form>;
 }
 
 #[derive(Clone, Debug)]
@@ -33,7 +36,9 @@ pub struct SignOutRequest {
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use crate::{shield::Shield, storage::Storage};
+    use async_trait::async_trait;
+
+    use crate::StorageError;
 
     use super::{Provider, SignInRequest, SignOutRequest, Subprovider};
 
@@ -51,19 +56,18 @@ pub(crate) mod tests {
         }
     }
 
+    #[async_trait]
     impl Provider for TestProvider {
         fn id(&self) -> &'static str {
             self.id.unwrap_or(TEST_PROVIDER_ID)
         }
 
-        fn subproviders(&self, _shield: &Shield) -> Vec<Subprovider> {
-            vec![]
+        async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+            Ok(vec![])
         }
 
-        fn sign_in(&self, _shield: &Shield, _request: SignInRequest) {}
+        async fn sign_in(&self, _request: SignInRequest) {}
 
-        fn sign_out(&self, _shield: &Shield, _request: SignOutRequest) {}
+        async fn sign_out(&self, _request: SignOutRequest) {}
     }
-
-    pub trait TestProviderStorage: Storage {}
 }

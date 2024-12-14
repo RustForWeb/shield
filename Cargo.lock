@@ -4356,6 +4356,7 @@ dependencies = [
 name = "shield"
 version = "0.0.1"
 dependencies = [
+ "async-trait",
  "serde_json",
 ]
 
@@ -4447,6 +4448,7 @@ dependencies = [
 name = "shield-oauth"
 version = "0.0.1"
 dependencies = [
+ "async-trait",
  "oauth2",
  "shield",
 ]
