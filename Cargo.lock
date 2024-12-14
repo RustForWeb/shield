@@ -4355,6 +4355,9 @@ dependencies = [
 [[package]]
 name = "shield"
 version = "0.0.1"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "shield-actix"

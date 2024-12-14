@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{any::Any, collections::HashMap};
 
 use crate::{provider::Provider, storage::Storage};
 
@@ -25,6 +25,10 @@ impl Shield {
         &*self.storage
     }
 
+    pub fn storage_as<T: 'static>(&self) -> Option<&T> {
+        self.storage.as_any().downcast_ref::<T>()
+    }
+
     pub fn provider_by_id(&self, provider_id: &str) -> Option<&dyn Provider> {
         self.providers.get(provider_id).map(|v| &**v)
     }
@@ -41,7 +45,7 @@ impl Shield {
 #[cfg(test)]
 mod tests {
     use crate::{
-        provider::tests::{TestProvider, TEST_PROVIDER_ID},
+        provider::tests::{TestProvider, TestProviderStorage, TEST_PROVIDER_ID},
         storage::tests::{TestStorage, TEST_STORAGE_ID},
     };
 
@@ -49,12 +53,17 @@ mod tests {
 
     #[test]
     fn test_storage() {
-        let shield = Shield::new(
-            TestStorage::default(),
-            vec![Box::new(TestProvider::default())],
-        );
+        let shield = Shield::new(TestStorage::default(), vec![]);
 
         assert_eq!(TEST_STORAGE_ID, shield.storage().id());
+    }
+
+    #[test]
+    fn test_storage_as() {
+        let shield = Shield::new(TestStorage::default(), vec![]);
+
+        let storage = shield.storage_as::<Box<dyn TestProviderStorage>>();
+        assert!(storage.is_some());
     }
 
     #[test]
