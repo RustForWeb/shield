@@ -1,11 +1,12 @@
 use leptos::{either::Either, prelude::*};
 use shield::SubproviderVisualisation;
 
+// TODO: Add feature cfg for Axum code.
+
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
+    use leptos_axum::extract;
     use shield_axum::ExtractShield;
-
-    use crate::extract::extract;
 
     let ExtractShield(shield) = extract::<ExtractShield>().await?;
 
