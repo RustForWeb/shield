@@ -3,6 +3,41 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "oidc_provider_pkce_code_challenge"
+)]
+pub enum OidcProviderPkceCodeChallenge {
+    #[sea_orm(string_value = "none")]
+    None,
+    #[sea_orm(string_value = "plain")]
+    Plain,
+    #[sea_orm(string_value = "s256")]
+    S256,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "oidc_provider_type")]
+pub enum OidcProviderType {
+    #[sea_orm(string_value = "custom")]
+    Custom,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "oidc_provider_visibility"
+)]
+pub enum OidcProviderVisibility {
+    #[sea_orm(string_value = "private")]
+    Private,
+    #[sea_orm(string_value = "public")]
+    Public,
+}
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "oidc_provider")]
 pub struct Model {
@@ -12,10 +47,8 @@ pub struct Model {
     pub updated_at: DateTimeUtc,
     pub name: String,
     pub slug: Option<String>,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub r#type: String,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub visibility: String,
+    pub r#type: OidcProviderType,
+    pub visibility: OidcProviderVisibility,
     #[sea_orm(column_type = "Text")]
     pub client_id: String,
     #[sea_orm(column_type = "Text", nullable)]
@@ -48,8 +81,7 @@ pub struct Model {
     pub json_web_key_set_url: Option<String>,
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub json_web_key_set: Option<Json>,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub pcke_code_challenge: String,
+    pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

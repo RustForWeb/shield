@@ -162,5 +162,5 @@ target/
 # mdBook
 book/book/
 
-# Tailwind CSS ouput
-tailwind.output.css
+# SeaORM
+packages/storage/shield-seaorm/src/entities_template/

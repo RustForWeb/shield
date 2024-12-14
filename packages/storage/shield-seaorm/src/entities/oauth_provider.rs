@@ -3,6 +3,45 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "oauth_provider_pkce_code_challenge"
+)]
+pub enum OauthProviderPkceCodeChallenge {
+    #[sea_orm(string_value = "none")]
+    None,
+    #[sea_orm(string_value = "plain")]
+    Plain,
+    #[sea_orm(string_value = "s256")]
+    S256,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "oauth_provider_type"
+)]
+pub enum OauthProviderType {
+    #[sea_orm(string_value = "custom")]
+    Custom,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(
+    rs_type = "String",
+    db_type = "Enum",
+    enum_name = "oauth_provider_visibility"
+)]
+pub enum OauthProviderVisibility {
+    #[sea_orm(string_value = "private")]
+    Private,
+    #[sea_orm(string_value = "public")]
+    Public,
+}
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "oauth_provider")]
 pub struct Model {
@@ -12,10 +51,8 @@ pub struct Model {
     pub updated_at: DateTimeUtc,
     pub name: String,
     pub slug: Option<String>,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub r#type: String,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub visibility: String,
+    pub r#type: OauthProviderType,
+    pub visibility: OauthProviderVisibility,
     #[sea_orm(column_type = "Text")]
     pub client_id: String,
     #[sea_orm(column_type = "Text", nullable)]
@@ -40,8 +77,7 @@ pub struct Model {
     pub revocation_url: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub revocation_url_params: Option<String>,
-    #[sea_orm(column_type = "custom(\"enum_text\")")]
-    pub pcke_code_challenge: String,
+    pub pkce_code_challenge: OauthProviderPkceCodeChallenge,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

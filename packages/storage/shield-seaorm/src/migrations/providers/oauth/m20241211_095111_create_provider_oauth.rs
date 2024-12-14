@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
                 manager
                     .create_type(
                         Type::create()
-                            .as_enum(OauthProviderType::Enum)
+                            .as_enum(OauthProviderType::Table)
                             .values(OauthProviderType::variants())
                             .to_owned(),
                     )
@@ -25,8 +25,17 @@ impl MigrationTrait for Migration {
                 manager
                     .create_type(
                         Type::create()
-                            .as_enum(OauthProviderVisibility::Enum)
+                            .as_enum(OauthProviderVisibility::Table)
                             .values(OauthProviderVisibility::variants())
+                            .to_owned(),
+                    )
+                    .await?;
+
+                manager
+                    .create_type(
+                        Type::create()
+                            .as_enum(OauthProviderPkceCodeChallenge::Table)
+                            .values(OauthProviderPkceCodeChallenge::variants())
                             .to_owned(),
                     )
                     .await?;
@@ -49,10 +58,13 @@ impl MigrationTrait for Migration {
 
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
-                                .enumeration(OauthProviderType::Enum, OauthProviderType::variants())
+                                .enumeration(
+                                    OauthProviderType::Table,
+                                    OauthProviderType::variants(),
+                                )
                                 .into_column_def(),
                             DatabaseBackend::Postgres => {
-                                column.custom(OauthProviderType::Enum).into_column_def()
+                                column.custom(OauthProviderType::Table).into_column_def()
                             }
                         }
                     })
@@ -64,12 +76,12 @@ impl MigrationTrait for Migration {
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
                                 .enumeration(
-                                    OauthProviderVisibility::Enum,
+                                    OauthProviderVisibility::Table,
                                     OauthProviderVisibility::variants(),
                                 )
                                 .into_column_def(),
                             DatabaseBackend::Postgres => column
-                                .custom(OauthProviderVisibility::Enum)
+                                .custom(OauthProviderVisibility::Table)
                                 .into_column_def(),
                         }
                     })
@@ -86,19 +98,19 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(OauthProvider::RevocationUrl).text())
                     .col(ColumnDef::new(OauthProvider::RevocationUrlParams).text())
                     .col({
-                        let mut column = ColumnDef::new(OauthProvider::PckeCodeChallenge)
+                        let mut column = ColumnDef::new(OauthProvider::PkceCodeChallenge)
                             .not_null()
                             .into_column_def();
 
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
                                 .enumeration(
-                                    OauthProviderPkceCodeChallenge::Enum,
+                                    OauthProviderPkceCodeChallenge::Table,
                                     OauthProviderPkceCodeChallenge::variants(),
                                 )
                                 .into_column_def(),
                             DatabaseBackend::Postgres => column
-                                .custom(OauthProviderPkceCodeChallenge::Enum)
+                                .custom(OauthProviderPkceCodeChallenge::Table)
                                 .into_column_def(),
                         }
                     })
@@ -111,7 +123,7 @@ impl MigrationTrait for Migration {
                 BaseTable::create(OauthProviderConnection::Table, manager)
                     .col(
                         ColumnDef::new(OauthProviderConnection::Identifier)
-                            .text()
+                            .string_len(256)
                             .not_null(),
                     )
                     .col(
@@ -139,7 +151,10 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name(OauthProviderConnection::FkConnectionProvider.to_string())
+                            .name(
+                                OauthProviderConnection::FkOauthProviderConnectionProvider
+                                    .to_string(),
+                            )
                             .from(
                                 OauthProviderConnection::Table,
                                 OauthProviderConnection::ProviderId,
@@ -150,7 +165,9 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name(OauthProviderConnection::FkConnectionUser.to_string())
+                            .name(
+                                OauthProviderConnection::FkOauthProviderConnectionUser.to_string(),
+                            )
                             .from(
                                 OauthProviderConnection::Table,
                                 OauthProviderConnection::UserId,
@@ -161,7 +178,9 @@ impl MigrationTrait for Migration {
                     )
                     .index(
                         Index::create()
-                            .name(OauthProviderConnection::UniqueProviderIdentifier.to_string())
+                            .name(
+                                OauthProviderConnection::UniqueOauthProviderIdentifier.to_string(),
+                            )
                             .col(OauthProviderConnection::ProviderId)
                             .col(OauthProviderConnection::Identifier)
                             .unique(),
@@ -190,11 +209,11 @@ impl MigrationTrait for Migration {
             DatabaseBackend::MySql | DatabaseBackend::Sqlite => {}
             DatabaseBackend::Postgres => {
                 manager
-                    .drop_type(Type::drop().name(OauthProviderVisibility::Enum).to_owned())
+                    .drop_type(Type::drop().name(OauthProviderVisibility::Table).to_owned())
                     .await?;
 
                 manager
-                    .drop_type(Type::drop().name(OauthProviderType::Enum).to_owned())
+                    .drop_type(Type::drop().name(OauthProviderType::Table).to_owned())
                     .await?;
             }
         }
@@ -210,7 +229,7 @@ enum User {
 
 #[derive(DeriveIden)]
 enum OauthProviderType {
-    Enum,
+    Table,
 
     Custom,
 }
@@ -223,7 +242,7 @@ impl OauthProviderType {
 
 #[derive(DeriveIden)]
 enum OauthProviderVisibility {
-    Enum,
+    Table,
 
     Public,
     Private,
@@ -237,7 +256,7 @@ impl OauthProviderVisibility {
 
 #[derive(DeriveIden)]
 enum OauthProviderPkceCodeChallenge {
-    Enum,
+    Table,
 
     None,
     Plain,
@@ -270,7 +289,7 @@ enum OauthProvider {
     IntrospectionUrlParams,
     RevocationUrl,
     RevocationUrlParams,
-    PckeCodeChallenge,
+    PkceCodeChallenge,
 }
 
 #[derive(DeriveIden)]
@@ -287,8 +306,8 @@ enum OauthProviderConnection {
     ProviderId,
     UserId,
 
-    FkConnectionProvider,
-    FkConnectionUser,
+    FkOauthProviderConnectionProvider,
+    FkOauthProviderConnectionUser,
 
-    UniqueProviderIdentifier,
+    UniqueOauthProviderIdentifier,
 }

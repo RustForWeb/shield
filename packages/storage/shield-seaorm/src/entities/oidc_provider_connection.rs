@@ -10,7 +10,6 @@ pub struct Model {
     pub id: Uuid,
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
-    #[sea_orm(column_type = "Text")]
     pub identifier: String,
     #[sea_orm(column_type = "Text")]
     pub token_type: String,

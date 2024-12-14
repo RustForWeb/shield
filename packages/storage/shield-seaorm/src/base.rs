@@ -20,9 +20,8 @@ impl BaseTable {
                     .not_null()
                     .primary_key()
                     .default(match manager.get_database_backend() {
-                        DatabaseBackend::MySql => Expr::cust("uuid()"),
+                        DatabaseBackend::MySql | DatabaseBackend::Sqlite => Expr::cust("(uuid())"),
                         DatabaseBackend::Postgres => PgFunc::gen_random_uuid().into(),
-                        DatabaseBackend::Sqlite => Expr::cust("(uuid())"),
                     }),
             )
             .col(

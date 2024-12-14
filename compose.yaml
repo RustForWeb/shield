@@ -1,0 +1,19 @@
+services:
+    mysql:
+        image: mysql
+        ports:
+            - 13306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: shield
+            MYSQL_USER: shield
+            MYSQL_PASSWORD: shield
+            MYSQL_DATABASE: shield
+
+    postgresql:
+        image: postgres
+        ports:
+            - 15432:5432
+        environment:
+            POSTGRES_USER: shield
+            POSTGRES_PASSWORD: shield
+            POSTGRES_DB: shield

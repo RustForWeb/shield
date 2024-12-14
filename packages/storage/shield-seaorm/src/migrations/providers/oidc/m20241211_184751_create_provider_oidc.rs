@@ -16,7 +16,7 @@ impl MigrationTrait for Migration {
                 manager
                     .create_type(
                         Type::create()
-                            .as_enum(OidcProviderType::Enum)
+                            .as_enum(OidcProviderType::Table)
                             .values(OidcProviderType::variants())
                             .to_owned(),
                     )
@@ -25,8 +25,17 @@ impl MigrationTrait for Migration {
                 manager
                     .create_type(
                         Type::create()
-                            .as_enum(OidcProviderVisibility::Enum)
+                            .as_enum(OidcProviderVisibility::Table)
                             .values(OidcProviderVisibility::variants())
+                            .to_owned(),
+                    )
+                    .await?;
+
+                manager
+                    .create_type(
+                        Type::create()
+                            .as_enum(OidcProviderPkceCodeChallenge::Table)
+                            .values(OidcProviderPkceCodeChallenge::variants())
                             .to_owned(),
                     )
                     .await?;
@@ -49,10 +58,10 @@ impl MigrationTrait for Migration {
 
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
-                                .enumeration(OidcProviderType::Enum, OidcProviderType::variants())
+                                .enumeration(OidcProviderType::Table, OidcProviderType::variants())
                                 .into_column_def(),
                             DatabaseBackend::Postgres => {
-                                column.custom(OidcProviderType::Enum).into_column_def()
+                                column.custom(OidcProviderType::Table).into_column_def()
                             }
                         }
                     })
@@ -64,12 +73,12 @@ impl MigrationTrait for Migration {
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
                                 .enumeration(
-                                    OidcProviderVisibility::Enum,
+                                    OidcProviderVisibility::Table,
                                     OidcProviderVisibility::variants(),
                                 )
                                 .into_column_def(),
                             DatabaseBackend::Postgres => column
-                                .custom(OidcProviderVisibility::Enum)
+                                .custom(OidcProviderVisibility::Table)
                                 .into_column_def(),
                         }
                     })
@@ -90,19 +99,19 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(OidcProvider::JsonWebKeySetUrl).text())
                     .col(ColumnDef::new(OidcProvider::JsonWebKeySet).json_binary())
                     .col({
-                        let mut column = ColumnDef::new(OidcProvider::PckeCodeChallenge)
+                        let mut column = ColumnDef::new(OidcProvider::PkceCodeChallenge)
                             .not_null()
                             .into_column_def();
 
                         match manager.get_database_backend() {
                             DatabaseBackend::MySql | DatabaseBackend::Sqlite => column
                                 .enumeration(
-                                    OidcProviderPkceCodeChallenge::Enum,
+                                    OidcProviderPkceCodeChallenge::Table,
                                     OidcProviderPkceCodeChallenge::variants(),
                                 )
                                 .into_column_def(),
                             DatabaseBackend::Postgres => column
-                                .custom(OidcProviderPkceCodeChallenge::Enum)
+                                .custom(OidcProviderPkceCodeChallenge::Table)
                                 .into_column_def(),
                         }
                     })
@@ -115,7 +124,7 @@ impl MigrationTrait for Migration {
                 BaseTable::create(OidcProviderConnection::Table, manager)
                     .col(
                         ColumnDef::new(OidcProviderConnection::Identifier)
-                            .text()
+                            .string_len(256)
                             .not_null(),
                     )
                     .col(
@@ -144,7 +153,10 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name(OidcProviderConnection::FkConnectionProvider.to_string())
+                            .name(
+                                OidcProviderConnection::FkOidcProviderConnectionProvider
+                                    .to_string(),
+                            )
                             .from(
                                 OidcProviderConnection::Table,
                                 OidcProviderConnection::ProviderId,
@@ -155,7 +167,7 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name(OidcProviderConnection::FkConnectionUser.to_string())
+                            .name(OidcProviderConnection::FkOidcProviderConnectionUser.to_string())
                             .from(
                                 OidcProviderConnection::Table,
                                 OidcProviderConnection::UserId,
@@ -166,7 +178,7 @@ impl MigrationTrait for Migration {
                     )
                     .index(
                         Index::create()
-                            .name(OidcProviderConnection::UniqueProviderIdentifier.to_string())
+                            .name(OidcProviderConnection::UniqueOidcProviderIdentifier.to_string())
                             .col(OidcProviderConnection::ProviderId)
                             .col(OidcProviderConnection::Identifier)
                             .unique(),
@@ -195,11 +207,11 @@ impl MigrationTrait for Migration {
             DatabaseBackend::MySql | DatabaseBackend::Sqlite => {}
             DatabaseBackend::Postgres => {
                 manager
-                    .drop_type(Type::drop().name(OidcProviderVisibility::Enum).to_owned())
+                    .drop_type(Type::drop().name(OidcProviderVisibility::Table).to_owned())
                     .await?;
 
                 manager
-                    .drop_type(Type::drop().name(OidcProviderType::Enum).to_owned())
+                    .drop_type(Type::drop().name(OidcProviderType::Table).to_owned())
                     .await?;
             }
         }
@@ -215,7 +227,7 @@ enum User {
 
 #[derive(DeriveIden)]
 enum OidcProviderType {
-    Enum,
+    Table,
 
     Custom,
 }
@@ -228,7 +240,7 @@ impl OidcProviderType {
 
 #[derive(DeriveIden)]
 enum OidcProviderVisibility {
-    Enum,
+    Table,
 
     Public,
     Private,
@@ -242,7 +254,7 @@ impl OidcProviderVisibility {
 
 #[derive(DeriveIden)]
 enum OidcProviderPkceCodeChallenge {
-    Enum,
+    Table,
 
     None,
     Plain,
@@ -279,7 +291,7 @@ enum OidcProvider {
     UserInfoUrl,
     JsonWebKeySetUrl,
     JsonWebKeySet,
-    PckeCodeChallenge,
+    PkceCodeChallenge,
 }
 
 #[derive(DeriveIden)]
@@ -297,8 +309,8 @@ enum OidcProviderConnection {
     ProviderId,
     UserId,
 
-    FkConnectionProvider,
-    FkConnectionUser,
+    FkOidcProviderConnectionProvider,
+    FkOidcProviderConnectionUser,
 
-    UniqueProviderIdentifier,
+    UniqueOidcProviderIdentifier,
 }
