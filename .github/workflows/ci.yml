@@ -37,6 +37,26 @@ jobs:
         name: Test
         runs-on: ubuntu-latest
 
+        services:
+            mysql:
+                image: mysql
+                ports:
+                    - 13306:3306
+                env:
+                    MYSQL_ROOT_PASSWORD: shield
+                    MYSQL_USER: shield
+                    MYSQL_PASSWORD: shield
+                    MYSQL_DATABASE: shield
+
+            postgresql:
+                image: postgres
+                ports:
+                    - 15432:5432
+                env:
+                    POSTGRES_USER: shield
+                    POSTGRES_PASSWORD: shield
+                    POSTGRES_DB: shield
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4

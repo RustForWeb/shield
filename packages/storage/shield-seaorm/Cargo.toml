@@ -12,8 +12,8 @@ version.workspace = true
 async-trait.workspace = true
 sea-orm.workspace = true
 sea-orm-migration.workspace = true
-serde.workspace = true
-shield = { path = "../../core/shield"}
+serde = { workspace = true, features = ["derive"] }
+shield = { path = "../../core/shield" }
 
 [features]
 default = []
