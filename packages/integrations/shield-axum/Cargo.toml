@@ -9,4 +9,7 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-shield = { path = "../../core/shield"}
+async-trait.workspace = true
+axum.workspace = true
+shield = { path = "../../core/shield" }
+shield-tower = { path = "../shield-tower" }

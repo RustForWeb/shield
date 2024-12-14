@@ -1,37 +1,44 @@
 use async_trait::async_trait;
-pub use serde_json::Value;
+use serde::{Deserialize, Serialize};
 
-use crate::{form::Form, StorageError};
+use crate::{
+    form::Form,
+    request::{SignInError, SignInRequest, SignOutError, SignOutRequest},
+    storage::StorageError,
+};
 
 #[async_trait]
-pub trait Provider {
-    fn id(&self) -> &'static str;
+pub trait Provider: Send + Sync {
+    fn id(&self) -> String;
 
     async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError>;
 
-    async fn sign_in(&self, option: SignInRequest);
+    async fn subprovider_by_id(
+        &self,
+        subprovider_id: &str,
+    ) -> Result<Option<Box<dyn Subprovider>>, StorageError>;
 
-    async fn sign_out(&self, option: SignOutRequest);
+    async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError>;
+
+    async fn sign_out(&self, request: SignOutRequest) -> Result<(), SignOutError>;
 }
 
-pub trait Subprovider {
+pub trait Subprovider: Send + Sync {
+    fn provider_id(&self) -> String;
+
     fn id(&self) -> Option<String>;
 
-    fn data(&self) -> Option<Value>;
+    fn name(&self) -> String;
 
     fn form(&self) -> Option<Form>;
 }
 
-#[derive(Clone, Debug)]
-pub struct SignInRequest {
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct SubproviderVisualisation {
+    pub key: String,
+    pub provider_id: String,
     pub subprovider_id: Option<String>,
-    pub data: Option<Value>,
-    pub form_data: Option<Value>,
-}
-
-#[derive(Clone, Debug)]
-pub struct SignOutRequest {
-    pub subprovider_id: Option<String>,
+    pub name: String,
 }
 
 #[cfg(test)]
@@ -40,7 +47,7 @@ pub(crate) mod tests {
 
     use crate::StorageError;
 
-    use super::{Provider, SignInRequest, SignOutRequest, Subprovider};
+    use super::{Provider, SignInError, SignInRequest, SignOutError, SignOutRequest, Subprovider};
 
     pub const TEST_PROVIDER_ID: &str = "test";
 
@@ -58,16 +65,27 @@ pub(crate) mod tests {
 
     #[async_trait]
     impl Provider for TestProvider {
-        fn id(&self) -> &'static str {
-            self.id.unwrap_or(TEST_PROVIDER_ID)
+        fn id(&self) -> String {
+            self.id.unwrap_or(TEST_PROVIDER_ID).to_owned()
         }
 
         async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
             Ok(vec![])
         }
 
-        async fn sign_in(&self, _request: SignInRequest) {}
+        async fn subprovider_by_id(
+            &self,
+            _subprovider_id: &str,
+        ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
+            Ok(None)
+        }
 
-        async fn sign_out(&self, _request: SignOutRequest) {}
+        async fn sign_in(&self, _request: SignInRequest) -> Result<(), SignInError> {
+            Ok(())
+        }
+
+        async fn sign_out(&self, _request: SignOutRequest) -> Result<(), SignOutError> {
+            Ok(())
+        }
     }
 }

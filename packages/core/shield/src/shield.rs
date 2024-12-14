@@ -1,19 +1,26 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::{provider::Provider, storage::Storage};
+use futures::future::try_join_all;
+
+use crate::{
+    provider::{Provider, Subprovider},
+    request::{SignInRequest, SignOutRequest},
+    storage::{Storage, StorageError},
+    SignInError, SignOutError, SubproviderVisualisation,
+};
 
 pub struct Shield {
-    storage: Box<dyn Storage>,
-    providers: HashMap<&'static str, Box<dyn Provider>>,
+    storage: Arc<dyn Storage>,
+    providers: HashMap<String, Arc<dyn Provider>>,
 }
 
 impl Shield {
-    pub fn new<S>(storage: S, providers: Vec<Box<dyn Provider>>) -> Self
+    pub fn new<S>(storage: S, providers: Vec<Arc<dyn Provider>>) -> Self
     where
         S: Storage + 'static,
     {
         Self {
-            storage: Box::new(storage),
+            storage: Arc::new(storage),
             providers: providers
                 .into_iter()
                 .map(|provider| (provider.id(), provider))
@@ -29,17 +36,66 @@ impl Shield {
         self.providers.get(provider_id).map(|v| &**v)
     }
 
-    pub fn sign_in(&self, _provider_id: &str) {
-        todo!()
+    pub async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+        try_join_all(
+            self.providers
+                .values()
+                .map(|provider| provider.subproviders()),
+        )
+        .await
+        .map(|subproviders| subproviders.into_iter().flatten().collect::<Vec<_>>())
     }
 
-    pub fn sign_out(&self, _provider_id: &str) {
+    pub async fn subprovider_visualisations(
+        &self,
+    ) -> Result<Vec<SubproviderVisualisation>, StorageError> {
+        self.subproviders().await.map(|subproviders| {
+            subproviders
+                .into_iter()
+                .map(|subprovider| {
+                    let provider_id = subprovider.provider_id();
+                    let subprovider_id = subprovider.id();
+
+                    SubproviderVisualisation {
+                        key: match &subprovider_id {
+                            Some(subprovider_id) => format!("{provider_id}-{subprovider_id}"),
+                            None => provider_id.clone(),
+                        },
+                        provider_id,
+                        subprovider_id,
+                        name: subprovider.name(),
+                    }
+                })
+                .collect()
+        })
+    }
+
+    pub async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {
+        let provider = match self.providers.get(&request.provider_id) {
+            Some(provider) => provider,
+            None => return Err(SignInError::ProviderNotFound(request.provider_id)),
+        };
+
+        // let subprovider = match request.subprovider_id {
+        //     Some(subprovider_id) => match provider.subprovider_by_id(&subprovider_id).await? {
+        //         Some(subprovider) => Some(subprovider),
+        //         None => return Err(SignInError::SubproviderNotFound(subprovider_id)),
+        //     },
+        //     None => None,
+        // };
+
+        provider.sign_in(request).await
+    }
+
+    pub async fn sign_out(&self, _request: SignOutRequest) -> Result<(), SignOutError> {
         todo!()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use crate::{
         provider::tests::{TestProvider, TEST_PROVIDER_ID},
         storage::tests::{TestStorage, TEST_STORAGE_ID},
@@ -59,8 +115,8 @@ mod tests {
         let shield = Shield::new(
             TestStorage::default(),
             vec![
-                Box::new(TestProvider::default().with_id("test1")),
-                Box::new(TestProvider::default().with_id("test2")),
+                Arc::new(TestProvider::default().with_id("test1")),
+                Arc::new(TestProvider::default().with_id("test2")),
             ],
         );
 
@@ -71,11 +127,11 @@ mod tests {
                 .map(|provider| provider.id())
         );
         assert_eq!(
-            Some("test1"),
+            Some("test1".to_owned()),
             shield.provider_by_id("test1").map(|provider| provider.id())
         );
         assert_eq!(
-            Some("test2"),
+            Some("test2".to_owned()),
             shield.provider_by_id("test2").map(|provider| provider.id())
         );
     }

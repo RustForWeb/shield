@@ -10,6 +10,6 @@ pub trait OauthStorage: Storage + Sync {
 
     async fn oauth_subprovider_by_id(
         &self,
-        subprovider_id: String,
+        subprovider_id: &str,
     ) -> Result<Option<OauthSubprovider>, StorageError>;
 }

@@ -1,8 +1,10 @@
-pub trait Storage {
-    fn id(&self) -> &'static str;
+use thiserror::Error;
+
+pub trait Storage: Send + Sync {
+    fn id(&self) -> String;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum StorageError {}
 
 #[cfg(test)]
@@ -15,8 +17,8 @@ pub(crate) mod tests {
     pub struct TestStorage {}
 
     impl Storage for TestStorage {
-        fn id(&self) -> &'static str {
-            TEST_STORAGE_ID
+        fn id(&self) -> String {
+            TEST_STORAGE_ID.to_owned()
         }
     }
 }

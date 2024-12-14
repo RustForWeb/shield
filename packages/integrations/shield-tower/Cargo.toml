@@ -9,5 +9,8 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-shield = { path = "../../core/shield"}
+http.workspace = true
+shield = { path = "../../core/shield" }
+tower-layer.workspace = true
+tower-service.workspace = true
 tower-sessions.workspace = true

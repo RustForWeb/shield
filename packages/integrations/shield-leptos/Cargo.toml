@@ -9,4 +9,13 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-shield = { path = "../../core/shield"}
+leptos.workspace = true
+leptos_actix = { workspace = true, optional = true }
+leptos_axum = { workspace = true, optional = true }
+shield = { path = "../../core/shield" }
+shield-axum = { path = "../shield-axum", optional = true }
+
+[features]
+default = []
+actix = ["dep:leptos_actix"]
+axum = ["dep:leptos_axum", "dep:shield-axum"]
