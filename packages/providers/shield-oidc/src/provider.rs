@@ -7,41 +7,72 @@ use crate::storage::OidcStorage;
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
 
-pub struct OidcProvider<'a> {
-    storage: &'a dyn OidcStorage,
+#[derive(Default)]
+pub struct OidcProvider {
+    subproviders: Vec<OidcSubprovider>,
+    storage: Option<Box<dyn OidcStorage>>,
 }
 
-impl<'a> OidcProvider<'a> {
-    pub fn new<S: OidcStorage + 'static>(storage: &'a S) -> Self {
-        Self { storage }
+impl OidcProvider {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_storage<S: OidcStorage + 'static>(mut self, storage: S) -> Self {
+        self.storage = Some(Box::new(storage));
+        self
+    }
+
+    pub fn with_subproviders<I: IntoIterator<Item = OidcSubprovider>>(
+        mut self,
+        subproviders: I,
+    ) -> Self {
+        self.subproviders = subproviders.into_iter().collect();
+        self
     }
 }
 
 #[async_trait]
-impl Provider for OidcProvider<'_> {
+impl Provider for OidcProvider {
     fn id(&self) -> String {
         OIDC_PROVIDER_ID.to_owned()
     }
 
     async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
-        self.storage.oidc_subproviders().await.map(|subproviders| {
-            subproviders
-                .into_iter()
-                .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
-                .collect()
-        })
+        let subproviders =
+            self.subproviders
+                .iter()
+                .cloned()
+                .chain(if let Some(storage) = &self.storage {
+                    storage.oidc_subproviders().await?
+                } else {
+                    vec![]
+                });
+
+        Ok(subproviders
+            .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
+            .collect())
     }
 
     async fn subprovider_by_id(
         &self,
         subprovider_id: &str,
     ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
-        self.storage
-            .oidc_subprovider_by_id(subprovider_id)
-            .await
-            .map(|subprovider| {
-                subprovider.map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
-            })
+        if let Some(subprovider) = self
+            .subproviders
+            .iter()
+            .find(|subprovider| subprovider.id == subprovider_id)
+        {
+            return Ok(Some(Box::new(subprovider.clone()) as Box<dyn Subprovider>));
+        }
+
+        if let Some(storage) = &self.storage {
+            if let Some(subprovider) = storage.oidc_subprovider_by_id(subprovider_id).await? {
+                return Ok(Some(Box::new(subprovider.clone()) as Box<dyn Subprovider>));
+            }
+        }
+
+        Ok(None)
     }
 
     async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {

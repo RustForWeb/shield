@@ -84,6 +84,8 @@ impl Shield {
         //     None => None,
         // };
 
+        println!("sign in {:?}", request);
+
         provider.sign_in(request).await
     }
 

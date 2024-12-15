@@ -1,9 +1,10 @@
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use thiserror::Error;
 
 use crate::storage::StorageError;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SignInRequest {
     pub provider_id: String,
     pub subprovider_id: Option<String>,
@@ -22,7 +23,7 @@ pub enum SignInError {
     Storage(#[from] StorageError),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SignOutRequest {
     pub provider_id: String,
     pub subprovider_id: Option<String>,
