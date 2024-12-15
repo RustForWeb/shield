@@ -5,7 +5,7 @@ use std::{
 };
 
 fn example_path() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../examples/seaorm")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../examples/sea-orm")
 }
 
 #[test]
