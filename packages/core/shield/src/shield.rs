@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
-    error::{ProviderError, ShieldError, StorageError},
+    error::{ProviderError, ShieldError},
     provider::{Provider, Subprovider, SubproviderVisualisation},
     request::{SignInRequest, SignOutRequest},
     storage::Storage,
