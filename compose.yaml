@@ -1,6 +1,6 @@
 services:
     mysql:
-        image: mysql
+        image: mysql:latest
         ports:
             - 13306:3306
         environment:
@@ -10,10 +10,21 @@ services:
             MYSQL_DATABASE: shield
 
     postgresql:
-        image: postgres
+        image: postgres:latest
         ports:
             - 15432:5432
         environment:
             POSTGRES_USER: shield
             POSTGRES_PASSWORD: shield
             POSTGRES_DB: shield
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        command: start-dev --import-realm
+        ports:
+            - 18080:8080
+        volumes:
+            - ./keycloak:/opt/keycloak/data/import
+        environment:
+            KC_BOOTSTRAP_ADMIN_USERNAME: shield
+            KC_BOOTSTRAP_ADMIN_PASSWORD: shield
