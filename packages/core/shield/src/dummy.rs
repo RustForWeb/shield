@@ -5,6 +5,7 @@ use crate::{
     form::Form,
     provider::{Provider, Subprovider},
     request::{SignInRequest, SignOutRequest},
+    response::Response,
     storage::Storage,
 };
 
@@ -38,12 +39,12 @@ impl Provider for DummyProvider {
         Ok(None)
     }
 
-    async fn sign_in(&self, _request: SignInRequest) -> Result<(), ShieldError> {
-        Ok(())
+    async fn sign_in(&self, _request: SignInRequest) -> Result<Response, ShieldError> {
+        todo!("redirect back?")
     }
 
-    async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
-        Ok(())
+    async fn sign_out(&self, _request: SignOutRequest) -> Result<Response, ShieldError> {
+        todo!("redirect back?")
     }
 }
 

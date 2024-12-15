@@ -18,11 +18,14 @@ pub async fn sign_in(
     provider_id: String,
     subprovider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    use shield::{Shield, SignInRequest};
+    use shield::{Response, Shield, ShieldError, SignInRequest};
+
+    use crate::context::LeptosRedirect;
 
     let shield = expect_context::<Shield>();
+    let redirect = expect_context::<LeptosRedirect>();
 
-    shield
+    let response = shield
         .sign_in(SignInRequest {
             provider_id,
             subprovider_id,
@@ -30,7 +33,15 @@ pub async fn sign_in(
             form_data: None,
         })
         .await
-        .map_err(|err| err.into())
+        .map_err(ServerFnError::<ShieldError>::from)?;
+
+    match response {
+        Response::Redirect(url) => {
+            redirect(&url);
+
+            Ok(())
+        }
+    }
 }
 
 #[component]

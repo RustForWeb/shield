@@ -6,6 +6,7 @@ use crate::{
     error::{ProviderError, ShieldError},
     provider::{Provider, Subprovider, SubproviderVisualisation},
     request::{SignInRequest, SignOutRequest},
+    response::Response,
     storage::Storage,
 };
 
@@ -73,7 +74,7 @@ impl Shield {
         })
     }
 
-    pub async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError> {
+    pub async fn sign_in(&self, request: SignInRequest) -> Result<Response, ShieldError> {
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
@@ -92,7 +93,7 @@ impl Shield {
         provider.sign_in(request).await
     }
 
-    pub async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
+    pub async fn sign_out(&self, _request: SignOutRequest) -> Result<Response, ShieldError> {
         todo!()
     }
 }

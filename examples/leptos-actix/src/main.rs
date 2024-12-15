@@ -7,10 +7,11 @@ async fn main() -> std::io::Result<()> {
     use actix_session::{storage::CookieSessionStore, SessionMiddleware};
     use actix_web::{cookie::Key, web::Data, App, HttpServer};
     use leptos::{config::get_configuration, prelude::provide_context};
-    use leptos_actix::{generate_route_list, LeptosRoutes};
+    use leptos_actix::{generate_route_list, redirect, LeptosRoutes};
     use shield::{DummyProvider, DummyStorage, Shield};
     use shield_actix::ShieldMiddleware;
     use shield_examples_leptos_actix::app::*;
+    use shield_leptos::context::LeptosRedirect;
     use shield_oidc::{KeycloakBuilder, OidcProvider};
 
     // Initialize Leptos
@@ -57,6 +58,7 @@ async fn main() -> std::io::Result<()> {
                 routes,
                 move || {
                     provide_context(shield.clone());
+                    provide_context(LeptosRedirect::from(redirect));
                 },
                 {
                     let leptos_options = leptos_options.clone();

@@ -6,8 +6,8 @@ use openidconnect::{
     UserInfoUrl,
 };
 use shield::{
-    ConfigurationError, Provider, ProviderError, ShieldError, SignInRequest, SignOutRequest,
-    Subprovider,
+    ConfigurationError, Provider, ProviderError, Response, ShieldError, SignInRequest,
+    SignOutRequest, Subprovider,
 };
 
 use crate::{storage::OidcStorage, subprovider::OidcSubprovider};
@@ -154,7 +154,7 @@ impl Provider for OidcProvider {
             .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
 
-    async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError> {
+    async fn sign_in(&self, request: SignInRequest) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
@@ -175,15 +175,15 @@ impl Provider for OidcProvider {
                 authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
         }
 
-        let (auth_url, csrf_token, nonce) = authorization_request.url();
+        let (auth_url, _csrf_token, _nonce) = authorization_request.url();
 
         // TODO: Store CSRF and nonce in session.
         // TODO: Redirect.
 
-        todo!("redirect {} {:?} {:?}", auth_url, csrf_token, nonce)
+        Ok(Response::Redirect(auth_url.to_string()))
     }
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<(), ShieldError> {
+    async fn sign_out(&self, request: SignOutRequest) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
@@ -195,16 +195,19 @@ impl Provider for OidcProvider {
         let client = Self::oidc_client_for_subprovider(&subprovider).await?;
 
         let revocation_request = match client.revoke_token(token.into()) {
-            Ok(revocation_request) => revocation_request,
-            Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => return Ok(()),
+            Ok(revocation_request) => Some(revocation_request),
+            Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
             Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
         };
 
-        revocation_request
-            .request_async(async_http_client)
-            .await
-            .expect("TODO: revocation request error");
+        if let Some(revocation_request) = revocation_request {
+            revocation_request
+                .request_async(async_http_client)
+                .await
+                .expect("TODO: revocation request error");
+        }
 
-        Ok(())
+        // TODO: This doesn't make sense and/or should be configurable.
+        Ok(Response::Redirect("/".to_owned()))
     }
 }

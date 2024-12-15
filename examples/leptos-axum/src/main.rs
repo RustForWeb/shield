@@ -6,10 +6,11 @@ async fn main() {
     use axum::Router;
     use leptos::logging::log;
     use leptos::{config::get_configuration, prelude::provide_context};
-    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use leptos_axum::{generate_route_list, redirect, LeptosRoutes};
     use shield::{DummyProvider, DummyStorage, Shield};
     use shield_axum::ShieldLayer;
     use shield_examples_leptos_axum::app::*;
+    use shield_leptos::context::LeptosRedirect;
     use shield_oidc::{KeycloakBuilder, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
@@ -52,6 +53,7 @@ async fn main() {
             routes,
             move || {
                 provide_context(shield.clone());
+                provide_context(LeptosRedirect::from(redirect));
             },
             {
                 let leptos_options = leptos_options.clone();

@@ -5,6 +5,7 @@ use crate::{
     error::ShieldError,
     form::Form,
     request::{SignInRequest, SignOutRequest},
+    response::Response,
 };
 
 #[async_trait]
@@ -18,9 +19,9 @@ pub trait Provider: Send + Sync {
         subprovider_id: &str,
     ) -> Result<Option<Box<dyn Subprovider>>, ShieldError>;
 
-    async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError>;
+    async fn sign_in(&self, request: SignInRequest) -> Result<Response, ShieldError>;
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<(), ShieldError>;
+    async fn sign_out(&self, request: SignOutRequest) -> Result<Response, ShieldError>;
 }
 
 pub trait Subprovider: Send + Sync {
@@ -45,7 +46,13 @@ pub struct SubproviderVisualisation {
 pub(crate) mod tests {
     use async_trait::async_trait;
 
-    use super::{Provider, ShieldError, SignInRequest, SignOutRequest, Subprovider};
+    use crate::{
+        error::ShieldError,
+        request::{SignInRequest, SignOutRequest},
+        response::Response,
+    };
+
+    use super::{Provider, Subprovider};
 
     pub const TEST_PROVIDER_ID: &str = "test";
 
@@ -78,12 +85,12 @@ pub(crate) mod tests {
             Ok(None)
         }
 
-        async fn sign_in(&self, _request: SignInRequest) -> Result<(), ShieldError> {
-            Ok(())
+        async fn sign_in(&self, _request: SignInRequest) -> Result<Response, ShieldError> {
+            todo!("redirect back?")
         }
 
-        async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
-            Ok(())
+        async fn sign_out(&self, _request: SignOutRequest) -> Result<Response, ShieldError> {
+            todo!("redirect back?")
         }
     }
 }
