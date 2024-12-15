@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreClient, CoreProviderMetadata},
     reqwest::async_http_client,
-    ClientId, ClientSecret, CsrfToken, IssuerUrl, Nonce, Scope,
+    AuthUrl, ClientId, ClientSecret, CsrfToken, IssuerUrl, Nonce, Scope, TokenUrl, UserInfoUrl,
 };
 use shield::{
     Provider, SignInError, SignInRequest, SignOutError, SignOutRequest, StorageError, Subprovider,
@@ -97,14 +97,13 @@ impl Provider for OidcProvider {
                 Some(subprovider) => subprovider,
                 None => return Err(SignInError::SubproviderNotFound(subprovider_id)),
             },
-            // TODO: SubproviderMissing error?
-            None => return Err(SignInError::SubproviderNotFound("".to_owned())),
+            None => return Err(SignInError::SubproviderMissing),
         };
 
-        let client = if let Some(issuer_url) = subprovider.issuer_url {
+        let client = if let Some(discovery_url) = subprovider.discovery_url {
             let provider_metadata = CoreProviderMetadata::discover_async(
                 // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
-                IssuerUrl::new(issuer_url).expect("TODO: issuer url error"),
+                IssuerUrl::new(discovery_url).expect("TODO: issuer url error"),
                 async_http_client,
             )
             .await
@@ -116,8 +115,25 @@ impl Provider for OidcProvider {
                 subprovider.client_secret.map(ClientSecret::new),
             )
         } else {
-            // CoreClient::new(client_id, client_secret, issuer, auth_url, token_url, userinfo_endpoint, jwks)
-            todo!("core client without issuer url")
+            CoreClient::new(
+                ClientId::new(subprovider.client_id),
+                subprovider.client_secret.map(ClientSecret::new),
+                IssuerUrl::new(subprovider.issuer_url.expect("TODO: missing issuer url"))
+                    .expect("TODO: issuer url error"),
+                subprovider
+                    .authorization_url
+                    .map(|authorization_url| {
+                        AuthUrl::new(authorization_url).expect("TODO: auth url error")
+                    })
+                    .expect("TODO: missing authorization url"),
+                subprovider
+                    .token_url
+                    .map(|token_url| TokenUrl::new(token_url).expect("TODO: token url error")),
+                subprovider.user_info_url.map(|user_info_url| {
+                    UserInfoUrl::new(user_info_url).expect("TODO: user info url error")
+                }),
+                subprovider.json_web_key_set.expect("TODO: missing jwks"),
+            )
         };
 
         // TODO: Common client options.
@@ -149,9 +165,9 @@ impl Provider for OidcProvider {
                 Some(subprovider) => Some(subprovider),
                 None => return Err(SignOutError::SubproviderNotFound(subprovider_id)),
             },
-            None => None,
+            None => return Err(SignOutError::SubproviderMissing),
         };
 
-        todo!()
+        todo!("oidc sign out")
     }
 }

@@ -4,8 +4,8 @@ async fn main() {
     use std::sync::Arc;
 
     use axum::Router;
-    use leptos::config::get_configuration;
     use leptos::logging::log;
+    use leptos::{config::get_configuration, prelude::provide_context};
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use shield::{DummyProvider, DummyStorage, Shield};
     use shield_axum::ShieldLayer;
@@ -43,14 +43,21 @@ async fn main() {
             ),
         ],
     );
-    let shield_layer = ShieldLayer::new(shield);
+    let shield_layer = ShieldLayer::new(shield.clone());
 
     // Initialize app
     let app = Router::new()
-        .leptos_routes(&leptos_options, routes, {
-            let leptos_options = leptos_options.clone();
-            move || shell(leptos_options.clone())
-        })
+        .leptos_routes_with_context(
+            &leptos_options,
+            routes,
+            move || {
+                provide_context(shield.clone());
+            },
+            {
+                let leptos_options = leptos_options.clone();
+                move || shell(leptos_options.clone())
+            },
+        )
         .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options)
         .layer(shield_layer)

@@ -14,13 +14,19 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 actix-files = { workspace = true, optional = true }
-actix-session = { workspace = true, features = ["cookie-session"], optional = true }
+actix-session = { workspace = true, features = [
+    "cookie-session",
+], optional = true }
 actix-web = { workspace = true, optional = true }
 console_error_panic_hook.workspace = true
 leptos.workspace = true
 leptos_actix = { workspace = true, optional = true }
 leptos_meta.workspace = true
 leptos_router.workspace = true
+shield = { path = "../../packages/core/shield", features = ["dummy"] }
+shield-actix = { path = "../../packages/integrations/shield-actix", optional = true }
+shield-leptos = { path = "../../packages/integrations/shield-leptos" }
+shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
 wasm-bindgen.workspace = true
 
 [features]
@@ -31,9 +37,12 @@ ssr = [
     "dep:actix-session",
     "dep:actix-web",
     "dep:leptos_actix",
+    "dep:shield-actix",
+    "dep:shield-oidc",
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+    "shield-leptos/actix",
 ]
 
 [package.metadata.leptos]

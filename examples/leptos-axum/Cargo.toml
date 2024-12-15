@@ -35,13 +35,13 @@ ssr = [
     "dep:axum",
     "dep:leptos_axum",
     "dep:shield-axum",
+    "dep:shield-oidc",
     "dep:tokio",
     "dep:tower-sessions",
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "shield-leptos/axum",
-    "shield-oidc",
 ]
 
 [package.metadata.leptos]

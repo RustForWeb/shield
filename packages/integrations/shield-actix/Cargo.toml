@@ -10,4 +10,6 @@ version.workspace = true
 
 [dependencies]
 actix-session.workspace = true
-shield = { path = "../../core/shield"}
+actix-utils.workspace = true
+actix-web.workspace = true
+shield = { path = "../../core/shield" }

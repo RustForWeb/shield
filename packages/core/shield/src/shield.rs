@@ -9,9 +9,10 @@ use crate::{
     SignInError, SignOutError, SubproviderVisualisation,
 };
 
+#[derive(Clone)]
 pub struct Shield {
     storage: Arc<dyn Storage>,
-    providers: HashMap<String, Arc<dyn Provider>>,
+    providers: Arc<HashMap<String, Arc<dyn Provider>>>,
 }
 
 impl Shield {
@@ -21,10 +22,12 @@ impl Shield {
     {
         Self {
             storage: Arc::new(storage),
-            providers: providers
-                .into_iter()
-                .map(|provider| (provider.id(), provider))
-                .collect(),
+            providers: Arc::new(
+                providers
+                    .into_iter()
+                    .map(|provider| (provider.id(), provider))
+                    .collect(),
+            ),
         }
     }
 

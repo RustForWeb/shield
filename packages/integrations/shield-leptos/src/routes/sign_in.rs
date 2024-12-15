@@ -3,23 +3,14 @@ use shield::SubproviderVisualisation;
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
-    #[cfg(feature = "actix")]
-    {
-        // use leptos_actix::extract;
-        // TODO
-    }
-    #[cfg(feature = "axum")]
-    {
-        use leptos_axum::extract;
-        use shield_axum::ExtractShield;
+    use shield::Shield;
 
-        let ExtractShield(shield) = extract::<ExtractShield>().await?;
+    let shield = expect_context::<Shield>();
 
-        shield
-            .subprovider_visualisations()
-            .await
-            .map_err(|err| err.into())
-    }
+    shield
+        .subprovider_visualisations()
+        .await
+        .map_err(|err| err.into())
 }
 
 #[server]
@@ -27,11 +18,9 @@ pub async fn sign_in(
     provider_id: String,
     subprovider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    use leptos_axum::extract;
-    use shield::SignInRequest;
-    use shield_axum::ExtractShield;
+    use shield::{Shield, SignInRequest};
 
-    let ExtractShield(shield) = extract::<ExtractShield>().await?;
+    let shield = expect_context::<Shield>();
 
     shield
         .sign_in(SignInRequest {

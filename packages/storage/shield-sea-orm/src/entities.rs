@@ -18,5 +18,3 @@ pub mod oauth_provider_connection;
 pub mod oidc_provider;
 #[cfg(feature = "provider-oidc")]
 pub mod oidc_provider_connection;
-
-// TODO: Use features to ensure all databases are supported (e.g. for enums).

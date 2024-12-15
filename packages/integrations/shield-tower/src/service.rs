@@ -1,7 +1,4 @@
-use std::{
-    sync::Arc,
-    task::{Context, Poll},
-};
+use std::task::{Context, Poll};
 
 use http::{Request, Response};
 use shield::Shield;
@@ -10,11 +7,11 @@ use tower_service::Service;
 #[derive(Clone)]
 pub struct ShieldService<S> {
     inner: S,
-    shield: Arc<Shield>,
+    shield: Shield,
 }
 
 impl<S> ShieldService<S> {
-    pub fn new(inner: S, shield: Arc<Shield>) -> Self {
+    pub fn new(inner: S, shield: Shield) -> Self {
         Self { inner, shield }
     }
 }

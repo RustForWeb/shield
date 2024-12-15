@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use axum::{
     extract::FromRequestParts,
@@ -7,7 +5,7 @@ use axum::{
 };
 use shield::Shield;
 
-pub struct ExtractShield(pub Arc<Shield>);
+pub struct ExtractShield(pub Shield);
 
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for ExtractShield {
@@ -16,7 +14,7 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractShield {
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
             .extensions
-            .get::<Arc<Shield>>()
+            .get::<Shield>()
             .cloned()
             .map(ExtractShield)
             .ok_or((

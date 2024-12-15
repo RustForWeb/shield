@@ -4368,6 +4368,8 @@ name = "shield-actix"
 version = "0.0.1"
 dependencies = [
  "actix-session",
+ "actix-utils",
+ "actix-web",
  "shield",
 ]
 
@@ -4414,6 +4416,10 @@ dependencies = [
  "leptos_actix",
  "leptos_meta",
  "leptos_router",
+ "shield",
+ "shield-actix",
+ "shield-leptos",
+ "shield-oidc",
  "wasm-bindgen",
 ]
 

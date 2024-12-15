@@ -17,6 +17,8 @@ pub struct SignInRequest {
 pub enum SignInError {
     #[error("provider `{0}` not found")]
     ProviderNotFound(String),
+    #[error("subprovider is missing")]
+    SubproviderMissing,
     #[error("subprovider `{0}` not found")]
     SubproviderNotFound(String),
     #[error(transparent)]
@@ -34,6 +36,8 @@ pub struct SignOutRequest {
 pub enum SignOutError {
     #[error("provider `{0}` not found")]
     ProviderNotFound(String),
+    #[error("subprovider is missing")]
+    SubproviderMissing,
     #[error("subprovider `{0}` not found")]
     SubproviderNotFound(String),
     #[error(transparent)]

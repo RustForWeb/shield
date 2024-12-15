@@ -29,6 +29,7 @@ pub struct OidcSubprovider {
     pub(crate) client_secret: Option<String>,
     pub(crate) scopes: Option<Vec<String>>,
     pub(crate) redirect_url: Option<String>,
+    pub(crate) discovery_url: Option<String>,
     pub(crate) issuer_url: Option<String>,
     pub(crate) authorization_url: Option<String>,
     pub(crate) authorization_url_params: Option<String>,

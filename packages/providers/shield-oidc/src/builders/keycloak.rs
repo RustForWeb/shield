@@ -4,17 +4,17 @@ use crate::subprovider::{OidcProviderPkceCodeChallenge, OidcProviderVisibility, 
 pub struct KeycloakBuilder {
     id: String,
     name: String,
-    issuer_url: String,
+    discovery_url: String,
     client_id: String,
     client_secret: Option<String>,
 }
 
 impl KeycloakBuilder {
-    pub fn new(id: &str, issuer_url: &str, client_id: &str) -> Self {
+    pub fn new(id: &str, discovery_url: &str, client_id: &str) -> Self {
         Self {
             id: id.to_owned(),
             name: "Keycloak".to_owned(),
-            issuer_url: issuer_url.to_owned(),
+            discovery_url: discovery_url.to_owned(),
             client_id: client_id.to_owned(),
             client_secret: None,
         }
@@ -40,7 +40,8 @@ impl KeycloakBuilder {
             client_secret: self.client_secret,
             scopes: None,
             redirect_url: None,
-            issuer_url: Some(self.issuer_url),
+            discovery_url: Some(self.discovery_url),
+            issuer_url: None,
             authorization_url: None,
             authorization_url_params: None,
             token_url: None,
