@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use shield::{Storage, StorageError};
 
-use crate::provider::OidcSubprovider;
+use crate::subprovider::OidcSubprovider;
 
 #[async_trait]
 pub trait OidcStorage: Storage + Sync {

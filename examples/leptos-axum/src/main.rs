@@ -10,7 +10,7 @@ async fn main() {
     use shield::{DummyProvider, DummyStorage, Shield};
     use shield_axum::ShieldLayer;
     use shield_examples_leptos_axum::app::*;
-    use shield_oidc::OidcProvider;
+    use shield_oidc::{KeycloakBuilder, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
@@ -32,7 +32,15 @@ async fn main() {
         DummyStorage::new(),
         vec![
             Arc::new(DummyProvider::new()),
-            Arc::new(OidcProvider::new()),
+            Arc::new(
+                OidcProvider::new().with_subproviders([KeycloakBuilder::new(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .build()]),
+            ),
         ],
     );
     let shield_layer = ShieldLayer::new(shield);
