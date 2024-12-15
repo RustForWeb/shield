@@ -6,13 +6,13 @@ on:
         branches:
             - main
 
-env:
-    RUSTFLAGS: '-Dwarnings'
-
 jobs:
     lint:
         name: Lint
         runs-on: ubuntu-latest
+
+        env:
+            RUSTFLAGS: '-Dwarnings'
 
         steps:
             - name: Checkout
