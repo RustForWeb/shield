@@ -2,25 +2,25 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    error::ShieldError,
     form::Form,
-    request::{SignInError, SignInRequest, SignOutError, SignOutRequest},
-    storage::StorageError,
+    request::{SignInRequest, SignOutRequest},
 };
 
 #[async_trait]
 pub trait Provider: Send + Sync {
     fn id(&self) -> String;
 
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError>;
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError>;
 
     async fn subprovider_by_id(
         &self,
         subprovider_id: &str,
-    ) -> Result<Option<Box<dyn Subprovider>>, StorageError>;
+    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError>;
 
-    async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError>;
+    async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError>;
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<(), SignOutError>;
+    async fn sign_out(&self, request: SignOutRequest) -> Result<(), ShieldError>;
 }
 
 pub trait Subprovider: Send + Sync {
@@ -45,9 +45,7 @@ pub struct SubproviderVisualisation {
 pub(crate) mod tests {
     use async_trait::async_trait;
 
-    use crate::StorageError;
-
-    use super::{Provider, SignInError, SignInRequest, SignOutError, SignOutRequest, Subprovider};
+    use super::{Provider, ShieldError, SignInRequest, SignOutRequest, Subprovider};
 
     pub const TEST_PROVIDER_ID: &str = "test";
 
@@ -69,22 +67,22 @@ pub(crate) mod tests {
             self.id.unwrap_or(TEST_PROVIDER_ID).to_owned()
         }
 
-        async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+        async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
             Ok(vec![])
         }
 
         async fn subprovider_by_id(
             &self,
             _subprovider_id: &str,
-        ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
+        ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
             Ok(None)
         }
 
-        async fn sign_in(&self, _request: SignInRequest) -> Result<(), SignInError> {
+        async fn sign_in(&self, _request: SignInRequest) -> Result<(), ShieldError> {
             Ok(())
         }
 
-        async fn sign_out(&self, _request: SignOutRequest) -> Result<(), SignOutError> {
+        async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
             Ok(())
         }
     }

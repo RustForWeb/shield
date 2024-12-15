@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use shield::{Storage, StorageError};
 
-use crate::provider::OauthSubprovider;
+use crate::subprovider::OauthSubprovider;
 
 #[async_trait]
 pub trait OauthStorage: Storage + Sync {

@@ -6,8 +6,8 @@ use openidconnect::{
     UserInfoUrl,
 };
 use shield::{
-    ConfigurationError, Provider, ProviderError, SignInError, SignInRequest, SignOutError,
-    SignOutRequest, StorageError, Subprovider,
+    ConfigurationError, Provider, ProviderError, ShieldError, SignInRequest, SignOutRequest,
+    Subprovider,
 };
 
 use crate::{storage::OidcStorage, subprovider::OidcSubprovider};
@@ -41,22 +41,22 @@ impl OidcProvider {
     async fn oidc_subprovider_by_id(
         &self,
         subprovider_id: &str,
-    ) -> Result<Option<OidcSubprovider>, StorageError> {
+    ) -> Result<OidcSubprovider, ShieldError> {
         if let Some(subprovider) = self
             .subproviders
             .iter()
             .find(|subprovider| subprovider.id == subprovider_id)
         {
-            return Ok(Some(subprovider.clone()));
+            return Ok(subprovider.clone());
         }
 
         if let Some(storage) = &self.storage {
             if let Some(subprovider) = storage.oidc_subprovider_by_id(subprovider_id).await? {
-                return Ok(Some(subprovider));
+                return Ok(subprovider);
             }
         }
 
-        Ok(None)
+        Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
     }
 
     async fn oidc_client_for_subprovider(
@@ -129,7 +129,7 @@ impl Provider for OidcProvider {
         OIDC_PROVIDER_ID.to_owned()
     }
 
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
         let subproviders =
             self.subproviders
                 .iter()
@@ -148,20 +148,15 @@ impl Provider for OidcProvider {
     async fn subprovider_by_id(
         &self,
         subprovider_id: &str,
-    ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
+    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
         self.oidc_subprovider_by_id(subprovider_id)
             .await
-            .map(|subprovider| {
-                subprovider.map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
-            })
+            .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
 
-    async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {
+    async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError> {
         let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => match self.oidc_subprovider_by_id(&subprovider_id).await? {
-                Some(subprovider) => subprovider,
-                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
-            },
+            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
@@ -188,12 +183,9 @@ impl Provider for OidcProvider {
         todo!("redirect {} {:?} {:?}", auth_url, csrf_token, nonce)
     }
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<(), SignOutError> {
+    async fn sign_out(&self, request: SignOutRequest) -> Result<(), ShieldError> {
         let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => match self.oidc_subprovider_by_id(&subprovider_id).await? {
-                Some(subprovider) => subprovider,
-                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
-            },
+            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 

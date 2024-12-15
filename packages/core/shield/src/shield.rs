@@ -3,10 +3,10 @@ use std::{collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
+    error::{ProviderError, ShieldError, StorageError},
     provider::{Provider, Subprovider, SubproviderVisualisation},
-    request::{SignInError, SignInRequest, SignOutError, SignOutRequest},
-    storage::{Storage, StorageError},
-    ProviderError,
+    request::{SignInRequest, SignOutRequest},
+    storage::Storage,
 };
 
 #[derive(Clone)]
@@ -39,7 +39,7 @@ impl Shield {
         self.providers.get(provider_id).map(|v| &**v)
     }
 
-    pub async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+    pub async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
         try_join_all(
             self.providers
                 .values()
@@ -51,7 +51,7 @@ impl Shield {
 
     pub async fn subprovider_visualisations(
         &self,
-    ) -> Result<Vec<SubproviderVisualisation>, StorageError> {
+    ) -> Result<Vec<SubproviderVisualisation>, ShieldError> {
         self.subproviders().await.map(|subproviders| {
             subproviders
                 .into_iter()
@@ -73,7 +73,7 @@ impl Shield {
         })
     }
 
-    pub async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {
+    pub async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError> {
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
@@ -92,7 +92,7 @@ impl Shield {
         provider.sign_in(request).await
     }
 
-    pub async fn sign_out(&self, _request: SignOutRequest) -> Result<(), SignOutError> {
+    pub async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
         todo!()
     }
 }

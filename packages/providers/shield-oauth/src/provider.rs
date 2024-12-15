@@ -1,10 +1,7 @@
 use async_trait::async_trait;
-use shield::{
-    Provider, ProviderError, SignInError, SignInRequest, SignOutError, SignOutRequest,
-    StorageError, Subprovider,
-};
+use shield::{Provider, ProviderError, ShieldError, SignInRequest, SignOutRequest, Subprovider};
 
-use crate::storage::OauthStorage;
+use crate::{storage::OauthStorage, subprovider::OauthSubprovider};
 
 pub const OAUTH_PROVIDER_ID: &str = "oauth";
 
@@ -35,22 +32,22 @@ impl OauthProvider {
     async fn oauth_subprovider_by_id(
         &self,
         subprovider_id: &str,
-    ) -> Result<Option<OauthSubprovider>, StorageError> {
+    ) -> Result<OauthSubprovider, ShieldError> {
         if let Some(subprovider) = self
             .subproviders
             .iter()
             .find(|subprovider| subprovider.id == subprovider_id)
         {
-            return Ok(Some(subprovider.clone()));
+            return Ok(subprovider.clone());
         }
 
         if let Some(storage) = &self.storage {
             if let Some(subprovider) = storage.oauth_subprovider_by_id(subprovider_id).await? {
-                return Ok(Some(subprovider));
+                return Ok(subprovider);
             }
         }
 
-        Ok(None)
+        Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
     }
 }
 
@@ -60,7 +57,7 @@ impl Provider for OauthProvider {
         OAUTH_PROVIDER_ID.to_owned()
     }
 
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
         let subproviders =
             self.subproviders
                 .iter()
@@ -79,58 +76,26 @@ impl Provider for OauthProvider {
     async fn subprovider_by_id(
         &self,
         subprovider_id: &str,
-    ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
+    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
         self.oauth_subprovider_by_id(subprovider_id)
             .await
-            .map(|subprovider| {
-                subprovider.map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
-            })
+            .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
-    async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {
+    async fn sign_in(&self, request: SignInRequest) -> Result<(), ShieldError> {
         let _subprovider = match request.subprovider_id {
-            Some(subprovider_id) => match self.oauth_subprovider_by_id(&subprovider_id).await? {
-                Some(subprovider) => subprovider,
-                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
-            },
+            Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
         todo!()
     }
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<(), SignOutError> {
+    async fn sign_out(&self, request: SignOutRequest) -> Result<(), ShieldError> {
         let _subprovider = match request.subprovider_id {
-            Some(subprovider_id) => match self.oauth_subprovider_by_id(&subprovider_id).await? {
-                Some(subprovider) => subprovider,
-                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
-            },
+            Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
         todo!()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct OauthSubprovider {
-    id: String,
-    name: String,
-}
-
-impl Subprovider for OauthSubprovider {
-    fn provider_id(&self) -> String {
-        OAUTH_PROVIDER_ID.to_owned()
-    }
-
-    fn id(&self) -> Option<String> {
-        Some(self.id.clone())
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn form(&self) -> Option<shield::Form> {
-        None
     }
 }

@@ -1,10 +1,11 @@
 use async_trait::async_trait;
 
 use crate::{
+    error::ShieldError,
     form::Form,
     provider::{Provider, Subprovider},
-    request::{SignInError, SignInRequest, SignOutError, SignOutRequest},
-    storage::{Storage, StorageError},
+    request::{SignInRequest, SignOutRequest},
+    storage::Storage,
 };
 
 pub const DUMMY_PROVIDER_ID: &str = "dummy";
@@ -26,22 +27,22 @@ impl Provider for DummyProvider {
         DUMMY_PROVIDER_ID.to_owned()
     }
 
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, StorageError> {
+    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
         Ok(vec![Box::new(self.subprovider.clone())])
     }
 
     async fn subprovider_by_id(
         &self,
         _subprovider_id: &str,
-    ) -> Result<Option<Box<dyn Subprovider>>, StorageError> {
+    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
         Ok(None)
     }
 
-    async fn sign_in(&self, _request: SignInRequest) -> Result<(), SignInError> {
+    async fn sign_in(&self, _request: SignInRequest) -> Result<(), ShieldError> {
         Ok(())
     }
 
-    async fn sign_out(&self, _request: SignOutRequest) -> Result<(), SignOutError> {
+    async fn sign_out(&self, _request: SignOutRequest) -> Result<(), ShieldError> {
         Ok(())
     }
 }

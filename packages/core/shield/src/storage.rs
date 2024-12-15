@@ -1,11 +1,6 @@
-use thiserror::Error;
-
 pub trait Storage: Send + Sync {
     fn id(&self) -> String;
 }
-
-#[derive(Debug, Error)]
-pub enum StorageError {}
 
 #[cfg(test)]
 pub(crate) mod tests {
