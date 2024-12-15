@@ -13,14 +13,30 @@ pub struct SignInRequest {
 }
 
 #[derive(Debug, Error)]
-
-pub enum SignInError {
+pub enum ProviderError {
     #[error("provider `{0}` not found")]
     ProviderNotFound(String),
     #[error("subprovider is missing")]
     SubproviderMissing,
     #[error("subprovider `{0}` not found")]
     SubproviderNotFound(String),
+}
+
+#[derive(Debug, Error)]
+pub enum ConfigurationError {
+    #[error("missing configuration: {0}")]
+    Missing(String),
+    #[error("invalid configuration: {0}")]
+    Invalid(String),
+}
+
+#[derive(Debug, Error)]
+
+pub enum SignInError {
+    #[error(transparent)]
+    Provider(#[from] ProviderError),
+    #[error(transparent)]
+    Configuration(#[from] ConfigurationError),
     #[error(transparent)]
     Storage(#[from] StorageError),
 }
@@ -34,12 +50,10 @@ pub struct SignOutRequest {
 #[derive(Debug, Error)]
 
 pub enum SignOutError {
-    #[error("provider `{0}` not found")]
-    ProviderNotFound(String),
-    #[error("subprovider is missing")]
-    SubproviderMissing,
-    #[error("subprovider `{0}` not found")]
-    SubproviderNotFound(String),
+    #[error(transparent)]
+    Provider(#[from] ProviderError),
+    #[error(transparent)]
+    Configuration(#[from] ConfigurationError),
     #[error(transparent)]
     Storage(#[from] StorageError),
 }

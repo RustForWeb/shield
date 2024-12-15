@@ -3,10 +3,10 @@ use std::{collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
-    provider::{Provider, Subprovider},
-    request::{SignInRequest, SignOutRequest},
+    provider::{Provider, Subprovider, SubproviderVisualisation},
+    request::{SignInError, SignInRequest, SignOutError, SignOutRequest},
     storage::{Storage, StorageError},
-    SignInError, SignOutError, SubproviderVisualisation,
+    ProviderError,
 };
 
 #[derive(Clone)]
@@ -76,7 +76,7 @@ impl Shield {
     pub async fn sign_in(&self, request: SignInRequest) -> Result<(), SignInError> {
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
-            None => return Err(SignInError::ProviderNotFound(request.provider_id)),
+            None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
         // let subprovider = match request.subprovider_id {

@@ -2,10 +2,12 @@ use async_trait::async_trait;
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreClient, CoreProviderMetadata},
     reqwest::async_http_client,
-    AuthUrl, ClientId, ClientSecret, CsrfToken, IssuerUrl, Nonce, Scope, TokenUrl, UserInfoUrl,
+    AccessToken, AuthUrl, ClientId, ClientSecret, CsrfToken, IssuerUrl, Nonce, Scope, TokenUrl,
+    UserInfoUrl,
 };
 use shield::{
-    Provider, SignInError, SignInRequest, SignOutError, SignOutRequest, StorageError, Subprovider,
+    ConfigurationError, Provider, ProviderError, SignInError, SignInRequest, SignOutError,
+    SignOutRequest, StorageError, Subprovider,
 };
 
 use crate::{storage::OidcStorage, subprovider::OidcSubprovider};
@@ -56,6 +58,69 @@ impl OidcProvider {
 
         Ok(None)
     }
+
+    async fn oidc_client_for_subprovider(
+        subprovider: &OidcSubprovider,
+    ) -> Result<CoreClient, ConfigurationError> {
+        let client = if let Some(discovery_url) = &subprovider.discovery_url {
+            let provider_metadata = CoreProviderMetadata::discover_async(
+                // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
+                IssuerUrl::new(discovery_url.clone())
+                    .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                async_http_client,
+            )
+            .await
+            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?;
+
+            CoreClient::from_provider_metadata(
+                provider_metadata,
+                ClientId::new(subprovider.client_id.clone()),
+                subprovider.client_secret.clone().map(ClientSecret::new),
+            )
+        } else {
+            CoreClient::new(
+                ClientId::new(subprovider.client_id.clone()),
+                subprovider.client_secret.clone().map(ClientSecret::new),
+                IssuerUrl::new(
+                    subprovider
+                        .issuer_url
+                        .clone()
+                        .ok_or(ConfigurationError::Missing("issuer URL".to_owned()))?,
+                )
+                .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                subprovider
+                    .authorization_url
+                    .as_ref()
+                    .ok_or(ConfigurationError::Missing("authorization URL".to_owned()))
+                    .and_then(|authorization_url| {
+                        AuthUrl::new(authorization_url.clone())
+                            .map_err(|err| ConfigurationError::Invalid(err.to_string()))
+                    })?,
+                match &subprovider.token_url {
+                    Some(token_url) => Some(
+                        TokenUrl::new(token_url.clone())
+                            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                    ),
+                    None => None,
+                },
+                match &subprovider.user_info_url {
+                    Some(user_info_url) => Some(
+                        UserInfoUrl::new(user_info_url.clone())
+                            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                    ),
+                    None => None,
+                },
+                subprovider
+                    .json_web_key_set
+                    .clone()
+                    .ok_or(ConfigurationError::Missing("JSON Web Key Set".to_owned()))?,
+            )
+        };
+
+        // TODO: Common client options.
+
+        Ok(client)
+    }
 }
 
 #[async_trait]
@@ -95,48 +160,12 @@ impl Provider for OidcProvider {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => match self.oidc_subprovider_by_id(&subprovider_id).await? {
                 Some(subprovider) => subprovider,
-                None => return Err(SignInError::SubproviderNotFound(subprovider_id)),
+                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
             },
-            None => return Err(SignInError::SubproviderMissing),
+            None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
-        let client = if let Some(discovery_url) = subprovider.discovery_url {
-            let provider_metadata = CoreProviderMetadata::discover_async(
-                // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
-                IssuerUrl::new(discovery_url).expect("TODO: issuer url error"),
-                async_http_client,
-            )
-            .await
-            .expect("TODO: provider metadata error");
-
-            CoreClient::from_provider_metadata(
-                provider_metadata,
-                ClientId::new(subprovider.client_id),
-                subprovider.client_secret.map(ClientSecret::new),
-            )
-        } else {
-            CoreClient::new(
-                ClientId::new(subprovider.client_id),
-                subprovider.client_secret.map(ClientSecret::new),
-                IssuerUrl::new(subprovider.issuer_url.expect("TODO: missing issuer url"))
-                    .expect("TODO: issuer url error"),
-                subprovider
-                    .authorization_url
-                    .map(|authorization_url| {
-                        AuthUrl::new(authorization_url).expect("TODO: auth url error")
-                    })
-                    .expect("TODO: missing authorization url"),
-                subprovider
-                    .token_url
-                    .map(|token_url| TokenUrl::new(token_url).expect("TODO: token url error")),
-                subprovider.user_info_url.map(|user_info_url| {
-                    UserInfoUrl::new(user_info_url).expect("TODO: user info url error")
-                }),
-                subprovider.json_web_key_set.expect("TODO: missing jwks"),
-            )
-        };
-
-        // TODO: Common client options.
+        let client = Self::oidc_client_for_subprovider(&subprovider).await?;
 
         let mut authorization_request = client.authorize_url(
             CoreAuthenticationFlow::AuthorizationCode,
@@ -160,14 +189,30 @@ impl Provider for OidcProvider {
     }
 
     async fn sign_out(&self, request: SignOutRequest) -> Result<(), SignOutError> {
-        let _subprovider = match request.subprovider_id {
-            Some(subprovider_id) => match self.subprovider_by_id(&subprovider_id).await? {
-                Some(subprovider) => Some(subprovider),
-                None => return Err(SignOutError::SubproviderNotFound(subprovider_id)),
+        let subprovider = match request.subprovider_id {
+            Some(subprovider_id) => match self.oidc_subprovider_by_id(&subprovider_id).await? {
+                Some(subprovider) => subprovider,
+                None => return Err(ProviderError::SubproviderNotFound(subprovider_id).into()),
             },
-            None => return Err(SignOutError::SubproviderMissing),
+            None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
-        todo!("oidc sign out")
+        // TODO: find access token
+        let token = AccessToken::new("".to_owned());
+
+        let client = Self::oidc_client_for_subprovider(&subprovider).await?;
+
+        let revocation_request = match client.revoke_token(token.into()) {
+            Ok(revocation_request) => revocation_request,
+            Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => return Ok(()),
+            Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
+        };
+
+        revocation_request
+            .request_async(async_http_client)
+            .await
+            .expect("TODO: revocation request error");
+
+        Ok(())
     }
 }
