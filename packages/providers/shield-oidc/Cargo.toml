@@ -9,5 +9,6 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+async-trait.workspace = true
 openidconnect = "3.5.0"
-shield = { path = "../../core/shield"}
+shield = { path = "../../core/shield" }
