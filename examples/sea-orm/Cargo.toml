@@ -16,14 +16,14 @@ sea-orm = { workspace = true, features = [
     "runtime-tokio-native-tls",
     "sqlx-mysql",
     "sqlx-postgres",
-    "sqlx-sqlite"
+    "sqlx-sqlite",
 ] }
 sea-orm-migration = { workspace = true, features = [
     "runtime-tokio-native-tls",
     "sqlx-mysql",
     "sqlx-postgres",
-    "sqlx-sqlite"
+    "sqlx-sqlite",
 ] }
-shield-seaorm = { path = "../../packages/storage/shield-seaorm", features = [
+shield-sea-orm = { path = "../../packages/storage/shield-sea-orm", features = [
     "all-providers",
 ] }

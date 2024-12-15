@@ -1,5 +1,5 @@
 [package]
-name = "shield-seaorm"
+name = "shield-sea-orm"
 description = "SeaORM storage for Shield."
 
 authors.workspace = true

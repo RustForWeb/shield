@@ -4443,7 +4443,7 @@ dependencies = [
  "async-std",
  "sea-orm",
  "sea-orm-migration",
- "shield-seaorm",
+ "shield-sea-orm",
 ]
 
 [[package]]
@@ -4475,7 +4475,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "shield-seaorm"
+name = "shield-sea-orm"
 version = "0.0.1"
 dependencies = [
  "async-trait",

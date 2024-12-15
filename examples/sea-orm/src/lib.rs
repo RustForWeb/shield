@@ -1,6 +1,6 @@
 use sea_orm::{Database, DbErr};
 use sea_orm_migration::migrator::MigratorTrait;
-use shield_seaorm::migrations::Migrator;
+use shield_sea_orm::migrations::Migrator;
 
 pub async fn run() -> Result<(), DbErr> {
     let database = Database::connect("sqlite::memory:").await?;
