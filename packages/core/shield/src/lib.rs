@@ -6,6 +6,7 @@ mod integration;
 mod provider;
 mod request;
 mod response;
+mod session;
 mod shield;
 mod storage;
 
@@ -17,5 +18,6 @@ pub use integration::*;
 pub use provider::*;
 pub use request::*;
 pub use response::*;
+pub use session::*;
 pub use shield::*;
 pub use storage::*;

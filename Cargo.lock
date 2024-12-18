@@ -4504,6 +4504,7 @@ dependencies = [
 name = "shield-tower"
 version = "0.0.1"
 dependencies = [
+ "async-trait",
  "http 1.2.0",
  "shield",
  "tower-layer",

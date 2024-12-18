@@ -27,6 +27,14 @@ pub enum StorageError {
 }
 
 #[derive(Debug, Error)]
+pub enum SessionError {
+    #[error(transparent)]
+    Configuration(#[from] ConfigurationError),
+    #[error("{0}")]
+    Engine(String),
+}
+
+#[derive(Debug, Error)]
 
 pub enum ShieldError {
     #[error(transparent)]
