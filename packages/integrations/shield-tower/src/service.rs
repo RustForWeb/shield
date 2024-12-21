@@ -66,7 +66,10 @@ where
                 }
             };
 
-            let shield_session = TowerSession::new(session.clone(), session_key);
+            let shield_session = match TowerSession::load(session.clone(), session_key).await {
+                Ok(shield_session) => shield_session,
+                Err(_err) => return Ok(Self::internal_server_error()),
+            };
 
             req.extensions_mut().insert(shield);
             req.extensions_mut().insert(shield_session);

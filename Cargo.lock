@@ -4417,8 +4417,8 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "shield",
- "shield-actix",
  "shield-leptos",
+ "shield-leptos-actix",
  "shield-oidc",
  "wasm-bindgen",
 ]
@@ -4434,8 +4434,8 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "shield",
- "shield-axum",
  "shield-leptos",
+ "shield-leptos-axum",
  "shield-oidc",
  "time",
  "tokio",
@@ -4458,7 +4458,26 @@ name = "shield-leptos"
 version = "0.0.1"
 dependencies = [
  "leptos",
+ "shield",
+]
+
+[[package]]
+name = "shield-leptos-actix"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "leptos",
  "leptos_actix",
+ "shield",
+ "shield-actix",
+]
+
+[[package]]
+name = "shield-leptos-axum"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "leptos",
  "leptos_axum",
  "shield",
  "shield-axum",

@@ -1,5 +1,5 @@
 use leptos::{either::Either, prelude::*};
-use shield::SubproviderVisualisation;
+use shield::{ServerIntegration, SubproviderVisualisation};
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
@@ -18,26 +18,28 @@ pub async fn sign_in(
     provider_id: String,
     subprovider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    use shield::{Response, Shield, ShieldError, SignInRequest};
+    use shield::{Response, ShieldError, SignInRequest};
 
-    use crate::context::LeptosRedirect;
-
-    let shield = expect_context::<Shield>();
-    let redirect = expect_context::<LeptosRedirect>();
+    let server_integration = expect_context::<&dyn ServerIntegration>();
+    let shield = server_integration.extract_shield().await;
+    let session = server_integration.extract_session().await;
 
     let response = shield
-        .sign_in(SignInRequest {
-            provider_id,
-            subprovider_id,
-            data: None,
-            form_data: None,
-        })
+        .sign_in(
+            SignInRequest {
+                provider_id,
+                subprovider_id,
+                data: None,
+                form_data: None,
+            },
+            session,
+        )
         .await
         .map_err(ServerFnError::<ShieldError>::from)?;
 
     match response {
         Response::Redirect(url) => {
-            redirect(&url);
+            server_integration.redirect(&url);
 
             Ok(())
         }

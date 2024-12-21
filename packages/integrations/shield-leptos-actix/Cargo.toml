@@ -1,6 +1,6 @@
 [package]
-name = "shield-leptos"
-description = "Leptos integration for Shield."
+name = "shield-leptos-actix"
+description = "Leptos Actix integration for Shield."
 
 authors.workspace = true
 edition.workspace = true
@@ -9,5 +9,8 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
+async-trait.workspace = true
 leptos.workspace = true
+leptos_actix.workspace = true
 shield = { path = "../../core/shield" }
+shield-actix = { path = "../../integrations/shield-actix" }

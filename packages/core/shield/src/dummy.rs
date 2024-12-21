@@ -6,6 +6,7 @@ use crate::{
     provider::{Provider, Subprovider},
     request::{SignInRequest, SignOutRequest},
     response::Response,
+    session::Session,
     storage::Storage,
 };
 
@@ -39,11 +40,19 @@ impl Provider for DummyProvider {
         Ok(None)
     }
 
-    async fn sign_in(&self, _request: SignInRequest) -> Result<Response, ShieldError> {
+    async fn sign_in(
+        &self,
+        _request: SignInRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
         todo!("redirect back?")
     }
 
-    async fn sign_out(&self, _request: SignOutRequest) -> Result<Response, ShieldError> {
+    async fn sign_out(
+        &self,
+        _request: SignOutRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
         todo!("redirect back?")
     }
 }

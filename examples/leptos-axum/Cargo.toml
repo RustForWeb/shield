@@ -20,8 +20,8 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta.workspace = true
 leptos_router.workspace = true
 shield = { path = "../../packages/core/shield", features = ["dummy"] }
-shield-axum = { path = "../../packages/integrations/shield-axum", optional = true }
 shield-leptos = { path = "../../packages/integrations/shield-leptos" }
+shield-leptos-axum = { path = "../../packages/integrations/shield-leptos-axum", optional = true }
 shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
 time = "0.3.37"
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
@@ -34,14 +34,13 @@ hydrate = ["leptos/hydrate"]
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
-    "dep:shield-axum",
     "dep:shield-oidc",
+    "dep:shield-leptos-axum",
     "dep:tokio",
     "dep:tower-sessions",
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "shield-leptos/axum",
 ]
 
 [package.metadata.leptos]

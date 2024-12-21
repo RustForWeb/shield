@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -7,9 +7,9 @@ use crate::error::SessionError;
 
 #[async_trait]
 pub trait SessionStorage: Send + Sync {
-    async fn load(&self) -> Result<SessionData, SessionError>;
+    fn data(&self) -> Arc<Mutex<SessionData>>;
 
-    async fn store(&self, session_data: SessionData) -> Result<(), SessionError>;
+    async fn update(&self) -> Result<(), SessionError>;
 
     async fn renew(&self) -> Result<(), SessionError>;
 
@@ -24,12 +24,12 @@ impl Session {
         Session(Arc::new(storage))
     }
 
-    pub async fn load(&self) -> Result<SessionData, SessionError> {
-        self.0.load().await
+    pub fn data(&self) -> Arc<Mutex<SessionData>> {
+        self.0.data()
     }
 
-    pub async fn update(&self, session_data: SessionData) -> Result<(), SessionError> {
-        self.0.store(session_data).await
+    pub async fn update(&self) -> Result<(), SessionError> {
+        self.0.update().await
     }
 
     pub async fn renew(&self) -> Result<(), SessionError> {

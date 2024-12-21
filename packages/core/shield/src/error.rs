@@ -32,6 +32,8 @@ pub enum SessionError {
     Configuration(#[from] ConfigurationError),
     #[error("{0}")]
     Engine(String),
+    #[error("{0}")]
+    Lock(String),
 }
 
 #[derive(Debug, Error)]

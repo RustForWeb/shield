@@ -3,7 +3,7 @@ use openidconnect::{
     core::CoreAuthenticationFlow, reqwest::async_http_client, AccessToken, CsrfToken, Nonce, Scope,
 };
 use shield::{
-    ConfigurationError, Provider, ProviderError, Response, ShieldError, SignInRequest,
+    ConfigurationError, Provider, ProviderError, Response, Session, ShieldError, SignInRequest,
     SignOutRequest, Subprovider,
 };
 
@@ -88,7 +88,11 @@ impl Provider for OidcProvider {
             .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
 
-    async fn sign_in(&self, request: SignInRequest) -> Result<Response, ShieldError> {
+    async fn sign_in(
+        &self,
+        request: SignInRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
@@ -117,7 +121,11 @@ impl Provider for OidcProvider {
         Ok(Response::Redirect(auth_url.to_string()))
     }
 
-    async fn sign_out(&self, request: SignOutRequest) -> Result<Response, ShieldError> {
+    async fn sign_out(
+        &self,
+        request: SignOutRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),

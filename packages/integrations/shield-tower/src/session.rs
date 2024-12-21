@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use async_trait::async_trait;
 use shield::{SessionData, SessionError, SessionStorage};
 use tower_sessions::Session;
@@ -6,30 +8,47 @@ use tower_sessions::Session;
 pub struct TowerSession {
     session: Session,
     session_key: &'static str,
+    session_data: Arc<Mutex<SessionData>>,
 }
 
 impl TowerSession {
-    pub fn new(session: Session, session_key: &'static str) -> Self {
-        Self {
+    pub async fn load(session: Session, session_key: &'static str) -> Result<Self, SessionError> {
+        let data = Self::load_data(&session, session_key).await?;
+
+        Ok(Self {
             session,
             session_key,
-        }
+            session_data: Arc::new(Mutex::new(data)),
+        })
+    }
+
+    async fn load_data(
+        session: &Session,
+        session_key: &'static str,
+    ) -> Result<SessionData, SessionError> {
+        session
+            .get::<SessionData>(session_key)
+            .await
+            .map_err(|err| SessionError::Engine(err.to_string()))
+            .map(|session_data| session_data.unwrap_or_default())
     }
 }
 
 #[async_trait]
 impl SessionStorage for TowerSession {
-    async fn load(&self) -> Result<SessionData, SessionError> {
-        self.session
-            .get::<SessionData>(self.session_key)
-            .await
-            .map_err(|err| SessionError::Engine(err.to_string()))
-            .map(|session_data| session_data.unwrap_or_default())
+    fn data(&self) -> Arc<Mutex<SessionData>> {
+        self.session_data.clone()
     }
 
-    async fn store(&self, session_data: SessionData) -> Result<(), SessionError> {
+    async fn update(&self) -> Result<(), SessionError> {
+        let data = self
+            .session_data
+            .lock()
+            .map_err(|err| SessionError::Lock(err.to_string()))?
+            .clone();
+
         self.session
-            .insert(self.session_key, &session_data)
+            .insert(self.session_key, data)
             .await
             .map_err(|err| SessionError::Engine(err.to_string()))
     }
@@ -45,6 +64,18 @@ impl SessionStorage for TowerSession {
         self.session
             .flush()
             .await
-            .map_err(|err| SessionError::Engine(err.to_string()))
+            .map_err(|err| SessionError::Engine(err.to_string()))?;
+
+        let data = Self::load_data(&self.session, self.session_key).await?;
+
+        {
+            let mut session_data = self
+                .session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+            *session_data = data;
+        }
+
+        Ok(())
     }
 }

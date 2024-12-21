@@ -24,10 +24,10 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractShield {
     }
 }
 
-pub struct ExtractShieldSession(pub Session);
+pub struct ExtractSession(pub Session);
 
 #[async_trait]
-impl<S: Send + Sync> FromRequestParts<S> for ExtractShieldSession {
+impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
@@ -35,7 +35,7 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractShieldSession {
             .extensions
             .get::<Session>()
             .cloned()
-            .map(ExtractShieldSession)
+            .map(ExtractSession)
             .ok_or((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Can't extract Shield session. Is `ShieldLayer` enabled?",

@@ -1,9 +1,14 @@
+use async_trait::async_trait;
+
 use crate::{session::Session, shield::Shield};
 
 pub trait ClientIntegration {}
 
-pub trait ServerIntegration {
-    fn extract_shield() -> Shield;
+#[async_trait]
+pub trait ServerIntegration: Send + Sync {
+    async fn extract_shield(&self) -> Shield;
 
-    fn extract_session() -> Session;
+    async fn extract_session(&self) -> Session;
+
+    fn redirect(&self, path: &str);
 }
