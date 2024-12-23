@@ -4,7 +4,7 @@ use crate::{
     error::ShieldError,
     form::Form,
     provider::{Provider, Subprovider},
-    request::{SignInRequest, SignOutRequest},
+    request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
     session::Session,
     storage::Storage,
@@ -43,6 +43,14 @@ impl Provider for DummyProvider {
     async fn sign_in(
         &self,
         _request: SignInRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
+        todo!("redirect back?")
+    }
+
+    async fn sign_in_callback(
+        &self,
+        _request: SignInCallbackRequest,
         _session: Session,
     ) -> Result<Response, ShieldError> {
         todo!("redirect back?")

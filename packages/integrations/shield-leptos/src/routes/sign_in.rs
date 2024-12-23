@@ -1,11 +1,14 @@
 use leptos::{either::Either, prelude::*};
-use shield::{ServerIntegration, SubproviderVisualisation};
+use shield::SubproviderVisualisation;
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
-    use shield::Shield;
+    use std::sync::Arc;
 
-    let shield = expect_context::<Shield>();
+    use shield::ServerIntegration;
+
+    let server_integration = expect_context::<Arc<dyn ServerIntegration>>();
+    let shield = server_integration.extract_shield().await;
 
     shield
         .subprovider_visualisations()
@@ -18,9 +21,11 @@ pub async fn sign_in(
     provider_id: String,
     subprovider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    use shield::{Response, ShieldError, SignInRequest};
+    use std::sync::Arc;
 
-    let server_integration = expect_context::<&dyn ServerIntegration>();
+    use shield::{Response, ServerIntegration, ShieldError, SignInRequest};
+
+    let server_integration = expect_context::<Arc<dyn ServerIntegration>>();
     let shield = server_integration.extract_shield().await;
     let session = server_integration.extract_session().await;
 

@@ -4497,6 +4497,7 @@ name = "shield-oidc"
 version = "0.0.1"
 dependencies = [
  "async-trait",
+ "oauth2",
  "openidconnect",
  "shield",
 ]

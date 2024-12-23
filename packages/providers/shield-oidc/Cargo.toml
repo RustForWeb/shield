@@ -10,5 +10,6 @@ version.workspace = true
 
 [dependencies]
 async-trait.workspace = true
+oauth2 = {version = "4.4.2", features = ["pkce-plain"]}
 openidconnect = "3.5.0"
 shield = { path = "../../core/shield" }

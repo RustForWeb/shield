@@ -44,5 +44,11 @@ pub enum ShieldError {
     #[error(transparent)]
     Configuration(#[from] ConfigurationError),
     #[error(transparent)]
+    Session(#[from] SessionError),
+    #[error(transparent)]
     Storage(#[from] StorageError),
+    #[error("{0}")]
+    Request(String),
+    #[error("{0}")]
+    Verification(String),
 }
