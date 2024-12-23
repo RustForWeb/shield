@@ -10,6 +10,13 @@ pub struct SignInRequest {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct SignInCallbackRequest {
+    pub provider_id: String,
+    pub subprovider_id: Option<String>,
+    pub data: Option<Value>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SignOutRequest {
     pub provider_id: String,
     pub subprovider_id: Option<String>,

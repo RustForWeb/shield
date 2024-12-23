@@ -5,7 +5,7 @@ use futures::future::try_join_all;
 use crate::{
     error::{ProviderError, ShieldError},
     provider::{Provider, Subprovider, SubproviderVisualisation},
-    request::{SignInRequest, SignOutRequest},
+    request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
     session::Session,
     storage::Storage,
@@ -90,6 +90,21 @@ impl Shield {
         provider.sign_in(request, session).await
     }
 
+    pub async fn sign_in_callback(
+        &self,
+        request: SignInCallbackRequest,
+        session: Session,
+    ) -> Result<Response, ShieldError> {
+        println!("sign in callback {:?}", request);
+
+        let provider = match self.providers.get(&request.provider_id) {
+            Some(provider) => provider,
+            None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
+        };
+
+        provider.sign_in_callback(request, session).await
+    }
+
     pub async fn sign_out(
         &self,
         request: SignOutRequest,
@@ -102,7 +117,11 @@ impl Shield {
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
-        provider.sign_out(request, session).await
+        let response = provider.sign_out(request, session.clone()).await?;
+
+        session.purge().await?;
+
+        Ok(response)
     }
 }
 

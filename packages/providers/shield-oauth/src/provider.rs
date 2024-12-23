@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use shield::{
-    Provider, ProviderError, Response, Session, ShieldError, SignInRequest, SignOutRequest,
-    Subprovider,
+    Provider, ProviderError, Response, Session, ShieldError, SignInCallbackRequest, SignInRequest,
+    SignOutRequest, Subprovider,
 };
 
 use crate::{storage::OauthStorage, subprovider::OauthSubprovider};
@@ -84,6 +84,7 @@ impl Provider for OauthProvider {
             .await
             .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
+
     async fn sign_in(
         &self,
         request: SignInRequest,
@@ -95,6 +96,19 @@ impl Provider for OauthProvider {
         };
 
         todo!("oauth sign in")
+    }
+
+    async fn sign_in_callback(
+        &self,
+        request: SignInCallbackRequest,
+        _session: Session,
+    ) -> Result<Response, ShieldError> {
+        let _subprovider = match request.subprovider_id {
+            Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,
+            None => return Err(ProviderError::SubproviderMissing.into()),
+        };
+
+        todo!("oauth sign in callback")
     }
 
     async fn sign_out(

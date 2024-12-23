@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     error::ShieldError,
     form::Form,
-    request::{SignInRequest, SignOutRequest},
+    request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
     session::Session,
 };
@@ -23,6 +23,12 @@ pub trait Provider: Send + Sync {
     async fn sign_in(
         &self,
         request: SignInRequest,
+        session: Session,
+    ) -> Result<Response, ShieldError>;
+
+    async fn sign_in_callback(
+        &self,
+        request: SignInCallbackRequest,
         session: Session,
     ) -> Result<Response, ShieldError>;
 
@@ -57,7 +63,7 @@ pub(crate) mod tests {
 
     use crate::{
         error::ShieldError,
-        request::{SignInRequest, SignOutRequest},
+        request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
         response::Response,
         session::Session,
     };
@@ -98,6 +104,14 @@ pub(crate) mod tests {
         async fn sign_in(
             &self,
             _request: SignInRequest,
+            _session: Session,
+        ) -> Result<Response, ShieldError> {
+            todo!("redirect back?")
+        }
+
+        async fn sign_in_callback(
+            &self,
+            _request: SignInCallbackRequest,
             _session: Session,
         ) -> Result<Response, ShieldError> {
             todo!("redirect back?")

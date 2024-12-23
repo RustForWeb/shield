@@ -1,13 +1,14 @@
 use async_trait::async_trait;
 use openidconnect::{
-    core::CoreAuthenticationFlow, reqwest::async_http_client, AccessToken, CsrfToken, Nonce, Scope,
+    core::CoreAuthenticationFlow, reqwest::async_http_client, AccessToken, AuthorizationCode,
+    CsrfToken, Nonce, PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse,
 };
 use shield::{
-    ConfigurationError, Provider, ProviderError, Response, Session, ShieldError, SignInRequest,
-    SignOutRequest, Subprovider,
+    ConfigurationError, Provider, ProviderError, Response, Session, SessionError, ShieldError,
+    SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
 };
 
-use crate::{storage::OidcStorage, subprovider::OidcSubprovider};
+use crate::{storage::OidcStorage, subprovider::OidcSubprovider, OidcProviderPkceCodeChallenge};
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
 
@@ -91,7 +92,7 @@ impl Provider for OidcProvider {
     async fn sign_in(
         &self,
         request: SignInRequest,
-        _session: Session,
+        session: Session,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
@@ -106,19 +107,95 @@ impl Provider for OidcProvider {
             Nonce::new_random,
         );
 
-        // TODO: PKCE code challenge.
+        let pkce_code_challenge = match subprovider.pkce_code_challenge {
+            OidcProviderPkceCodeChallenge::None => None,
+            OidcProviderPkceCodeChallenge::Plain => Some(PkceCodeChallenge::new_random_plain()),
+            OidcProviderPkceCodeChallenge::S256 => Some(PkceCodeChallenge::new_random_sha256()),
+        };
+
+        if let Some((pkce_code_challenge, _)) = &pkce_code_challenge {
+            authorization_request =
+                authorization_request.set_pkce_challenge(pkce_code_challenge.clone());
+        }
 
         if let Some(scopes) = subprovider.scopes {
             authorization_request =
                 authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
         }
 
-        let (auth_url, _csrf_token, _nonce) = authorization_request.url();
+        let (auth_url, csrf_token, nonce) = authorization_request.url();
 
-        // TODO: Store CSRF and nonce in session.
-        // TODO: Redirect.
+        {
+            let session_data = session.data();
+            let mut session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.csrf = Some(csrf_token.secret().clone());
+            session_data.nonce = Some(nonce.secret().clone());
+            session_data.verifier = pkce_code_challenge
+                .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone());
+        }
 
         Ok(Response::Redirect(auth_url.to_string()))
+    }
+
+    async fn sign_in_callback(
+        &self,
+        request: SignInCallbackRequest,
+        session: Session,
+    ) -> Result<Response, ShieldError> {
+        let (pkce_verifier, nonce) = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            (session_data.verifier.clone(), session_data.nonce.clone())
+        };
+
+        let subprovider = match request.subprovider_id {
+            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
+            None => return Err(ProviderError::SubproviderMissing.into()),
+        };
+
+        let client = subprovider.oidc_client().await?;
+
+        let authorization_code = "".to_owned();
+
+        let mut token_request = client.exchange_code(AuthorizationCode::new(authorization_code));
+
+        if let Some(pkce_verifier) = pkce_verifier {
+            token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
+        } else if subprovider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
+            return Err(ShieldError::Verification(
+                "Missing PKCE verifier.".to_owned(),
+            ));
+        }
+
+        let token_response = token_request
+            .request_async(async_http_client)
+            .await
+            .map_err(|err| ShieldError::Request(err.to_string()))?;
+
+        if let Some(id_token) = token_response.id_token() {
+            let claims =
+                id_token
+                    .claims(
+                        &client.id_token_verifier(),
+                        &Nonce::new(nonce.ok_or_else(|| {
+                            ShieldError::Verification("Missing nonce.".to_owned())
+                        })?),
+                    )
+                    .map_err(|err| ShieldError::Verification(err.to_string()))?;
+
+            println!("{:?}", claims);
+        }
+
+        // let user_info = client.user_info(token_response.access_token(), None)
+
+        // TODO
+        Ok(Response::Redirect("/".to_owned()))
     }
 
     async fn sign_out(
