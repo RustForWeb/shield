@@ -5,13 +5,13 @@ use shield::{SessionData, SessionError, SessionStorage};
 use tower_sessions::Session;
 
 #[derive(Clone, Debug)]
-pub struct TowerSession {
+pub struct TowerSessionStorage {
     session: Session,
     session_key: &'static str,
     session_data: Arc<Mutex<SessionData>>,
 }
 
-impl TowerSession {
+impl TowerSessionStorage {
     pub async fn load(session: Session, session_key: &'static str) -> Result<Self, SessionError> {
         let data = Self::load_data(&session, session_key).await?;
 
@@ -35,7 +35,7 @@ impl TowerSession {
 }
 
 #[async_trait]
-impl SessionStorage for TowerSession {
+impl SessionStorage for TowerSessionStorage {
     fn data(&self) -> Arc<Mutex<SessionData>> {
         self.session_data.clone()
     }

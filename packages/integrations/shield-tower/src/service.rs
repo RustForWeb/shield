@@ -8,7 +8,7 @@ use http::{Request, Response};
 use shield::{Session, Shield};
 use tower_service::Service;
 
-use crate::session::TowerSession;
+use crate::session::TowerSessionStorage;
 
 #[derive(Clone)]
 pub struct ShieldService<S> {
@@ -66,10 +66,11 @@ where
                 }
             };
 
-            let session_storage = match TowerSession::load(session.clone(), session_key).await {
-                Ok(session_storage) => session_storage,
-                Err(_err) => return Ok(Self::internal_server_error()),
-            };
+            let session_storage =
+                match TowerSessionStorage::load(session.clone(), session_key).await {
+                    Ok(session_storage) => session_storage,
+                    Err(_err) => return Ok(Self::internal_server_error()),
+                };
             let shield_session = Session::new(session_storage);
 
             req.extensions_mut().insert(shield);
