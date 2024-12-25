@@ -36,10 +36,10 @@ pub enum OauthProviderType {
     enum_name = "oauth_provider_visibility"
 )]
 pub enum OauthProviderVisibility {
-    #[sea_orm(string_value = "private")]
-    Private,
     #[sea_orm(string_value = "public")]
     Public,
+    #[sea_orm(string_value = "unlisted")]
+    Unlisted,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]

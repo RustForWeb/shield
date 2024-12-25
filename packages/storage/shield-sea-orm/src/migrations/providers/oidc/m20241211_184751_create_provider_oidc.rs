@@ -86,6 +86,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(OidcProvider::ClientSecret).text())
                     .col(ColumnDef::new(OidcProvider::Scopes).text())
                     .col(ColumnDef::new(OidcProvider::RedirectUrl).text())
+                    .col(ColumnDef::new(OidcProvider::DiscoveryUrl).text())
                     .col(ColumnDef::new(OidcProvider::IssuerUrl).text())
                     .col(ColumnDef::new(OidcProvider::AuthorizationUrl).text())
                     .col(ColumnDef::new(OidcProvider::AuthorizationUrlParams).text())
@@ -243,12 +244,12 @@ enum OidcProviderVisibility {
     Table,
 
     Public,
-    Private,
+    Unlisted,
 }
 
 impl OidcProviderVisibility {
     fn variants() -> Vec<Self> {
-        vec![Self::Public, Self::Private]
+        vec![Self::Public, Self::Unlisted]
     }
 }
 
@@ -279,6 +280,7 @@ enum OidcProvider {
     ClientSecret,
     Scopes,
     RedirectUrl,
+    DiscoveryUrl,
     IssuerUrl,
     AuthorizationUrl,
     AuthorizationUrlParams,

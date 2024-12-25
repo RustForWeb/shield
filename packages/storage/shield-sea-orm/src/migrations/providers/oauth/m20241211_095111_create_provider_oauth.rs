@@ -245,12 +245,12 @@ enum OauthProviderVisibility {
     Table,
 
     Public,
-    Private,
+    Unlisted,
 }
 
 impl OauthProviderVisibility {
     fn variants() -> Vec<Self> {
-        vec![Self::Public, Self::Private]
+        vec![Self::Public, Self::Unlisted]
     }
 }
 

@@ -32,10 +32,10 @@ pub enum OidcProviderType {
     enum_name = "oidc_provider_visibility"
 )]
 pub enum OidcProviderVisibility {
-    #[sea_orm(string_value = "private")]
-    Private,
     #[sea_orm(string_value = "public")]
     Public,
+    #[sea_orm(string_value = "unlisted")]
+    Unlisted,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
@@ -57,6 +57,8 @@ pub struct Model {
     pub scopes: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub redirect_url: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub discovery_url: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]
     pub issuer_url: Option<String>,
     #[sea_orm(column_type = "Text", nullable)]

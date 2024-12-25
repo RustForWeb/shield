@@ -12,8 +12,8 @@ use crate::provider::OIDC_PROVIDER_ID;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OidcProviderVisibility {
-    Private,
     Public,
+    Unlisted,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
