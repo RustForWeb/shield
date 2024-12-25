@@ -5,7 +5,7 @@ use std::{
 };
 
 use http::{Request, Response};
-use shield::Shield;
+use shield::{Session, Shield};
 use tower_service::Service;
 
 use crate::session::TowerSession;
@@ -66,10 +66,11 @@ where
                 }
             };
 
-            let shield_session = match TowerSession::load(session.clone(), session_key).await {
-                Ok(shield_session) => shield_session,
+            let session_storage = match TowerSession::load(session.clone(), session_key).await {
+                Ok(session_storage) => session_storage,
                 Err(_err) => return Ok(Self::internal_server_error()),
             };
+            let shield_session = Session::new(session_storage);
 
             req.extensions_mut().insert(shield);
             req.extensions_mut().insert(shield_session);

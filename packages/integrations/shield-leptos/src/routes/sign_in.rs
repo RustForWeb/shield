@@ -3,12 +3,9 @@ use shield::SubproviderVisualisation;
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
-    use std::sync::Arc;
+    use crate::context::expect_shield;
 
-    use shield::ServerIntegration;
-
-    let server_integration = expect_context::<Arc<dyn ServerIntegration>>();
-    let shield = server_integration.extract_shield().await;
+    let shield = expect_shield().await;
 
     shield
         .subprovider_visualisations()
@@ -21,11 +18,11 @@ pub async fn sign_in(
     provider_id: String,
     subprovider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    use std::sync::Arc;
+    use shield::{Response, ShieldError, SignInRequest};
 
-    use shield::{Response, ServerIntegration, ShieldError, SignInRequest};
+    use crate::context::expect_server_integration;
 
-    let server_integration = expect_context::<Arc<dyn ServerIntegration>>();
+    let server_integration = expect_server_integration();
     let shield = server_integration.extract_shield().await;
     let session = server_integration.extract_session().await;
 
