@@ -7,6 +7,7 @@ pub struct KeycloakBuilder {
     discovery_url: String,
     client_id: String,
     client_secret: Option<String>,
+    redirect_url: Option<String>,
 }
 
 impl KeycloakBuilder {
@@ -17,6 +18,7 @@ impl KeycloakBuilder {
             discovery_url: discovery_url.to_owned(),
             client_id: client_id.to_owned(),
             client_secret: None,
+            redirect_url: None,
         }
     }
 
@@ -30,6 +32,11 @@ impl KeycloakBuilder {
         self
     }
 
+    pub fn redirect_url(mut self, redirect_url: &str) -> Self {
+        self.redirect_url = Some(redirect_url.to_owned());
+        self
+    }
+
     pub fn build(self) -> OidcSubprovider {
         OidcSubprovider {
             id: self.id,
@@ -39,7 +46,7 @@ impl KeycloakBuilder {
             client_id: self.client_id,
             client_secret: self.client_secret,
             scopes: None,
-            redirect_url: None,
+            redirect_url: self.redirect_url,
             discovery_url: Some(self.discovery_url),
             issuer_url: None,
             authorization_url: None,

@@ -4,7 +4,7 @@ use openidconnect::{
         CoreProviderMetadata,
     },
     reqwest::async_http_client,
-    AuthUrl, ClientId, ClientSecret, IssuerUrl, JsonWebKeySet, TokenUrl, UserInfoUrl,
+    AuthUrl, ClientId, ClientSecret, IssuerUrl, JsonWebKeySet, RedirectUrl, TokenUrl, UserInfoUrl,
 };
 use shield::{ConfigurationError, Subprovider};
 
@@ -60,7 +60,7 @@ pub struct OidcSubprovider {
 
 impl OidcSubprovider {
     pub async fn oidc_client(&self) -> Result<CoreClient, ConfigurationError> {
-        let client = if let Some(discovery_url) = &self.discovery_url {
+        let mut client = if let Some(discovery_url) = &self.discovery_url {
             let provider_metadata = CoreProviderMetadata::discover_async(
                 // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
                 IssuerUrl::new(discovery_url.clone())
@@ -111,6 +111,13 @@ impl OidcSubprovider {
                     .ok_or(ConfigurationError::Missing("JSON Web Key Set".to_owned()))?,
             )
         };
+
+        if let Some(redirect_url) = &self.redirect_url {
+            client = client.set_redirect_uri(
+                RedirectUrl::new(redirect_url.clone())
+                    .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+            );
+        }
 
         // TODO: Common client options.
 

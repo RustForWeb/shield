@@ -39,6 +39,10 @@ async fn main() {
                     "client1",
                 )
                 .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .redirect_url(&format!(
+                    "http://localhost:{}/api/auth/oidc/keycloak/callback",
+                    addr.port()
+                ))
                 .build()]),
             ),
         ],
