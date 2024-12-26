@@ -147,14 +147,36 @@ impl Provider for OidcProvider {
         request: SignInCallbackRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        let (pkce_verifier, nonce) = {
+        let (pkce_verifier, csrf, nonce) = {
             let session_data = session.data();
             let session_data = session_data
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-            (session_data.verifier.clone(), session_data.nonce.clone())
+            (
+                session_data.verifier.clone(),
+                session_data.csrf.clone(),
+                session_data.nonce.clone(),
+            )
         };
+
+        let state = request
+            .query
+            .as_ref()
+            .and_then(|query| query.get("state"))
+            .and_then(|code| code.as_str())
+            .ok_or_else(|| ShieldError::Verification("Missing state.".to_owned()))?;
+
+        if csrf.is_none_or(|csrf| csrf != state) {
+            return Err(ShieldError::Verification("Invalid state.".to_owned()));
+        }
+
+        let authorization_code = request
+            .query
+            .as_ref()
+            .and_then(|query| query.get("code"))
+            .and_then(|code| code.as_str())
+            .ok_or_else(|| ShieldError::Verification("Missing authorization code.".to_owned()))?;
 
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
@@ -163,13 +185,8 @@ impl Provider for OidcProvider {
 
         let client = subprovider.oidc_client().await?;
 
-        let authorization_code = request
-            .query
-            .and_then(|query| query.get("code").cloned())
-            .and_then(|code| code.as_str().map(|s| s.to_string()))
-            .ok_or_else(|| ShieldError::Verification("Missing authorization code.".to_owned()))?;
-
-        let mut token_request = client.exchange_code(AuthorizationCode::new(authorization_code));
+        let mut token_request =
+            client.exchange_code(AuthorizationCode::new(authorization_code.to_owned()));
 
         if let Some(pkce_verifier) = pkce_verifier {
             token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
