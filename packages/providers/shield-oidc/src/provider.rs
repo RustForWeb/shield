@@ -1,14 +1,19 @@
 use async_trait::async_trait;
 use openidconnect::{
-    core::CoreAuthenticationFlow, reqwest::async_http_client, AccessToken, AuthorizationCode,
-    CsrfToken, Nonce, PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse,
+    core::{CoreAuthenticationFlow, CoreGenderClaim},
+    reqwest::async_http_client,
+    AccessToken, AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
+    PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
 };
 use shield::{
     ConfigurationError, Provider, ProviderError, Response, Session, SessionError, ShieldError,
     SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
 };
 
-use crate::{storage::OidcStorage, subprovider::OidcSubprovider, OidcProviderPkceCodeChallenge};
+use crate::{
+    claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider,
+    OidcProviderPkceCodeChallenge,
+};
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
 
@@ -201,7 +206,7 @@ impl Provider for OidcProvider {
             .await
             .map_err(|err| ShieldError::Request(err.to_string()))?;
 
-        if let Some(id_token) = token_response.id_token() {
+        let claims = if let Some(id_token) = token_response.id_token() {
             let claims =
                 id_token
                     .claims(
@@ -212,10 +217,19 @@ impl Provider for OidcProvider {
                     )
                     .map_err(|err| ShieldError::Verification(err.to_string()))?;
 
-            println!("{:?}", claims);
-        }
+            Claims::from(claims.clone())
+        } else {
+            let claims: UserInfoClaims<EmptyAdditionalClaims, CoreGenderClaim> = client
+                .user_info(token_response.access_token().to_owned(), None)
+                .map_err(|err| ConfigurationError::Missing(err.to_string()))?
+                .request_async(async_http_client)
+                .await
+                .map_err(|err| ShieldError::Request(err.to_string()))?;
 
-        // let user_info = client.user_info(token_response.access_token(), None)
+            Claims::from(claims)
+        };
+
+        println!("{:?}\n{:?}", claims.subject(), claims);
 
         // TODO
         Ok(Response::Redirect("/".to_owned()))

@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Title};
 use leptos_router::{
-    components::{Route, Router, Routes},
+    components::{Route, Router, Routes, A},
     path,
 };
 use shield_leptos::routes::SignIn;
@@ -29,11 +29,11 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Title text="Welcome to Leptos"/>
+        <Title text="Shield Leptos Axum Example"/>
 
         <Router>
             <main>
-                <Routes fallback=|| "Page not found.".into_view()>
+                <Routes fallback=|| "Not found.".into_view()>
                     <Route path=path!("") view=HomePage/>
 
                     <Route path=path!("/auth/sign-in") view=SignIn />
@@ -45,11 +45,10 @@ pub fn App() -> impl IntoView {
 
 #[component]
 fn HomePage() -> impl IntoView {
-    let count = RwSignal::new(0);
-    let on_click = move |_| *count.write() += 1;
-
     view! {
-        <h1>"Welcome to Leptos!"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
+        <h1>"Shield Leptos Axum Example"</h1>
+        <A href="/auth/sign-in">
+            <button>"Sign in"</button>
+        </A>
     }
 }

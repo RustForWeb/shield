@@ -25,7 +25,7 @@ async fn main() {
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::hours(1)));
+        .with_expiry(Expiry::OnInactivity(Duration::minutes(10)));
 
     // Initialize Shield
     let shield = Shield::new(
