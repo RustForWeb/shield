@@ -137,6 +137,8 @@ impl Provider for OidcProvider {
                 .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone());
         }
 
+        session.update().await?;
+
         Ok(Response::Redirect(auth_url.to_string()))
     }
 
@@ -161,7 +163,11 @@ impl Provider for OidcProvider {
 
         let client = subprovider.oidc_client().await?;
 
-        let authorization_code = "".to_owned();
+        let authorization_code = request
+            .query
+            .and_then(|query| query.get("code").cloned())
+            .and_then(|code| code.as_str().map(|s| s.to_string()))
+            .ok_or_else(|| ShieldError::Verification("Missing authorization code.".to_owned()))?;
 
         let mut token_request = client.exchange_code(AuthorizationCode::new(authorization_code));
 

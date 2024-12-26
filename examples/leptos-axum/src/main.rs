@@ -9,7 +9,7 @@ async fn main() {
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use shield::{DummyProvider, DummyStorage, Shield};
     use shield_examples_leptos_axum::app::*;
-    use shield_leptos_axum::{provide_axum_integration, ShieldLayer};
+    use shield_leptos_axum::{auth_router, provide_axum_integration, ShieldLayer};
     use shield_oidc::{KeycloakBuilder, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
@@ -40,7 +40,7 @@ async fn main() {
                 )
                 .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
                 .redirect_url(&format!(
-                    "http://localhost:{}/api/auth/oidc/keycloak/callback",
+                    "http://localhost:{}/api/auth/sign-in/callback/oidc/keycloak",
                     addr.port()
                 ))
                 .build()]),
@@ -51,6 +51,7 @@ async fn main() {
 
     // Initialize app
     let app = Router::new()
+        .nest("/api/auth", auth_router())
         .leptos_routes_with_context(
             &leptos_options,
             routes,
