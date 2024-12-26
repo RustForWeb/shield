@@ -5,20 +5,20 @@ use std::{
 };
 
 use http::{Request, Response};
-use shield::{Session, Shield};
+use shield::{Session, Shield, User};
 use tower_service::Service;
 
 use crate::session::TowerSessionStorage;
 
 #[derive(Clone)]
-pub struct ShieldService<S> {
+pub struct ShieldService<S, U: User> {
     inner: S,
-    shield: Shield,
+    shield: Shield<U>,
     session_key: &'static str,
 }
 
-impl<S> ShieldService<S> {
-    pub fn new(inner: S, shield: Shield, session_key: &'static str) -> Self {
+impl<S, U: User> ShieldService<S, U> {
+    pub fn new(inner: S, shield: Shield<U>, session_key: &'static str) -> Self {
         Self {
             inner,
             shield,
@@ -33,7 +33,8 @@ impl<S> ShieldService<S> {
     }
 }
 
-impl<S, ReqBody, ResBody> Service<Request<ReqBody>> for ShieldService<S>
+impl<S, U: User + Clone + 'static, ReqBody, ResBody> Service<Request<ReqBody>>
+    for ShieldService<S, U>
 where
     S: Service<Request<ReqBody>, Response = Response<ResBody>> + Clone + Send + 'static,
     S::Future: Send + 'static,

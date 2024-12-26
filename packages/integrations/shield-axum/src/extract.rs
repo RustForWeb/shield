@@ -3,18 +3,18 @@ use axum::{
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
 };
-use shield::{Session, Shield};
+use shield::{Session, Shield, User};
 
-pub struct ExtractShield(pub Shield);
+pub struct ExtractShield<U: User>(pub Shield<U>);
 
 #[async_trait]
-impl<S: Send + Sync> FromRequestParts<S> for ExtractShield {
+impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractShield<U> {
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
             .extensions
-            .get::<Shield>()
+            .get::<Shield<U>>()
             .cloned()
             .map(ExtractShield)
             .ok_or((

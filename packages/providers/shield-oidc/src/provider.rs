@@ -7,30 +7,27 @@ use openidconnect::{
 };
 use shield::{
     ConfigurationError, Provider, ProviderError, Response, Session, SessionError, ShieldError,
-    SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
+    SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider, User,
 };
 
 use crate::{
-    claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider,
+    claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider, CreateOidcConnection,
     OidcProviderPkceCodeChallenge,
 };
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
 
-#[derive(Default)]
-pub struct OidcProvider {
+pub struct OidcProvider<U: User> {
     subproviders: Vec<OidcSubprovider>,
-    storage: Option<Box<dyn OidcStorage>>,
+    storage: Box<dyn OidcStorage<U>>,
 }
 
-impl OidcProvider {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_storage<S: OidcStorage + 'static>(mut self, storage: S) -> Self {
-        self.storage = Some(Box::new(storage));
-        self
+impl<U: User> OidcProvider<U> {
+    pub fn new<S: OidcStorage<U> + 'static>(storage: S) -> Self {
+        Self {
+            subproviders: vec![],
+            storage: Box::new(storage),
+        }
     }
 
     pub fn with_subproviders<I: IntoIterator<Item = OidcSubprovider>>(
@@ -53,32 +50,30 @@ impl OidcProvider {
             return Ok(subprovider.clone());
         }
 
-        if let Some(storage) = &self.storage {
-            if let Some(subprovider) = storage.oidc_subprovider_by_id(subprovider_id).await? {
-                return Ok(subprovider);
-            }
+        if let Some(subprovider) = self.storage.oidc_subprovider_by_id(subprovider_id).await? {
+            return Ok(subprovider);
         }
 
         Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
     }
+
+    async fn get_or_create_user(&self, _claims: &Claims) -> Result<U, ShieldError> {
+        todo!("get_or_create_user")
+    }
 }
 
 #[async_trait]
-impl Provider for OidcProvider {
+impl<U: User> Provider for OidcProvider<U> {
     fn id(&self) -> String {
         OIDC_PROVIDER_ID.to_owned()
     }
 
     async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        let subproviders =
-            self.subproviders
-                .iter()
-                .cloned()
-                .chain(if let Some(storage) = &self.storage {
-                    storage.oidc_subproviders().await?
-                } else {
-                    vec![]
-                });
+        let subproviders = self
+            .subproviders
+            .iter()
+            .cloned()
+            .chain(self.storage.oidc_subproviders().await?);
 
         Ok(subproviders
             .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
@@ -230,6 +225,58 @@ impl Provider for OidcProvider {
         };
 
         println!("{:?}\n{:?}", claims.subject(), claims);
+
+        let (_connection, _user) = match self
+            .storage
+            .oidc_connection_by_identifier(&subprovider.id, claims.subject())
+            .await?
+        {
+            Some(connection) => {
+                // TODO: update connection
+
+                // TODO: get user
+
+                let user = self
+                    .storage
+                    .user_by_id(&connection.user_id)
+                    .await?
+                    .expect("TODO");
+
+                (connection, user)
+            }
+            None => {
+                // TODO: find or create user
+                let user = self.get_or_create_user(&claims).await?;
+
+                let connection = self
+                    .storage
+                    .create_oidc_connection(CreateOidcConnection {
+                        identifier: claims.subject().to_string(),
+                        // token_type: token_response.token_type(),
+                        token_type: "".to_owned(),
+                        access_token: token_response.access_token().secret().clone(),
+                        refresh_token: token_response
+                            .refresh_token()
+                            .map(|refresh_token| refresh_token.secret().clone()),
+                        id_token: token_response
+                            .id_token()
+                            .map(|id_token| id_token.to_string()),
+                        // expired_at: token_response.expires_in().map(|expires_in| {
+                        //     Duration::from_std(expires_in)
+                        //         .map_err(|err| ShieldError::Verification(err.to_string()))
+                        // }),
+                        expired_at: None,
+                        scopes: token_response
+                            .scopes()
+                            .map(|scopes| scopes.iter().map(|scope| scope.to_string()).collect()),
+                        provider_id: subprovider.id,
+                        user_id: user.id(),
+                    })
+                    .await?;
+
+                (connection, user)
+            }
+        };
 
         // TODO
         Ok(Response::Redirect("/".to_owned()))

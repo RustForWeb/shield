@@ -1,6 +1,6 @@
 use axum::extract::{Path, Query};
 use serde_json::Value;
-use shield::SignInCallbackRequest;
+use shield::{SignInCallbackRequest, User};
 
 use crate::{
     error::RouteError,
@@ -9,13 +9,13 @@ use crate::{
     response::RouteResponse,
 };
 
-pub async fn sign_in_callback(
+pub async fn sign_in_callback<U: User>(
     Path(AuthPath {
         provider_id,
         subprovider_id,
     }): Path<AuthPath>,
     Query(query): Query<Value>,
-    ExtractShield(shield): ExtractShield,
+    ExtractShield(shield): ExtractShield<U>,
     ExtractSession(session): ExtractSession,
 ) -> Result<RouteResponse, RouteError> {
     let response = shield

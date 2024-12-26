@@ -3,9 +3,9 @@ use shield::SubproviderVisualisation;
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
-    use crate::context::expect_shield;
+    use crate::{context::expect_shield, user::LeptosUser};
 
-    let shield = expect_shield().await;
+    let shield = expect_shield::<LeptosUser>().await;
 
     shield
         .subprovider_visualisations()
@@ -20,9 +20,9 @@ pub async fn sign_in(
 ) -> Result<(), ServerFnError> {
     use shield::{Response, ShieldError, SignInRequest};
 
-    use crate::context::expect_server_integration;
+    use crate::{context::expect_server_integration, user::LeptosUser};
 
-    let server_integration = expect_server_integration();
+    let server_integration = expect_server_integration::<LeptosUser>();
     let shield = server_integration.extract_shield().await;
     let session = server_integration.extract_session().await;
 

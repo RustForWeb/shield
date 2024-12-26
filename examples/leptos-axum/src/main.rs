@@ -4,12 +4,13 @@ async fn main() {
     use std::sync::Arc;
 
     use axum::Router;
-    use leptos::config::get_configuration;
+    use leptos::config::{get_configuration, LeptosOptions};
     use leptos::logging::log;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use shield::{DummyProvider, DummyStorage, Shield};
+    use shield::Shield;
     use shield_examples_leptos_axum::app::*;
     use shield_leptos_axum::{auth_router, provide_axum_integration, ShieldLayer};
+    use shield_memory::{MemoryStorage, User};
     use shield_oidc::{KeycloakBuilder, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
@@ -28,35 +29,33 @@ async fn main() {
         .with_expiry(Expiry::OnInactivity(Duration::minutes(10)));
 
     // Initialize Shield
+    let storage = MemoryStorage::new();
     let shield = Shield::new(
-        DummyStorage::new(),
-        vec![
-            Arc::new(DummyProvider::new()),
-            Arc::new(
-                OidcProvider::new().with_subproviders([KeycloakBuilder::new(
-                    "keycloak",
-                    "http://localhost:18080/realms/Shield",
-                    "client1",
-                )
-                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-                .redirect_url(&format!(
-                    "http://localhost:{}/api/auth/sign-in/callback/oidc/keycloak",
-                    addr.port()
-                ))
-                .build()]),
-            ),
-        ],
+        storage.clone(),
+        vec![Arc::new(
+            OidcProvider::new(storage).with_subproviders([KeycloakBuilder::new(
+                "keycloak",
+                "http://localhost:18080/realms/Shield",
+                "client1",
+            )
+            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+            .redirect_url(&format!(
+                "http://localhost:{}/api/auth/sign-in/callback/oidc/keycloak",
+                addr.port()
+            ))
+            .build()]),
+        )],
     );
     let shield_layer = ShieldLayer::new(shield.clone());
 
     // Initialize app
     let app = Router::new()
-        .nest("/api/auth", auth_router())
+        .nest("/api/auth", auth_router::<User, LeptosOptions>())
         .leptos_routes_with_context(
             &leptos_options,
             routes,
             move || {
-                provide_axum_integration();
+                provide_axum_integration::<User>();
             },
             {
                 let leptos_options = leptos_options.clone();

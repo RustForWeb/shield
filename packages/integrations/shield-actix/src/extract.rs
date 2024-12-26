@@ -2,18 +2,18 @@ use actix_utils::future::{ready, Ready};
 use actix_web::{
     dev::Payload, error::ErrorInternalServerError, Error, FromRequest, HttpMessage, HttpRequest,
 };
-use shield::{Session, Shield};
+use shield::{Session, Shield, User};
 
-pub struct ExtractShield(pub Shield);
+pub struct ExtractShield<U: User>(pub Shield<U>);
 
-impl FromRequest for ExtractShield {
+impl<U: User + Clone + 'static> FromRequest for ExtractShield<U> {
     type Error = Error;
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
         ready(
             req.extensions()
-                .get::<Shield>()
+                .get::<Shield<U>>()
                 .cloned()
                 .map(ExtractShield)
                 .ok_or(ErrorInternalServerError(

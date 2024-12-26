@@ -8,9 +8,10 @@ async fn main() -> std::io::Result<()> {
     use actix_web::{cookie::Key, web::Data, App, HttpServer};
     use leptos::config::get_configuration;
     use leptos_actix::{generate_route_list, LeptosRoutes};
-    use shield::{DummyProvider, DummyStorage, Shield};
+    use shield::Shield;
     use shield_examples_leptos_actix::app::*;
     use shield_leptos_actix::{provide_actix_integration, ShieldMiddleware};
+    use shield_memory::{MemoryStorage, User};
     use shield_oidc::{KeycloakBuilder, OidcProvider};
 
     // Initialize Leptos
@@ -33,20 +34,18 @@ async fn main() -> std::io::Result<()> {
             SessionMiddleware::new(CookieSessionStore::default(), session_secret_key.clone());
 
         // Initialize Shield
+        let shield_storage = MemoryStorage::new();
         let shield = Shield::new(
-            DummyStorage::new(),
-            vec![
-                Arc::new(DummyProvider::new()),
-                Arc::new(
-                    OidcProvider::new().with_subproviders([KeycloakBuilder::new(
-                        "keycloak",
-                        "http://localhost:18080/realms/Shield",
-                        "client1",
-                    )
-                    .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-                    .build()]),
-                ),
-            ],
+            shield_storage.clone(),
+            vec![Arc::new(
+                OidcProvider::new(shield_storage).with_subproviders([KeycloakBuilder::new(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .build()]),
+            )],
         );
         let shield_middleware = ShieldMiddleware::new(shield.clone());
 
@@ -56,7 +55,7 @@ async fn main() -> std::io::Result<()> {
             .leptos_routes_with_context(
                 routes,
                 move || {
-                    provide_actix_integration();
+                    provide_actix_integration::<User>();
                 },
                 {
                     let leptos_options = leptos_options.clone();

@@ -1,27 +1,24 @@
 use async_trait::async_trait;
 use shield::{
     Provider, ProviderError, Response, Session, ShieldError, SignInCallbackRequest, SignInRequest,
-    SignOutRequest, Subprovider,
+    SignOutRequest, Subprovider, User,
 };
 
 use crate::{storage::OauthStorage, subprovider::OauthSubprovider};
 
 pub const OAUTH_PROVIDER_ID: &str = "oauth";
 
-#[derive(Default)]
-pub struct OauthProvider {
+pub struct OauthProvider<U: User> {
     subproviders: Vec<OauthSubprovider>,
-    storage: Option<Box<dyn OauthStorage>>,
+    storage: Box<dyn OauthStorage<U>>,
 }
 
-impl OauthProvider {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_storage<S: OauthStorage + 'static>(mut self, storage: S) -> Self {
-        self.storage = Some(Box::new(storage));
-        self
+impl<U: User> OauthProvider<U> {
+    pub fn new<S: OauthStorage<U> + 'static>(storage: S) -> Self {
+        Self {
+            subproviders: vec![],
+            storage: Box::new(storage),
+        }
     }
 
     pub fn with_subproviders<I: IntoIterator<Item = OauthSubprovider>>(
@@ -44,10 +41,8 @@ impl OauthProvider {
             return Ok(subprovider.clone());
         }
 
-        if let Some(storage) = &self.storage {
-            if let Some(subprovider) = storage.oauth_subprovider_by_id(subprovider_id).await? {
-                return Ok(subprovider);
-            }
+        if let Some(subprovider) = self.storage.oauth_subprovider_by_id(subprovider_id).await? {
+            return Ok(subprovider);
         }
 
         Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
@@ -55,21 +50,17 @@ impl OauthProvider {
 }
 
 #[async_trait]
-impl Provider for OauthProvider {
+impl<U: User> Provider for OauthProvider<U> {
     fn id(&self) -> String {
         OAUTH_PROVIDER_ID.to_owned()
     }
 
     async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        let subproviders =
-            self.subproviders
-                .iter()
-                .cloned()
-                .chain(if let Some(storage) = &self.storage {
-                    storage.oauth_subproviders().await?
-                } else {
-                    vec![]
-                });
+        let subproviders = self
+            .subproviders
+            .iter()
+            .cloned()
+            .chain(self.storage.oauth_subproviders().await?);
 
         Ok(subproviders
             .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)

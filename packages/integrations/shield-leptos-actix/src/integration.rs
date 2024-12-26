@@ -3,14 +3,14 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use leptos::prelude::provide_context;
 use leptos_actix::{extract, redirect};
-use shield::{ServerIntegration, Session, Shield};
+use shield::{ServerIntegration, Session, Shield, User};
 use shield_actix::{ExtractSession, ExtractShield};
 
 pub struct LeptosActixIntegration;
 
 #[async_trait]
-impl ServerIntegration for LeptosActixIntegration {
-    async fn extract_shield(&self) -> Shield {
+impl<U: User + Clone + 'static> ServerIntegration<U> for LeptosActixIntegration {
+    async fn extract_shield(&self) -> Shield<U> {
         let ExtractShield(shield) = extract().await.expect("TOD");
         shield
     }
@@ -25,6 +25,6 @@ impl ServerIntegration for LeptosActixIntegration {
     }
 }
 
-pub fn provide_actix_integration() {
-    provide_context::<Arc<dyn ServerIntegration>>(Arc::new(LeptosActixIntegration));
+pub fn provide_actix_integration<U: User + Clone + 'static>() {
+    provide_context::<Arc<dyn ServerIntegration<U>>>(Arc::new(LeptosActixIntegration));
 }

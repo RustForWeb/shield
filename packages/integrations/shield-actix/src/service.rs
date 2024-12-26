@@ -4,20 +4,20 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse},
     Error, HttpMessage,
 };
-use shield::Shield;
+use shield::{Shield, User};
 
-pub struct ShieldService<S> {
+pub struct ShieldService<S, U: User> {
     inner: S,
-    shield: Shield,
+    shield: Shield<U>,
 }
 
-impl<S> ShieldService<S> {
-    pub fn new(inner: S, shield: Shield) -> Self {
+impl<S, U: User> ShieldService<S, U> {
+    pub fn new(inner: S, shield: Shield<U>) -> Self {
         Self { inner, shield }
     }
 }
 
-impl<S, ResBody> Service<ServiceRequest> for ShieldService<S>
+impl<S, U: User + Clone + 'static, ResBody> Service<ServiceRequest> for ShieldService<S, U>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<ResBody>, Error = Error>,
 {

@@ -3,31 +3,31 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     Error,
 };
-use shield::Shield;
+use shield::{Shield, User};
 
 use crate::service::ShieldService;
 
 // Actix uses a `Middleware` suffix instead of a `Transform` suffix, despite the trait being called `Transform`.
 // Export both names so users can choose.
-pub type ShieldMiddleware = ShieldTransform;
+pub type ShieldMiddleware<U> = ShieldTransform<U>;
 
-pub struct ShieldTransform {
-    shield: Shield,
+pub struct ShieldTransform<U: User> {
+    shield: Shield<U>,
 }
 
-impl ShieldTransform {
-    pub fn new(shield: Shield) -> Self {
+impl<U: User> ShieldTransform<U> {
+    pub fn new(shield: Shield<U>) -> Self {
         Self { shield }
     }
 }
 
-impl<S, ResBody> Transform<S, ServiceRequest> for ShieldTransform
+impl<S, U: User + Clone + 'static, ResBody> Transform<S, ServiceRequest> for ShieldTransform<U>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<ResBody>, Error = Error>,
 {
     type Response = ServiceResponse<ResBody>;
     type Error = Error;
-    type Transform = ShieldService<S>;
+    type Transform = ShieldService<S, U>;
     type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 

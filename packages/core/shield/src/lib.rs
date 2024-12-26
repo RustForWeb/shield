@@ -1,5 +1,3 @@
-#[cfg(feature = "dummy")]
-mod dummy;
 mod error;
 mod form;
 mod integration;
@@ -9,9 +7,8 @@ mod response;
 mod session;
 mod shield;
 mod storage;
+mod user;
 
-#[cfg(feature = "dummy")]
-pub use dummy::*;
 pub use error::*;
 pub use form::*;
 pub use integration::*;
@@ -21,3 +18,4 @@ pub use response::*;
 pub use session::*;
 pub use shield::*;
 pub use storage::*;
+pub use user::*;

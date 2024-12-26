@@ -23,31 +23,29 @@ pub enum OidcProviderPkceCodeChallenge {
     S256,
 }
 
-// TODO: Remove allow dead code.
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct OidcSubprovider {
-    pub(crate) id: String,
-    pub(crate) name: String,
-    pub(crate) slug: Option<String>,
-    pub(crate) visibility: OidcProviderVisibility,
-    pub(crate) client_id: String,
-    pub(crate) client_secret: Option<String>,
-    pub(crate) scopes: Option<Vec<String>>,
-    pub(crate) redirect_url: Option<String>,
-    pub(crate) discovery_url: Option<String>,
-    pub(crate) issuer_url: Option<String>,
-    pub(crate) authorization_url: Option<String>,
-    pub(crate) authorization_url_params: Option<String>,
-    pub(crate) token_url: Option<String>,
-    pub(crate) token_url_params: Option<String>,
-    pub(crate) introspection_url: Option<String>,
-    pub(crate) introspection_url_params: Option<String>,
-    pub(crate) revocation_url: Option<String>,
-    pub(crate) revocation_url_params: Option<String>,
-    pub(crate) user_info_url: Option<String>,
-    pub(crate) json_web_key_set_url: Option<String>,
-    pub(crate) json_web_key_set: Option<
+    pub id: String,
+    pub name: String,
+    pub slug: Option<String>,
+    pub visibility: OidcProviderVisibility,
+    pub client_id: String,
+    pub client_secret: Option<String>,
+    pub scopes: Option<Vec<String>>,
+    pub redirect_url: Option<String>,
+    pub discovery_url: Option<String>,
+    pub issuer_url: Option<String>,
+    pub authorization_url: Option<String>,
+    pub authorization_url_params: Option<String>,
+    pub token_url: Option<String>,
+    pub token_url_params: Option<String>,
+    pub introspection_url: Option<String>,
+    pub introspection_url_params: Option<String>,
+    pub revocation_url: Option<String>,
+    pub revocation_url_params: Option<String>,
+    pub user_info_url: Option<String>,
+    pub json_web_key_set_url: Option<String>,
+    pub json_web_key_set: Option<
         JsonWebKeySet<
             CoreJwsSigningAlgorithm,
             CoreJsonWebKeyType,
@@ -55,7 +53,7 @@ pub struct OidcSubprovider {
             CoreJsonWebKey,
         >,
     >,
-    pub(crate) pkce_code_challenge: OidcProviderPkceCodeChallenge,
+    pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
 }
 
 impl OidcSubprovider {

@@ -9,18 +9,19 @@ use crate::{
     response::Response,
     session::Session,
     storage::Storage,
+    user::User,
 };
 
 #[derive(Clone)]
-pub struct Shield {
-    storage: Arc<dyn Storage>,
+pub struct Shield<U: User> {
+    storage: Arc<dyn Storage<U>>,
     providers: Arc<HashMap<String, Arc<dyn Provider>>>,
 }
 
-impl Shield {
+impl<U: User> Shield<U> {
     pub fn new<S>(storage: S, providers: Vec<Arc<dyn Provider>>) -> Self
     where
-        S: Storage + 'static,
+        S: Storage<U> + 'static,
     {
         Self {
             storage: Arc::new(storage),
@@ -33,7 +34,7 @@ impl Shield {
         }
     }
 
-    pub fn storage(&self) -> &dyn Storage {
+    pub fn storage(&self) -> &dyn Storage<U> {
         &*self.storage
     }
 

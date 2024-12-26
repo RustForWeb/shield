@@ -4421,6 +4421,7 @@ dependencies = [
  "shield",
  "shield-leptos",
  "shield-leptos-actix",
+ "shield-memory",
  "shield-oidc",
  "wasm-bindgen",
 ]
@@ -4438,6 +4439,7 @@ dependencies = [
  "shield",
  "shield-leptos",
  "shield-leptos-axum",
+ "shield-memory",
  "shield-oidc",
  "time",
  "tokio",
@@ -4486,6 +4488,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-memory"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "shield",
+ "shield-oidc",
+]
+
+[[package]]
 name = "shield-oauth"
 version = "0.0.1"
 dependencies = [
@@ -4499,6 +4510,7 @@ name = "shield-oidc"
 version = "0.0.1"
 dependencies = [
  "async-trait",
+ "chrono",
  "oauth2",
  "openidconnect",
  "shield",

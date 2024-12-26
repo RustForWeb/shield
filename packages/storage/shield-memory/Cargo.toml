@@ -1,0 +1,27 @@
+[package]
+name = "shield-memory"
+description = "In-memory storage for Shield."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+shield = { path = "../../core/shield" }
+shield-oidc = { path = "../../providers/shield-oidc", optional = true }
+
+[features]
+default = []
+all-providers = [
+    "provider-email",
+    "provider-oauth",
+    "provider-oidc",
+    "provider-webauthn",
+]
+provider-email = []
+provider-oauth = []
+provider-oidc = ["dep:shield-oidc"]
+provider-webauthn = []
