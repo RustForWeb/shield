@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
 use leptos::prelude::expect_context;
-use shield::{ServerIntegration, Shield, User};
+use shield::{Shield, User};
 
-pub fn expect_server_integration<U: User + 'static>() -> Arc<dyn ServerIntegration<U>> {
-    expect_context::<Arc<dyn ServerIntegration<U>>>()
+use crate::integration::LeptosIntegration;
+
+pub fn expect_server_integration<U: User + 'static>() -> Arc<dyn LeptosIntegration<U>> {
+    expect_context::<Arc<dyn LeptosIntegration<U>>>()
 }
 
 pub async fn expect_shield<U: User + 'static>() -> Shield<U> {

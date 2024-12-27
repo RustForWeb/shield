@@ -4461,6 +4461,7 @@ dependencies = [
 name = "shield-leptos"
 version = "0.0.1"
 dependencies = [
+ "async-trait",
  "leptos",
  "shield",
 ]
@@ -4474,6 +4475,7 @@ dependencies = [
  "leptos_actix",
  "shield",
  "shield-actix",
+ "shield-leptos",
 ]
 
 [[package]]
@@ -4485,6 +4487,7 @@ dependencies = [
  "leptos_axum",
  "shield",
  "shield-axum",
+ "shield-leptos",
 ]
 
 [[package]]

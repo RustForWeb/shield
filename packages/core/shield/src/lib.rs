@@ -1,6 +1,5 @@
 mod error;
 mod form;
-mod integration;
 mod provider;
 mod request;
 mod response;
@@ -11,7 +10,6 @@ mod user;
 
 pub use error::*;
 pub use form::*;
-pub use integration::*;
 pub use provider::*;
 pub use request::*;
 pub use response::*;

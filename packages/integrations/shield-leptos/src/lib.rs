@@ -1,3 +1,6 @@
 pub mod context;
+mod integration;
 pub mod routes;
-pub mod user;
+mod user;
+
+pub use integration::*;

@@ -14,3 +14,4 @@ leptos.workspace = true
 leptos_axum.workspace = true
 shield = { path = "../../core/shield" }
 shield-axum = { path = "../../integrations/shield-axum" }
+shield-leptos = { path = "../../integrations/shield-leptos" }
