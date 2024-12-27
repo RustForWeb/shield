@@ -1,19 +1,26 @@
-use std::sync::Arc;
+use std::{marker::PhantomData, sync::Arc};
 
 use async_trait::async_trait;
 use leptos::prelude::provide_context;
 use leptos_axum::{extract, redirect};
-use shield::{Session, Shield, User};
+use shield::{Session, ShieldDyn, User};
 use shield_axum::{ExtractSession, ExtractShield};
 use shield_leptos::LeptosIntegration;
 
-pub struct LeptosAxumIntegration;
+pub struct LeptosAxumIntegration<U: User>(PhantomData<U>);
+
+impl<U: User> Default for LeptosAxumIntegration<U> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
 
 #[async_trait]
-impl<U: User + Clone + 'static> LeptosIntegration<U> for LeptosAxumIntegration {
-    async fn extract_shield(&self) -> Shield<U> {
-        let ExtractShield(shield) = extract().await.expect("TODO");
-        shield
+impl<U: User + Clone + 'static> LeptosIntegration for LeptosAxumIntegration<U> {
+    async fn extract_shield(&self) -> ShieldDyn {
+        let ExtractShield(shield) = extract::<ExtractShield<U>>().await.expect("TODO");
+
+        ShieldDyn::new(shield)
     }
 
     async fn extract_session(&self) -> Session {
@@ -27,5 +34,5 @@ impl<U: User + Clone + 'static> LeptosIntegration<U> for LeptosAxumIntegration {
 }
 
 pub fn provide_axum_integration<U: User + Clone + 'static>() {
-    provide_context::<Arc<dyn LeptosIntegration<U>>>(Arc::new(LeptosAxumIntegration));
+    provide_context::<Arc<dyn LeptosIntegration>>(Arc::new(LeptosAxumIntegration::<U>::default()));
 }

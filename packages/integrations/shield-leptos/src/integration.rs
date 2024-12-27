@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 
-use shield::{Session, Shield, User};
+use shield::{Session, ShieldDyn};
 
 #[async_trait]
-pub trait LeptosIntegration<U: User>: Send + Sync {
-    async fn extract_shield(&self) -> Shield<U>;
+pub trait LeptosIntegration: Send + Sync {
+    async fn extract_shield(&self) -> ShieldDyn;
 
     async fn extract_session(&self) -> Session;
 

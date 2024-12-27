@@ -5,6 +5,7 @@ mod request;
 mod response;
 mod session;
 mod shield;
+mod shield_dyn;
 mod storage;
 mod user;
 
@@ -15,5 +16,6 @@ pub use request::*;
 pub use response::*;
 pub use session::*;
 pub use shield::*;
+pub use shield_dyn::*;
 pub use storage::*;
 pub use user::*;
