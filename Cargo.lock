@@ -4357,6 +4357,7 @@ name = "shield"
 version = "0.0.1"
 dependencies = [
  "async-trait",
+ "chrono",
  "futures",
  "serde",
  "serde_json",
@@ -4496,7 +4497,11 @@ version = "0.0.1"
 dependencies = [
  "async-trait",
  "shield",
+ "shield-credentials",
+ "shield-email",
+ "shield-oauth",
  "shield-oidc",
+ "shield-webauthn",
 ]
 
 [[package]]
@@ -4527,7 +4532,13 @@ dependencies = [
  "sea-orm",
  "sea-orm-migration",
  "serde",
+ "serde_json",
  "shield",
+ "shield-credentials",
+ "shield-email",
+ "shield-oauth",
+ "shield-oidc",
+ "shield-webauthn",
 ]
 
 [[package]]

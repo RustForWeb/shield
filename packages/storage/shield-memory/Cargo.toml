@@ -11,17 +11,23 @@ version.workspace = true
 [dependencies]
 async-trait.workspace = true
 shield = { path = "../../core/shield" }
+shield-credentials = { path = "../../providers/shield-credentials", optional = true }
+shield-email = { path = "../../providers/shield-email", optional = true }
+shield-oauth = { path = "../../providers/shield-oauth", optional = true }
 shield-oidc = { path = "../../providers/shield-oidc", optional = true }
+shield-webauthn = { path = "../../providers/shield-webauthn", optional = true }
 
 [features]
 default = []
 all-providers = [
+    "provider-credentials",
     "provider-email",
     "provider-oauth",
     "provider-oidc",
     "provider-webauthn",
 ]
-provider-email = []
-provider-oauth = []
+provider-credentials = ["dep:shield-credentials"]
+provider-email = ["dep:shield-email"]
+provider-oauth = ["dep:shield-oauth"]
 provider-oidc = ["dep:shield-oidc"]
-provider-webauthn = []
+provider-webauthn = ["dep:shield-webauthn"]

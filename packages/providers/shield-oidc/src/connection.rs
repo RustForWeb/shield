@@ -32,8 +32,8 @@ pub struct UpdateOidcConnection {
     pub id: String,
     pub token_type: Option<String>,
     pub access_token: Option<String>,
-    pub refresh_token: Option<String>,
-    pub id_token: Option<String>,
-    pub expired_at: Option<DateTime<Utc>>,
-    pub scopes: Option<Vec<String>>,
+    pub refresh_token: Option<Option<String>>,
+    pub id_token: Option<Option<String>>,
+    pub expired_at: Option<Option<DateTime<Utc>>>,
+    pub scopes: Option<Option<Vec<String>>>,
 }

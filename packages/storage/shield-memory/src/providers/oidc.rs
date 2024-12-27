@@ -56,4 +56,8 @@ impl OidcStorage<User> for MemoryStorage {
     ) -> Result<OidcConnection, StorageError> {
         todo!("update_oidc_connection")
     }
+
+    async fn delete_oidc_connection(&self, _connection_id: &str) -> Result<(), StorageError> {
+        todo!("delete_oidc_connection")
+    }
 }

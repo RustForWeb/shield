@@ -1,10 +1,7 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
-use shield::{Storage, StorageError};
+use shield::{Storage, StorageError, User as _};
 
 use crate::user::User;
 
@@ -12,7 +9,7 @@ pub const MEMORY_STORAGE_ID: &str = "memory";
 
 #[derive(Clone, Debug, Default)]
 pub struct MemoryStorage {
-    pub(crate) users: Arc<Mutex<HashMap<String, User>>>,
+    pub(crate) users: Arc<Mutex<Vec<User>>>,
     #[cfg(feature = "provider-oidc")]
     pub(crate) oidc: crate::providers::oidc::OidcMemoryStorage,
 }
@@ -34,11 +31,22 @@ impl Storage<User> for MemoryStorage {
             .users
             .lock()
             .map_err(|err| StorageError::Engine(err.to_string()))?
-            .get(user_id)
+            .iter()
+            .find(|user| user.id() == user_id)
             .cloned())
     }
 
-    async fn user_by_email(&self, _email: &str) -> Result<Option<User>, StorageError> {
-        todo!("user_by_email")
+    async fn user_by_email(&self, email: &str) -> Result<Option<User>, StorageError> {
+        Ok(self
+            .users
+            .lock()
+            .map_err(|err| StorageError::Engine(err.to_string()))?
+            .iter()
+            .find(|user| {
+                user.email_addresses
+                    .iter()
+                    .any(|email_address| email_address.email == email)
+            })
+            .cloned())
     }
 }

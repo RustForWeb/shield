@@ -23,6 +23,8 @@ pub enum StorageError {
     #[error(transparent)]
     Configuration(#[from] ConfigurationError),
     #[error("{0}")]
+    Validation(String),
+    #[error("{0}")]
     Engine(String),
 }
 
