@@ -269,7 +269,7 @@ impl<U: User> Provider for OidcProvider<U> {
                         scopes: token_response
                             .scopes()
                             .map(|scopes| scopes.iter().map(|scope| scope.to_string()).collect()),
-                        provider_id: subprovider.id,
+                        subprovider_id: subprovider.id,
                         user_id: user.id(),
                     })
                     .await?;

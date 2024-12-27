@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use async_trait::async_trait;
 use shield::StorageError;
 use shield_oidc::{
@@ -5,6 +7,11 @@ use shield_oidc::{
 };
 
 use crate::{storage::MemoryStorage, user::User};
+
+#[derive(Clone, Debug, Default)]
+pub struct OidcMemoryStorage {
+    connections: Arc<Mutex<Vec<OidcConnection>>>,
+}
 
 #[async_trait]
 impl OidcStorage<User> for MemoryStorage {
@@ -21,10 +28,19 @@ impl OidcStorage<User> for MemoryStorage {
 
     async fn oidc_connection_by_identifier(
         &self,
-        _subprovider_id: &str,
-        _identifier: &str,
+        subprovider_id: &str,
+        identifier: &str,
     ) -> Result<Option<OidcConnection>, StorageError> {
-        todo!("oidc_connection_by_identifier")
+        Ok(self
+            .oidc
+            .connections
+            .lock()
+            .map_err(|err| StorageError::Engine(err.to_string()))?
+            .iter()
+            .find(|connection| {
+                connection.subprovider_id == subprovider_id && connection.identifier == identifier
+            })
+            .cloned())
     }
 
     async fn create_oidc_connection(

@@ -12,7 +12,9 @@ pub const MEMORY_STORAGE_ID: &str = "memory";
 
 #[derive(Clone, Debug, Default)]
 pub struct MemoryStorage {
-    users: Arc<Mutex<HashMap<String, User>>>,
+    pub(crate) users: Arc<Mutex<HashMap<String, User>>>,
+    #[cfg(feature = "provider-oidc")]
+    pub(crate) oidc: crate::providers::oidc::OidcMemoryStorage,
 }
 
 impl MemoryStorage {
