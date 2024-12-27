@@ -90,31 +90,26 @@ impl OidcStorage<user::Model> for SeaOrmStorage {
                 .one(&self.database)
                 .await
                 .map_err(|err| StorageError::Engine(err.to_string()))?
-                .ok_or_else(|| {
-                    StorageError::Validation(format!(
-                        "OIDC connection `{}` not found.",
-                        connection.id
-                    ))
-                })?
+                .ok_or_else(|| StorageError::NotFound("OIDC Connection".to_owned(), connection.id))?
                 .into();
 
         if let Some(token_type) = connection.token_type {
-            active_model.token_type = ActiveValue::set(token_type);
+            active_model.token_type = ActiveValue::Set(token_type);
         }
         if let Some(access_token) = connection.access_token {
-            active_model.access_token = ActiveValue::set(access_token);
+            active_model.access_token = ActiveValue::Set(access_token);
         }
         if let Some(refresh_token) = connection.refresh_token {
-            active_model.refresh_token = ActiveValue::set(refresh_token);
+            active_model.refresh_token = ActiveValue::Set(refresh_token);
         }
         if let Some(id_token) = connection.id_token {
-            active_model.id_token = ActiveValue::set(id_token);
+            active_model.id_token = ActiveValue::Set(id_token);
         }
         if let Some(expired_at) = connection.expired_at {
-            active_model.expired_at = ActiveValue::set(expired_at);
+            active_model.expired_at = ActiveValue::Set(expired_at);
         }
         if let Some(scopes) = connection.scopes {
-            active_model.scopes = ActiveValue::set(scopes.map(|scopes| scopes.join(",")));
+            active_model.scopes = ActiveValue::Set(scopes.map(|scopes| scopes.join(",")));
         }
 
         active_model

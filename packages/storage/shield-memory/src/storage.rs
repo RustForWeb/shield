@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
-use shield::{Storage, StorageError, User as _};
+use shield::{CreateEmailAddress, CreateUser, Storage, StorageError, UpdateUser, User as _};
 
 use crate::user::User;
 
@@ -48,5 +48,21 @@ impl Storage<User> for MemoryStorage {
                     .any(|email_address| email_address.email == email)
             })
             .cloned())
+    }
+
+    async fn create_user(
+        &self,
+        _user: CreateUser,
+        _email_address: CreateEmailAddress,
+    ) -> Result<User, StorageError> {
+        todo!("create_user")
+    }
+
+    async fn update_user(&self, _user: UpdateUser) -> Result<User, StorageError> {
+        todo!("update_user")
+    }
+
+    async fn delete_user(&self, _user_id: &str) -> Result<(), StorageError> {
+        todo!("delete_user")
     }
 }

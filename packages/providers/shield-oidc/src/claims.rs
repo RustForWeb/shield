@@ -1,6 +1,6 @@
 use openidconnect::{
-    core::CoreGenderClaim, EmptyAdditionalClaims, EndUserEmail, IdTokenClaims, SubjectIdentifier,
-    UserInfoClaims,
+    core::CoreGenderClaim, EmptyAdditionalClaims, EndUserEmail, EndUserName, IdTokenClaims,
+    LocalizedClaim, SubjectIdentifier, UserInfoClaims,
 };
 
 /// Unified interface for [`IdTokenClaims`] and [`UserInfoClaims`].
@@ -18,12 +18,17 @@ impl Claims {
         }
     }
 
-    // TODO: Remove allow dead code.
-    #[allow(dead_code)]
     pub fn email(&self) -> Option<&EndUserEmail> {
         match &self {
             Claims::IdToken(id_token_claims) => id_token_claims.email(),
             Claims::UserInfo(user_info_claims) => user_info_claims.email(),
+        }
+    }
+
+    pub fn name(&self) -> Option<&LocalizedClaim<EndUserName>> {
+        match &self {
+            Claims::IdToken(id_token_claims) => id_token_claims.name(),
+            Claims::UserInfo(user_info_claims) => user_info_claims.name(),
         }
     }
 }

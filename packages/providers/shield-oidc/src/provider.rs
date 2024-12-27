@@ -1,18 +1,20 @@
 use async_trait::async_trait;
+use chrono::{DateTime, Duration, Utc};
 use openidconnect::{
-    core::{CoreAuthenticationFlow, CoreGenderClaim},
+    core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
     reqwest::async_http_client,
     AccessToken, AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
 };
 use shield::{
-    ConfigurationError, Provider, ProviderError, Response, Session, SessionError, ShieldError,
-    SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider, User,
+    ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError, Response, Session,
+    SessionError, ShieldError, SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
+    UpdateUser, User,
 };
 
 use crate::{
     claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider, CreateOidcConnection,
-    OidcProviderPkceCodeChallenge,
+    OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
 };
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
@@ -57,8 +59,103 @@ impl<U: User> OidcProvider<U> {
         Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
     }
 
-    async fn get_or_create_user(&self, _claims: &Claims) -> Result<U, ShieldError> {
-        todo!("get_or_create_user")
+    async fn create_user(&self, claims: &Claims) -> Result<U, ShieldError> {
+        if let Some(email) = claims.email() {
+            match self.storage.user_by_email(email).await? {
+                Some(_) => Err(ShieldError::Validation(
+                    "\
+                Email address `{email}` is already used by another account. \
+                To link a new provider, sign in to with your exising account first. \
+                If this is not your account, please contact support for assistence.\
+                "
+                    .to_owned(),
+                )),
+                None => Ok(self
+                    .storage
+                    .create_user(
+                        CreateUser {
+                            name: claims
+                                .name()
+                                .and_then(|name| name.get(None).map(|name| name.to_string())),
+                        },
+                        CreateEmailAddress {
+                            email: email.to_string(),
+                            is_primary: true,
+                            // TODO: from claim?
+                            is_verified: false,
+                            // TODO: generate if not verified
+                            verification_token: None,
+                            verification_token_expired_at: None,
+                            verified_at: None,
+                        },
+                    )
+                    .await?),
+            }
+        } else {
+            Err(ShieldError::Validation(
+                "Missing email address in OpenID Connect claims.".to_owned(),
+            ))
+        }
+    }
+
+    async fn update_user(&self, user_id: &str, claims: &Claims) -> Result<U, ShieldError> {
+        self.storage
+            .update_user(UpdateUser {
+                id: user_id.to_owned(),
+                name: claims
+                    .name()
+                    .map(|name| name.get(None).map(|name| name.to_string())),
+            })
+            .await
+            .map_err(ShieldError::Storage)
+    }
+
+    async fn create_oidc_connection(
+        &self,
+        subprovider_id: String,
+        user_id: String,
+        identifier: String,
+        token_response: CoreTokenResponse,
+    ) -> Result<OidcConnection, ShieldError> {
+        let (token_type, access_token, refresh_token, id_token, expired_at, scopes) =
+            parse_token_response(token_response)?;
+
+        self.storage
+            .create_oidc_connection(CreateOidcConnection {
+                identifier,
+                token_type,
+                access_token,
+                refresh_token,
+                id_token,
+                expired_at,
+                scopes,
+                subprovider_id,
+                user_id,
+            })
+            .await
+            .map_err(ShieldError::Storage)
+    }
+
+    async fn update_oidc_connection(
+        &self,
+        connection_id: String,
+        token_response: CoreTokenResponse,
+    ) -> Result<OidcConnection, ShieldError> {
+        let (token_type, access_token, refresh_token, id_token, expired_at, scopes) =
+            parse_token_response(token_response)?;
+
+        self.storage
+            .update_oidc_connection(UpdateOidcConnection {
+                id: connection_id,
+                token_type: Some(token_type),
+                access_token: Some(access_token),
+                refresh_token: Some(refresh_token),
+                id_token: Some(id_token),
+                expired_at: Some(expired_at),
+                scopes: Some(scopes),
+            })
+            .await
+            .map_err(ShieldError::Storage)
     }
 }
 
@@ -165,10 +262,10 @@ impl<U: User> Provider for OidcProvider<U> {
             .as_ref()
             .and_then(|query| query.get("state"))
             .and_then(|code| code.as_str())
-            .ok_or_else(|| ShieldError::Verification("Missing state.".to_owned()))?;
+            .ok_or_else(|| ShieldError::Validation("Missing state.".to_owned()))?;
 
         if csrf.is_none_or(|csrf| csrf != state) {
-            return Err(ShieldError::Verification("Invalid state.".to_owned()));
+            return Err(ShieldError::Validation("Invalid state.".to_owned()));
         }
 
         let authorization_code = request
@@ -176,7 +273,7 @@ impl<U: User> Provider for OidcProvider<U> {
             .as_ref()
             .and_then(|query| query.get("code"))
             .and_then(|code| code.as_str())
-            .ok_or_else(|| ShieldError::Verification("Missing authorization code.".to_owned()))?;
+            .ok_or_else(|| ShieldError::Validation("Missing authorization code.".to_owned()))?;
 
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
@@ -191,9 +288,7 @@ impl<U: User> Provider for OidcProvider<U> {
         if let Some(pkce_verifier) = pkce_verifier {
             token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
         } else if subprovider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
-            return Err(ShieldError::Verification(
-                "Missing PKCE verifier.".to_owned(),
-            ));
+            return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
 
         let token_response = token_request
@@ -202,15 +297,15 @@ impl<U: User> Provider for OidcProvider<U> {
             .map_err(|err| ShieldError::Request(err.to_string()))?;
 
         let claims = if let Some(id_token) = token_response.id_token() {
-            let claims =
-                id_token
-                    .claims(
-                        &client.id_token_verifier(),
-                        &Nonce::new(nonce.ok_or_else(|| {
-                            ShieldError::Verification("Missing nonce.".to_owned())
-                        })?),
-                    )
-                    .map_err(|err| ShieldError::Verification(err.to_string()))?;
+            let claims = id_token
+                .claims(
+                    &client.id_token_verifier(),
+                    &Nonce::new(
+                        nonce
+                            .ok_or_else(|| ShieldError::Validation("Missing nonce.".to_owned()))?,
+                    ),
+                )
+                .map_err(|err| ShieldError::Validation(err.to_string()))?;
 
             Claims::from(claims.clone())
         } else {
@@ -232,46 +327,24 @@ impl<U: User> Provider for OidcProvider<U> {
             .await?
         {
             Some(connection) => {
-                // TODO: update connection
+                let connection = self
+                    .update_oidc_connection(connection.id, token_response)
+                    .await?;
 
-                // TODO: get user
-
-                let user = self
-                    .storage
-                    .user_by_id(&connection.user_id)
-                    .await?
-                    .expect("TODO");
+                let user = self.update_user(&connection.user_id, &claims).await?;
 
                 (connection, user)
             }
             None => {
-                // TODO: find or create user
-                let user = self.get_or_create_user(&claims).await?;
+                let user = self.create_user(&claims).await?;
 
                 let connection = self
-                    .storage
-                    .create_oidc_connection(CreateOidcConnection {
-                        identifier: claims.subject().to_string(),
-                        // token_type: token_response.token_type(),
-                        token_type: "".to_owned(),
-                        access_token: token_response.access_token().secret().clone(),
-                        refresh_token: token_response
-                            .refresh_token()
-                            .map(|refresh_token| refresh_token.secret().clone()),
-                        id_token: token_response
-                            .id_token()
-                            .map(|id_token| id_token.to_string()),
-                        // expired_at: token_response.expires_in().map(|expires_in| {
-                        //     Duration::from_std(expires_in)
-                        //         .map_err(|err| ShieldError::Verification(err.to_string()))
-                        // }),
-                        expired_at: None,
-                        scopes: token_response
-                            .scopes()
-                            .map(|scopes| scopes.iter().map(|scope| scope.to_string()).collect()),
-                        subprovider_id: subprovider.id,
-                        user_id: user.id(),
-                    })
+                    .create_oidc_connection(
+                        subprovider.id,
+                        user.id(),
+                        claims.subject().to_string(),
+                        token_response,
+                    )
                     .await?;
 
                 (connection, user)
@@ -313,4 +386,39 @@ impl<U: User> Provider for OidcProvider<U> {
         // TODO: This doesn't make sense and/or should be configurable.
         Ok(Response::Redirect("/".to_owned()))
     }
+}
+
+type ParsedTokenResponse = (
+    String,
+    String,
+    Option<String>,
+    Option<String>,
+    Option<DateTime<Utc>>,
+    Option<Vec<String>>,
+);
+
+fn parse_token_response(
+    token_response: CoreTokenResponse,
+) -> Result<ParsedTokenResponse, ShieldError> {
+    Ok((
+        token_response.token_type().as_ref().to_string(),
+        token_response.access_token().secret().clone(),
+        token_response
+            .refresh_token()
+            .map(|refresh_token| refresh_token.secret().clone()),
+        token_response
+            .id_token()
+            .map(|id_token| id_token.to_string()),
+        match token_response.expires_in() {
+            Some(expires_in) => Some(
+                Utc::now()
+                    + Duration::from_std(expires_in)
+                        .map_err(|err| ShieldError::Validation(err.to_string()))?,
+            ),
+            None => None,
+        },
+        token_response
+            .scopes()
+            .map(|scopes| scopes.iter().map(|scope| scope.to_string()).collect()),
+    ))
 }

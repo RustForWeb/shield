@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{error::StorageError, user::User};
+use crate::{
+    error::StorageError,
+    user::{CreateEmailAddress, CreateUser, UpdateUser, User},
+};
 
 #[async_trait]
 pub trait Storage<U: User>: Send + Sync {
@@ -9,13 +12,29 @@ pub trait Storage<U: User>: Send + Sync {
     async fn user_by_id(&self, user_id: &str) -> Result<Option<U>, StorageError>;
 
     async fn user_by_email(&self, email: &str) -> Result<Option<U>, StorageError>;
+
+    async fn create_user(
+        &self,
+        user: CreateUser,
+        email_address: CreateEmailAddress,
+    ) -> Result<U, StorageError>;
+
+    async fn update_user(&self, user: UpdateUser) -> Result<U, StorageError>;
+
+    async fn delete_user(&self, user_id: &str) -> Result<(), StorageError>;
+
+    // TODO: create, update, delete email address
 }
 
 #[cfg(test)]
 pub(crate) mod tests {
     use async_trait::async_trait;
 
-    use crate::{error::StorageError, storage::Storage, user::tests::TestUser};
+    use crate::{
+        error::StorageError,
+        storage::Storage,
+        user::{tests::TestUser, CreateEmailAddress, CreateUser, UpdateUser},
+    };
 
     pub const TEST_STORAGE_ID: &str = "test";
 
@@ -34,6 +53,22 @@ pub(crate) mod tests {
 
         async fn user_by_email(&self, _email: &str) -> Result<Option<TestUser>, StorageError> {
             todo!("user_by_email")
+        }
+
+        async fn create_user(
+            &self,
+            _user: CreateUser,
+            _email_address: CreateEmailAddress,
+        ) -> Result<TestUser, StorageError> {
+            todo!("create_user")
+        }
+
+        async fn update_user(&self, _user: UpdateUser) -> Result<TestUser, StorageError> {
+            todo!("update_user")
+        }
+
+        async fn delete_user(&self, _user_id: &str) -> Result<(), StorageError> {
+            todo!("delete_user")
         }
     }
 }

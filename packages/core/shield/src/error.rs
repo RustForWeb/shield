@@ -24,6 +24,8 @@ pub enum StorageError {
     Configuration(#[from] ConfigurationError),
     #[error("{0}")]
     Validation(String),
+    #[error("{0} with ID `{1}` not found.")]
+    NotFound(String, String),
     #[error("{0}")]
     Engine(String),
 }
@@ -52,5 +54,5 @@ pub enum ShieldError {
     #[error("{0}")]
     Request(String),
     #[error("{0}")]
-    Verification(String),
+    Validation(String),
 }
