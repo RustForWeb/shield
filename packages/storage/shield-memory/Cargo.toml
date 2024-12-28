@@ -12,24 +12,24 @@ version.workspace = true
 async-trait.workspace = true
 serde.workspace = true
 shield = { path = "../../core/shield", version = "0.0.2" }
-shield-credentials = { path = "../../providers/shield-credentials", version = "0.0.2", optional = true }
-shield-email = { path = "../../providers/shield-email", version = "0.0.2", optional = true }
-shield-oauth = { path = "../../providers/shield-oauth", version = "0.0.2", optional = true }
+# shield-credentials = { path = "../../providers/shield-credentials", version = "0.0.2", optional = true }
+# shield-email = { path = "../../providers/shield-email", version = "0.0.2", optional = true }
+# shield-oauth = { path = "../../providers/shield-oauth", version = "0.0.2", optional = true }
 shield-oidc = { path = "../../providers/shield-oidc", version = "0.0.2", optional = true }
-shield-webauthn = { path = "../../providers/shield-webauthn", version = "0.0.2", optional = true }
+# shield-webauthn = { path = "../../providers/shield-webauthn", version = "0.0.2", optional = true }
 uuid = { workspace = true, features = ["v4"] }
 
 [features]
 default = []
 all-providers = [
-    "provider-credentials",
-    "provider-email",
-    "provider-oauth",
+    # "provider-credentials",
+    # "provider-email",
+    # "provider-oauth",
     "provider-oidc",
-    "provider-webauthn",
+    # "provider-webauthn",
 ]
-provider-credentials = ["dep:shield-credentials"]
-provider-email = ["dep:shield-email"]
-provider-oauth = ["dep:shield-oauth"]
+# provider-credentials = ["dep:shield-credentials"]
+# provider-email = ["dep:shield-email"]
+# provider-oauth = ["dep:shield-oauth"]
 provider-oidc = ["dep:shield-oidc"]
-provider-webauthn = ["dep:shield-webauthn"]
+# provider-webauthn = ["dep:shield-webauthn"]

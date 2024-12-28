@@ -4522,11 +4522,7 @@ dependencies = [
  "async-trait",
  "serde",
  "shield",
- "shield-credentials",
- "shield-email",
- "shield-oauth",
  "shield-oidc",
- "shield-webauthn",
  "uuid",
 ]
 
@@ -4561,11 +4557,7 @@ dependencies = [
  "serde",
  "serde_json",
  "shield",
- "shield-credentials",
- "shield-email",
- "shield-oauth",
  "shield-oidc",
- "shield-webauthn",
 ]
 
 [[package]]
