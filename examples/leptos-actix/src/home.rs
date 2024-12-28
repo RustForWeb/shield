@@ -1,10 +1,9 @@
-use std::sync::Arc;
-
 use leptos::{either::Either, prelude::*};
 use leptos_router::components::A;
+use shield_leptos::integration::LeptosUser;
 
 #[server]
-pub async fn user() -> Result<Option<Arc<dyn shield::User>>, ServerFnError> {
+pub async fn user() -> Result<Option<LeptosUser>, ServerFnError> {
     use shield_leptos::context::extract_user;
 
     Ok(extract_user().await)
@@ -20,7 +19,9 @@ pub fn HomePage() -> impl IntoView {
         <Suspense fallback=|| view! { "Loading..." }>
             {move || Suspend::new(async move { match user.await {
                 Ok(user) => Either::Left(match user {
-                    Some(_user) => Either::Left(view! {
+                    Some(user) => Either::Left(view! {
+                        {user.id}
+
                         <A href="/auth/sign-out">
                             <button>"Sign out"</button>
                         </A>

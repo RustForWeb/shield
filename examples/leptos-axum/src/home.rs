@@ -1,16 +1,12 @@
-use std::sync::Arc;
-
-use leptos::prelude::*;
-use tracing::debug;
+use leptos::{either::Either, prelude::*};
+use leptos_router::components::A;
+use shield_leptos::integration::LeptosUser;
 
 #[server]
-pub async fn user() -> Result<Option<Arc<dyn shield::User>>, ServerFnError> {
+pub async fn user() -> Result<Option<LeptosUser>, ServerFnError> {
     use shield_leptos::context::extract_user;
 
-    let user = extract_user().await;
-    debug!("action {:?}", user.as_ref().map(|user| user.id()));
-
-    Ok(user)
+    Ok(extract_user().await)
 }
 
 #[component]
@@ -20,35 +16,26 @@ pub fn HomePage() -> impl IntoView {
     view! {
         <h1>"Shield Leptos Axum Example"</h1>
 
-        {move || match user.get() {
-            Some(user) => {
-                debug!("{:?}", user);
-                match user {
-                    Ok(user) => view! {
-                        {user.as_ref().map(|user| user.id())}
-                    }.into_any(),
-                    Err(err) => view! {
-                        {err.to_string()}
-                    }.into_any(),
-                }
-            }.into_any(),
-            None => view! { "Loading..." }.into_any(),
-        }}
+        <Suspense fallback=|| view! { "Loading..." }>
+            {move || Suspend::new(async move { match user.await {
+                Ok(user) => Either::Left(match user {
+                    Some(user) => Either::Left(view! {
+                        {user.id}
 
-        // <Suspense fallback=move || view! { "Loading..." }>
-        //     {move || Suspend::new(async move {
-        //         let user = user.await;
-        //         debug!("view {:?}", user);
-
-        //         match user {
-        //             Ok(user) => Either::Left(view! {
-        //                 {user.as_ref().map(|user| user.id())}
-        //             }),
-        //             Err(err) => Either::Right(view! {
-        //                 {err.to_string()}
-        //             })
-        //         }
-        //     })}
-        // </Suspense>
+                        <A href="/auth/sign-out">
+                            <button>"Sign out"</button>
+                        </A>
+                    }),
+                    None => Either::Right(view! {
+                        <A href="/auth/sign-in">
+                            <button>"Sign in"</button>
+                        </A>
+                    }),
+                }),
+                Err(err) => Either::Right(view! {
+                    {err.to_string()}
+                })
+            }})}
+        </Suspense>
     }
 }

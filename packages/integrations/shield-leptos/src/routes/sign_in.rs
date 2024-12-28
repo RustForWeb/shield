@@ -3,9 +3,9 @@ use shield::SubproviderVisualisation;
 
 #[server]
 pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
-    use crate::context::expect_shield;
+    use crate::context::extract_shield;
 
-    let shield = expect_shield().await;
+    let shield = extract_shield().await;
 
     shield
         .subprovider_visualisations()

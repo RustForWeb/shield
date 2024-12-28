@@ -11,4 +11,5 @@ version.workspace = true
 [dependencies]
 async-trait.workspace = true
 leptos.workspace = true
+serde.workspace = true
 shield = { path = "../../core/shield" }

@@ -8,7 +8,6 @@ pub struct User {
     pub(crate) email_addresses: Vec<EmailAddress>,
 }
 
-#[typetag::serde]
 impl shield::User for User {
     fn id(&self) -> String {
         self.id.clone()

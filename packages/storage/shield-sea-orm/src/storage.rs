@@ -11,7 +11,6 @@ use crate::entities::{email_address, prelude::User, user};
 
 pub const SEA_ORM_STORAGE_ID: &str = "sea-orm";
 
-#[typetag::serde]
 impl shield::User for user::Model {
     fn id(&self) -> String {
         self.id.to_string()

@@ -3,7 +3,6 @@ use std::fmt::Debug;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[typetag::serde(tag = "type")]
 pub trait User: Debug + Send + Sync {
     fn id(&self) -> String;
 }
@@ -62,7 +61,6 @@ pub(crate) mod tests {
         id: String,
     }
 
-    #[typetag::serde]
     impl User for TestUser {
         fn id(&self) -> String {
             self.id.clone()

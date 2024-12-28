@@ -5,7 +5,7 @@ use leptos::prelude::provide_context;
 use leptos_actix::{extract, redirect};
 use shield::{Session, ShieldDyn, User};
 use shield_actix::{ExtractSession, ExtractShield, ExtractUser};
-use shield_leptos::LeptosIntegration;
+use shield_leptos::integration::{LeptosIntegration, LeptosUser};
 
 pub struct LeptosActixIntegration<U: User>(PhantomData<U>);
 
@@ -29,10 +29,10 @@ impl<U: User + Clone + 'static> LeptosIntegration for LeptosActixIntegration<U> 
         session
     }
 
-    async fn extract_user(&self) -> Option<Arc<dyn User>> {
+    async fn extract_user(&self) -> Option<LeptosUser> {
         let ExtractUser(user) = extract::<ExtractUser<U>>().await.expect("TODO");
 
-        user.map(|user| Arc::new(user) as Arc<dyn User>)
+        user.map(|user| user.into())
     }
 
     fn redirect(&self, path: &str) {
