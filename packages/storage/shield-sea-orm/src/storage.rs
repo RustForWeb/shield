@@ -1,10 +1,12 @@
 use async_trait::async_trait;
 use sea_orm::{
     prelude::Uuid, ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait,
-    QueryFilter,
+    QueryFilter, TransactionError, TransactionTrait,
 };
 use shield::{CreateEmailAddress, CreateUser, Storage, StorageError, UpdateUser};
 
+#[cfg(feature = "entity")]
+use crate::entities::entity;
 use crate::entities::{email_address, prelude::User, user};
 
 pub const SEA_ORM_STORAGE_ID: &str = "sea-orm";
@@ -57,56 +59,132 @@ impl Storage<user::Model> for SeaOrmStorage {
         user: CreateUser,
         email_address: CreateEmailAddress,
     ) -> Result<user::Model, StorageError> {
-        // TODO: transaction
+        self.database
+            .transaction::<_, user::Model, StorageError>(|database_transaction| {
+                Box::pin(async move {
+                    let user = {
+                        #[cfg(feature = "entity")]
+                        {
+                            let active_model = entity::ActiveModel {
+                                name: ActiveValue::Set(user.name.unwrap_or_default()),
+                                ..Default::default()
+                            };
 
-        let active_model = user::ActiveModel {
-            name: ActiveValue::Set(user.name.unwrap_or_default()),
-            ..Default::default()
-        };
+                            let entity = active_model
+                                .insert(database_transaction)
+                                .await
+                                .map_err(|err| StorageError::Engine(err.to_string()))?;
 
-        let user = active_model
-            .insert(&self.database)
+                            let active_model = user::ActiveModel {
+                                entity_id: ActiveValue::Set(entity.id),
+                                ..Default::default()
+                            };
+
+                            active_model
+                                .insert(database_transaction)
+                                .await
+                                .map_err(|err| StorageError::Engine(err.to_string()))?
+                        }
+
+                        #[cfg(not(feature = "entity"))]
+                        {
+                            let active_model = user::ActiveModel {
+                                name: ActiveValue::Set(user.name.unwrap_or_default()),
+                                ..Default::default()
+                            };
+
+                            active_model
+                                .insert(database_transaction)
+                                .await
+                                .map_err(|err| StorageError::Engine(err.to_string()))?
+                        }
+                    };
+
+                    let active_model = email_address::ActiveModel {
+                        email: ActiveValue::Set(email_address.email),
+                        is_primary: ActiveValue::Set(email_address.is_primary),
+                        is_verified: ActiveValue::Set(email_address.is_verified),
+                        verification_token: ActiveValue::Set(email_address.verification_token),
+                        verification_token_expired_at: ActiveValue::Set(
+                            email_address.verification_token_expired_at,
+                        ),
+                        verified_at: ActiveValue::Set(email_address.verified_at),
+                        user_id: ActiveValue::Set(user.id),
+                        ..Default::default()
+                    };
+
+                    active_model
+                        .insert(database_transaction)
+                        .await
+                        .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+                    Ok(user)
+                })
+            })
             .await
-            .map_err(|err| StorageError::Engine(err.to_string()))?;
-
-        let active_model = email_address::ActiveModel {
-            email: ActiveValue::Set(email_address.email),
-            is_primary: ActiveValue::Set(email_address.is_primary),
-            is_verified: ActiveValue::Set(email_address.is_verified),
-            verification_token: ActiveValue::Set(email_address.verification_token),
-            verification_token_expired_at: ActiveValue::Set(
-                email_address.verification_token_expired_at,
-            ),
-            verified_at: ActiveValue::Set(email_address.verified_at),
-            user_id: ActiveValue::Set(user.id),
-            ..Default::default()
-        };
-
-        active_model
-            .insert(&self.database)
-            .await
-            .map_err(|err| StorageError::Engine(err.to_string()))?;
-
-        Ok(user)
+            .map_err(|err| match err {
+                TransactionError::Connection(err) => StorageError::Engine(err.to_string()),
+                TransactionError::Transaction(err) => err,
+            })
     }
 
     async fn update_user(&self, user: UpdateUser) -> Result<user::Model, StorageError> {
-        let mut active_model: user::ActiveModel = user::Entity::find()
-            .filter(user::Column::Id.eq(Self::parse_uuid(&user.id)?))
-            .one(&self.database)
-            .await
-            .map_err(|err| StorageError::Engine(err.to_string()))?
-            .ok_or_else(|| StorageError::NotFound("User".to_owned(), user.id))?
-            .into();
+        self.database
+            .transaction::<_, user::Model, StorageError>(|database_transaction| {
+                Box::pin(async move {
+                    let user_entity = user::Entity::find()
+                        .filter(user::Column::Id.eq(Self::parse_uuid(&user.id)?))
+                        .one(database_transaction)
+                        .await
+                        .map_err(|err| StorageError::Engine(err.to_string()))?
+                        .ok_or_else(|| {
+                            StorageError::NotFound("User".to_owned(), user.id.clone())
+                        })?;
 
-        if let Some(Some(name)) = user.name {
-            active_model.name = ActiveValue::Set(name);
-        }
+                    #[cfg(feature = "entity")]
+                    {
+                        use sea_orm::ModelTrait;
 
-        active_model
-            .update(&self.database)
+                        let mut entity_active_model = user_entity
+                            .find_related(entity::Entity)
+                            .one(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?
+                            .ok_or_else(|| {
+                                StorageError::NotFound(
+                                    "Entity".to_owned(),
+                                    user_entity.entity_id.clone(),
+                                )
+                            })?;
+
+                        if let Some(Some(name)) = user.name {
+                            entity_active_model.name = ActiveValue::Set(name);
+                        }
+
+                        entity_active_model
+                            .update(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
+                    }
+
+                    let mut user_active_model: user::ActiveModel = user_entity.into();
+
+                    #[cfg(not(feature = "entity"))]
+                    if let Some(Some(name)) = user.name {
+                        user_active_model.name = ActiveValue::Set(name);
+                    }
+
+                    user_active_model
+                        .update(database_transaction)
+                        .await
+                        .map_err(|err| StorageError::Engine(err.to_string()))
+                })
+            })
             .await
-            .map_err(|err| StorageError::Engine(err.to_string()))
+            .map_err(|err| match err {
+                TransactionError::Connection(err) => StorageError::Engine(err.to_string()),
+                TransactionError::Transaction(err) => err,
+            })
     }
 
     async fn delete_user(&self, user_id: &str) -> Result<(), StorageError> {
