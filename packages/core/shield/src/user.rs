@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
+#[typetag::serde(tag = "type")]
 pub trait User: Send + Sync {
     fn id(&self) -> String;
 }
@@ -15,7 +17,7 @@ pub struct UpdateUser {
     pub name: Option<Option<String>>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmailAddress {
     pub id: String,
     pub email: String,
@@ -49,13 +51,16 @@ pub struct UpdateEmailAddress {
 
 #[cfg(test)]
 pub(crate) mod tests {
+    use serde::{Deserialize, Serialize};
+
     use super::User;
 
-    #[derive(Clone, Debug)]
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct TestUser {
         id: String,
     }
 
+    #[typetag::serde]
     impl User for TestUser {
         fn id(&self) -> String {
             self.id.clone()

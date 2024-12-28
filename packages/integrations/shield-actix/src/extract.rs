@@ -41,3 +41,22 @@ impl FromRequest for ExtractSession {
         )
     }
 }
+
+pub struct ExtractUser<U: User>(pub Option<U>);
+
+impl<U: User + Clone + 'static> FromRequest for ExtractUser<U> {
+    type Error = Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        ready(
+            req.extensions()
+                .get::<Option<U>>()
+                .cloned()
+                .map(ExtractUser)
+                .ok_or(ErrorInternalServerError(
+                    "Can't extract Shield user. Is `ShieldTransform` enabled?",
+                )),
+        )
+    }
+}

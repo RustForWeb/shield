@@ -42,3 +42,22 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
             ))
     }
 }
+
+pub struct ExtractUser<U: User>(pub Option<U>);
+
+#[async_trait]
+impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractUser<U> {
+    type Rejection = (StatusCode, &'static str);
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        parts
+            .extensions
+            .get::<Option<U>>()
+            .cloned()
+            .map(ExtractUser)
+            .ok_or((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Can't extract Shield user. Is `ShieldLayer` enabled?",
+            ))
+    }
+}

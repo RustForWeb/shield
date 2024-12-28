@@ -1,10 +1,12 @@
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, MetaTags, Title};
 use leptos_router::{
-    components::{Route, Router, Routes, A},
+    components::{Route, Router, Routes},
     path,
 };
-use shield_leptos::routes::SignIn;
+use shield_leptos::routes::{SignIn, SignOut};
+
+use crate::home::HomePage;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -34,21 +36,12 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 <Routes fallback=|| "Not found.".into_view()>
-                    <Route path=path!("") view=HomePage/>
+                    <Route path=path!("") view=HomePage />
 
                     <Route path=path!("/auth/sign-in") view=SignIn />
+                    <Route path=path!("/auth/sign-out") view=SignOut />
                 </Routes>
             </main>
         </Router>
-    }
-}
-
-#[component]
-fn HomePage() -> impl IntoView {
-    view! {
-        <h1>"Shield Leptos Axum Example"</h1>
-        <A href="/auth/sign-in">
-            <button>"Sign in"</button>
-        </A>
     }
 }

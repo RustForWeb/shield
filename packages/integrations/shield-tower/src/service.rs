@@ -74,8 +74,31 @@ where
                 };
             let shield_session = Session::new(session_storage);
 
+            let user_id = match shield_session.data().lock() {
+                Ok(session) => session.user_id.clone(),
+                Err(_err) => return Ok(Self::internal_server_error()),
+            };
+
+            let user = if let Some(user_id) = user_id {
+                match shield.storage().user_by_id(&user_id).await {
+                    Ok(user) => {
+                        if user.is_none() {
+                            if let Err(_err) = shield_session.purge().await {
+                                return Ok(Self::internal_server_error());
+                            }
+                        }
+
+                        user
+                    }
+                    Err(_err) => return Ok(Self::internal_server_error()),
+                }
+            } else {
+                None
+            };
+
             req.extensions_mut().insert(shield);
             req.extensions_mut().insert(shield_session);
+            req.extensions_mut().insert(user);
 
             inner.call(req).await
         })

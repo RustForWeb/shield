@@ -20,6 +20,7 @@ shield-email = { path = "../../providers/shield-email", optional = true }
 shield-oauth = { path = "../../providers/shield-oauth", optional = true }
 shield-oidc = { path = "../../providers/shield-oidc", optional = true }
 shield-webauthn = { path = "../../providers/shield-webauthn", optional = true }
+typetag.workspace = true
 
 [features]
 default = []
