@@ -22,7 +22,7 @@ leptos_router.workspace = true
 shield = { path = "../../packages/core/shield" }
 shield-leptos = { path = "../../packages/integrations/shield-leptos" }
 shield-leptos-axum = { path = "../../packages/integrations/shield-leptos-axum", optional = true }
-shield-memory = { path = "../../packages/storage/shield-memory" }
+shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
 shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
 time = "0.3.37"
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
@@ -35,8 +35,9 @@ hydrate = ["leptos/hydrate"]
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
-    "dep:shield-oidc",
     "dep:shield-leptos-axum",
+    "dep:shield-memory",
+    "dep:shield-oidc",
     "dep:tokio",
     "dep:tower-sessions",
     "leptos/ssr",

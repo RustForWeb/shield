@@ -26,7 +26,7 @@ leptos_router.workspace = true
 shield = { path = "../../packages/core/shield" }
 shield-leptos = { path = "../../packages/integrations/shield-leptos" }
 shield-leptos-actix = { path = "../../packages/integrations/shield-leptos-actix", optional = true }
-shield-memory = { path = "../../packages/storage/shield-memory" }
+shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
 shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
 wasm-bindgen.workspace = true
 
@@ -39,6 +39,7 @@ ssr = [
     "dep:actix-web",
     "dep:leptos_actix",
     "dep:shield-leptos-actix",
+    "dep:shield-memory",
     "dep:shield-oidc",
     "leptos/ssr",
     "leptos_meta/ssr",

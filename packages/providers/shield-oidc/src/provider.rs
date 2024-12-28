@@ -321,7 +321,7 @@ impl<U: User> Provider for OidcProvider<U> {
 
         println!("{:?}\n{:?}", claims.subject(), claims);
 
-        let (_connection, _user) = match self
+        let (connection, user) = match self
             .storage
             .oidc_connection_by_identifier(&subprovider.id, claims.subject())
             .await?
@@ -351,14 +351,29 @@ impl<U: User> Provider for OidcProvider<U> {
             }
         };
 
-        // TODO
+        session.renew().await?;
+
+        {
+            let session_data = session.data();
+            let mut session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.user_id = Some(user.id());
+        }
+
+        session.update().await?;
+
+        println!("signed in {:?} {:?}", user.id(), connection);
+
+        // TODO: Should be configurable.
         Ok(Response::Redirect("/".to_owned()))
     }
 
     async fn sign_out(
         &self,
         request: SignOutRequest,
-        _session: Session,
+        session: Session,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
@@ -383,7 +398,9 @@ impl<U: User> Provider for OidcProvider<U> {
                 .expect("TODO: revocation request error");
         }
 
-        // TODO: This doesn't make sense and/or should be configurable.
+        session.purge().await?;
+
+        // TODO: Should be configurable.
         Ok(Response::Redirect("/".to_owned()))
     }
 }
