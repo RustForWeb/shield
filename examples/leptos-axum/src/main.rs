@@ -15,6 +15,12 @@ async fn main() {
     use time::Duration;
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
+    use tracing::level_filters::LevelFilter;
+
+    // Initialize tracing
+    tracing_subscriber::fmt()
+        .with_max_level(LevelFilter::DEBUG)
+        .init();
 
     // Initialize Leptos
     let conf = get_configuration(None).unwrap();

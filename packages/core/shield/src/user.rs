@@ -1,8 +1,10 @@
+use std::fmt::Debug;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[typetag::serde(tag = "type")]
-pub trait User: Send + Sync {
+pub trait User: Debug + Send + Sync {
     fn id(&self) -> String;
 }
 

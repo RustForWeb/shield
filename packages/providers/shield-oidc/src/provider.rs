@@ -11,6 +11,7 @@ use shield::{
     SessionError, ShieldError, SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
     UpdateUser, User,
 };
+use tracing::debug;
 
 use crate::{
     claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider, CreateOidcConnection,
@@ -319,7 +320,7 @@ impl<U: User> Provider for OidcProvider<U> {
             Claims::from(claims)
         };
 
-        println!("{:?}\n{:?}", claims.subject(), claims);
+        debug!("{:?}\n{:?}", claims.subject(), claims);
 
         let (connection, user) = match self
             .storage
@@ -364,7 +365,7 @@ impl<U: User> Provider for OidcProvider<U> {
 
         session.update().await?;
 
-        println!("signed in {:?} {:?}", user.id(), connection);
+        debug!("signed in {:?} {:?}", user.id(), connection);
 
         // TODO: Should be configurable.
         Ok(Response::Redirect("/".to_owned()))

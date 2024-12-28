@@ -28,7 +28,10 @@ shield-leptos = { path = "../../packages/integrations/shield-leptos" }
 shield-leptos-actix = { path = "../../packages/integrations/shield-leptos-actix", optional = true }
 shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
 shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
+tracing.workspace = true
+tracing-subscriber.workspace = true
 wasm-bindgen.workspace = true
+wasm-tracing.workspace = true
 
 [features]
 default = ["ssr"]

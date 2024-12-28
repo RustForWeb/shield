@@ -1,6 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use futures::future::try_join_all;
+use tracing::debug;
 
 use crate::{
     error::{ProviderError, ShieldError},
@@ -81,7 +82,7 @@ impl<U: User> Shield<U> {
         request: SignInRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        println!("sign in {:?}", request);
+        debug!("sign in {:?}", request);
 
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
@@ -96,7 +97,7 @@ impl<U: User> Shield<U> {
         request: SignInCallbackRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        println!("sign in callback {:?}", request);
+        debug!("sign in callback {:?}", request);
 
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
@@ -111,7 +112,7 @@ impl<U: User> Shield<U> {
         request: SignOutRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        println!("sign out {:?}", request);
+        debug!("sign out {:?}", request);
 
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,

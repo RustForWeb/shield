@@ -13,6 +13,12 @@ async fn main() -> std::io::Result<()> {
     use shield_leptos_actix::{provide_actix_integration, ShieldMiddleware};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{KeycloakBuilder, OidcProvider};
+    use tracing::{info, level_filters::LevelFilter};
+
+    // Initialize tracing
+    tracing_subscriber::fmt()
+        .with_max_level(LevelFilter::DEBUG)
+        .init();
 
     // Initialize Leptos
     let conf = get_configuration(None).unwrap();
@@ -27,7 +33,7 @@ async fn main() -> std::io::Result<()> {
         let leptos_options = &conf.leptos_options;
         let site_root = leptos_options.site_root.clone().to_string();
 
-        println!("listening on http://{}", &addr);
+        info!("listening on http://{}", &addr);
 
         // Initialize sessions
         let session_middleware =
