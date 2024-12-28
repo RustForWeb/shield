@@ -43,10 +43,18 @@ impl Session {
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct SessionData {
-    pub user_id: Option<String>,
+    pub authentication: Option<Authentication>,
 
-    // TODO: allow arbitrary data to be stored by providers?
+    // TODO: Allow arbitrary data to be stored by providers?
     pub csrf: Option<String>,
     pub nonce: Option<String>,
     pub verifier: Option<String>,
+    pub oidc_connection_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct Authentication {
+    pub provider_id: String,
+    pub subprovider_id: Option<String>,
+    pub user_id: String,
 }

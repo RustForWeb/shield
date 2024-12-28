@@ -40,6 +40,17 @@ impl OidcStorage<user::Model> for SeaOrmStorage {
             })
     }
 
+    async fn oidc_connection_by_id(
+        &self,
+        connection_id: &str,
+    ) -> Result<Option<OidcConnection>, StorageError> {
+        oidc_provider_connection::Entity::find_by_id(Self::parse_uuid(connection_id)?)
+            .one(&self.database)
+            .await
+            .map_err(|err| StorageError::Engine(err.to_string()))
+            .map(|connection| connection.map(OidcConnection::from))
+    }
+
     async fn oidc_connection_by_identifier(
         &self,
         subprovider_id: &str,

@@ -20,7 +20,7 @@ pub fn HomePage() -> impl IntoView {
             {move || Suspend::new(async move { match user.await {
                 Ok(user) => Either::Left(match user {
                     Some(user) => Either::Left(view! {
-                        {user.id}
+                        <p><b>User ID:</b> {user.id}</p>
 
                         <A href="/auth/sign-out">
                             <button>"Sign out"</button>

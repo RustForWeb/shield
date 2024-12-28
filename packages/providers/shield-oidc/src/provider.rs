@@ -7,9 +7,9 @@ use openidconnect::{
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
 };
 use shield::{
-    ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError, Response, Session,
-    SessionError, ShieldError, SignInCallbackRequest, SignInRequest, SignOutRequest, Subprovider,
-    UpdateUser, User,
+    Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError,
+    Response, Session, SessionError, ShieldError, SignInCallbackRequest, SignInRequest,
+    SignOutRequest, Subprovider, UpdateUser, User,
 };
 use tracing::debug;
 
@@ -341,7 +341,7 @@ impl<U: User> Provider for OidcProvider<U> {
 
                 let connection = self
                     .create_oidc_connection(
-                        subprovider.id,
+                        subprovider.id.clone(),
                         user.id(),
                         claims.subject().to_string(),
                         token_response,
@@ -352,6 +352,8 @@ impl<U: User> Provider for OidcProvider<U> {
             }
         };
 
+        debug!("signed in {:?} {:?}", user.id(), connection);
+
         session.renew().await?;
 
         {
@@ -360,12 +362,19 @@ impl<U: User> Provider for OidcProvider<U> {
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-            session_data.user_id = Some(user.id());
+            session_data.csrf = None;
+            session_data.nonce = None;
+            session_data.verifier = None;
+
+            session_data.authentication = Some(Authentication {
+                provider_id: self.id(),
+                subprovider_id: Some(subprovider.id),
+                user_id: user.id(),
+            });
+            session_data.oidc_connection_id = Some(connection.id);
         }
 
         session.update().await?;
-
-        debug!("signed in {:?} {:?}", user.id(), connection);
 
         // TODO: Should be configurable.
         Ok(Response::Redirect("/".to_owned()))
@@ -381,25 +390,37 @@ impl<U: User> Provider for OidcProvider<U> {
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
-        // TODO: find access token
-        let token = AccessToken::new("".to_owned());
+        let connection_id = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-        let client = subprovider.oidc_client().await?;
-
-        let revocation_request = match client.revoke_token(token.into()) {
-            Ok(revocation_request) => Some(revocation_request),
-            Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
-            Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
+            session_data.oidc_connection_id.clone()
         };
 
-        if let Some(revocation_request) = revocation_request {
-            revocation_request
-                .request_async(async_http_client)
-                .await
-                .expect("TODO: revocation request error");
-        }
+        if let Some(connection_id) = connection_id {
+            if let Some(connection) = self.storage.oidc_connection_by_id(&connection_id).await? {
+                debug!("revoking access token {:?}", connection.access_token);
 
-        session.purge().await?;
+                let token = AccessToken::new(connection.access_token);
+
+                let client = subprovider.oidc_client().await?;
+
+                let revocation_request = match client.revoke_token(token.into()) {
+                    Ok(revocation_request) => Some(revocation_request),
+                    Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
+                    Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
+                };
+
+                if let Some(revocation_request) = revocation_request {
+                    revocation_request
+                        .request_async(async_http_client)
+                        .await
+                        .map_err(|err| ShieldError::Request(err.to_string()))?;
+                }
+            }
+        }
 
         // TODO: Should be configurable.
         Ok(Response::Redirect("/".to_owned()))

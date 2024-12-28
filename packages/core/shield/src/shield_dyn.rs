@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use crate::{
     error::ShieldError,
     provider::{Subprovider, SubproviderVisualisation},
-    request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
+    request::{SignInCallbackRequest, SignInRequest},
     response::Response,
     session::Session,
     shield::Shield,
@@ -32,11 +32,7 @@ pub trait DynShield: Send + Sync {
         session: Session,
     ) -> Result<Response, ShieldError>;
 
-    async fn sign_out(
-        &self,
-        request: SignOutRequest,
-        session: Session,
-    ) -> Result<Response, ShieldError>;
+    async fn sign_out(&self, session: Session) -> Result<Response, ShieldError>;
 }
 
 #[async_trait]
@@ -67,12 +63,8 @@ impl<U: User> DynShield for Shield<U> {
         self.sign_in_callback(request, session).await
     }
 
-    async fn sign_out(
-        &self,
-        request: SignOutRequest,
-        session: Session,
-    ) -> Result<Response, ShieldError> {
-        self.sign_out(request, session).await
+    async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
+        self.sign_out(session).await
     }
 }
 
@@ -109,11 +101,7 @@ impl ShieldDyn {
         self.0.sign_in_callback(request, session).await
     }
 
-    pub async fn sign_out(
-        &self,
-        request: SignOutRequest,
-        session: Session,
-    ) -> Result<Response, ShieldError> {
-        self.0.sign_out(request, session).await
+    pub async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
+        self.0.sign_out(session).await
     }
 }

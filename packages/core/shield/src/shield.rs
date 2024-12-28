@@ -4,7 +4,7 @@ use futures::future::try_join_all;
 use tracing::debug;
 
 use crate::{
-    error::{ProviderError, ShieldError},
+    error::{ProviderError, SessionError, ShieldError},
     provider::{Provider, Subprovider, SubproviderVisualisation},
     request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
@@ -107,19 +107,39 @@ impl<U: User> Shield<U> {
         provider.sign_in_callback(request, session).await
     }
 
-    pub async fn sign_out(
-        &self,
-        request: SignOutRequest,
-        session: Session,
-    ) -> Result<Response, ShieldError> {
-        debug!("sign out {:?}", request);
+    pub async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
+        debug!("sign out");
 
-        let provider = match self.providers.get(&request.provider_id) {
-            Some(provider) => provider,
-            None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
+        let authenticated = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.authentication.clone()
         };
 
-        let response = provider.sign_out(request, session.clone()).await?;
+        let response = if let Some(authenticated) = authenticated {
+            let provider = match self.providers.get(&authenticated.provider_id) {
+                Some(provider) => provider,
+                None => {
+                    return Err(ProviderError::ProviderNotFound(authenticated.provider_id).into())
+                }
+            };
+
+            provider
+                .sign_out(
+                    SignOutRequest {
+                        provider_id: authenticated.provider_id,
+                        subprovider_id: authenticated.subprovider_id,
+                    },
+                    session.clone(),
+                )
+                .await?
+        } else {
+            // TODO: Should be configurable.
+            Response::Redirect("/".to_owned())
+        };
 
         session.purge().await?;
 

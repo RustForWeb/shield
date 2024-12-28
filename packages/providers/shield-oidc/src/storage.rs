@@ -16,6 +16,11 @@ pub trait OidcStorage<U: User>: Storage<U> + Sync {
         subprovider_id: &str,
     ) -> Result<Option<OidcSubprovider>, StorageError>;
 
+    async fn oidc_connection_by_id(
+        &self,
+        connection_id: &str,
+    ) -> Result<Option<OidcConnection>, StorageError>;
+
     async fn oidc_connection_by_identifier(
         &self,
         subprovider_id: &str,

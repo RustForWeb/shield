@@ -27,6 +27,20 @@ impl OidcStorage<User> for MemoryStorage {
         Ok(None)
     }
 
+    async fn oidc_connection_by_id(
+        &self,
+        connection_id: &str,
+    ) -> Result<Option<OidcConnection>, StorageError> {
+        Ok(self
+            .oidc
+            .connections
+            .lock()
+            .map_err(|err| StorageError::Engine(err.to_string()))?
+            .iter()
+            .find(|connection| connection.id == connection_id)
+            .cloned())
+    }
+
     async fn oidc_connection_by_identifier(
         &self,
         subprovider_id: &str,

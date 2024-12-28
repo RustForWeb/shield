@@ -1,11 +1,8 @@
 use leptos::prelude::*;
 
 #[server]
-pub async fn sign_out(
-    provider_id: String,
-    subprovider_id: Option<String>,
-) -> Result<(), ServerFnError> {
-    use shield::{Response, ShieldError, SignOutRequest};
+pub async fn sign_out() -> Result<(), ServerFnError> {
+    use shield::{Response, ShieldError};
 
     use crate::context::expect_server_integration;
 
@@ -14,13 +11,7 @@ pub async fn sign_out(
     let session = server_integration.extract_session().await;
 
     let response = shield
-        .sign_out(
-            SignOutRequest {
-                provider_id,
-                subprovider_id,
-            },
-            session,
-        )
+        .sign_out(session)
         .await
         .map_err(ServerFnError::<ShieldError>::from)?;
 
@@ -41,9 +32,6 @@ pub fn SignOut() -> impl IntoView {
         <h1>"Sign out"</h1>
 
         <ActionForm action=sign_out>
-            // <input name="provider_id" type="hidden" value=subprovider.provider_id />
-            // <input name="subprovider_id" type="hidden" value=subprovider.subprovider_id />
-
             <button type="submit">"Sign out"</button>
         </ActionForm>
     }
