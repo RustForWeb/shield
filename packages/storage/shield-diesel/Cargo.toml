@@ -9,4 +9,4 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-shield = { path = "../../core/shield"}
+shield = { path = "../../core/shield", version = "0.0.2" }

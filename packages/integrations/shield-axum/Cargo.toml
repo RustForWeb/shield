@@ -13,5 +13,5 @@ async-trait.workspace = true
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-shield = { path = "../../core/shield" }
-shield-tower = { path = "../shield-tower" }
+shield = { path = "../../core/shield", version = "0.0.2" }
+shield-tower = { path = "../shield-tower", version = "0.0.2" }
