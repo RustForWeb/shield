@@ -46,12 +46,27 @@ impl Storage<user::Model> for SeaOrmStorage {
     }
 
     async fn user_by_email(&self, email: &str) -> Result<Option<user::Model>, StorageError> {
-        User::find()
-            .left_join(email_address::Entity)
-            .filter(email_address::Column::Email.eq(email))
-            .one(&self.database)
-            .await
-            .map_err(|err| StorageError::Engine(err.to_string()))
+        #[cfg(feature = "entity")]
+        {
+            use sea_orm::{JoinType, QuerySelect, RelationTrait};
+
+            User::find()
+                .join(JoinType::LeftJoin, user::Relation::Entity.def())
+                .join(JoinType::LeftJoin, entity::Relation::EmailAddress.def())
+                .filter(email_address::Column::Email.eq(email))
+                .one(&self.database)
+                .await
+                .map_err(|err| StorageError::Engine(err.to_string()))
+        }
+        #[cfg(not(feature = "entity"))]
+        {
+            User::find()
+                .left_join(email_address::Entity)
+                .filter(email_address::Column::Email.eq(email))
+                .one(&self.database)
+                .await
+                .map_err(|err| StorageError::Engine(err.to_string()))
+        }
     }
 
     async fn create_user(
@@ -62,63 +77,81 @@ impl Storage<user::Model> for SeaOrmStorage {
         self.database
             .transaction::<_, user::Model, StorageError>(|database_transaction| {
                 Box::pin(async move {
-                    let user = {
-                        #[cfg(feature = "entity")]
-                        {
-                            let active_model = entity::ActiveModel {
-                                name: ActiveValue::Set(user.name.unwrap_or_default()),
-                                ..Default::default()
-                            };
+                    #[cfg(feature = "entity")]
+                    {
+                        let active_model = entity::ActiveModel {
+                            name: ActiveValue::Set(user.name.unwrap_or_default()),
+                            ..Default::default()
+                        };
 
-                            let entity = active_model
-                                .insert(database_transaction)
-                                .await
-                                .map_err(|err| StorageError::Engine(err.to_string()))?;
+                        let entity = active_model
+                            .insert(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
 
-                            let active_model = user::ActiveModel {
-                                entity_id: ActiveValue::Set(entity.id),
-                                ..Default::default()
-                            };
+                        let active_model = user::ActiveModel {
+                            entity_id: ActiveValue::Set(entity.id),
+                            ..Default::default()
+                        };
 
-                            active_model
-                                .insert(database_transaction)
-                                .await
-                                .map_err(|err| StorageError::Engine(err.to_string()))?
-                        }
+                        let user = active_model
+                            .insert(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
 
-                        #[cfg(not(feature = "entity"))]
-                        {
-                            let active_model = user::ActiveModel {
-                                name: ActiveValue::Set(user.name.unwrap_or_default()),
-                                ..Default::default()
-                            };
+                        let active_model = email_address::ActiveModel {
+                            email: ActiveValue::Set(email_address.email),
+                            is_primary: ActiveValue::Set(email_address.is_primary),
+                            is_verified: ActiveValue::Set(email_address.is_verified),
+                            verification_token: ActiveValue::Set(email_address.verification_token),
+                            verification_token_expired_at: ActiveValue::Set(
+                                email_address.verification_token_expired_at,
+                            ),
+                            verified_at: ActiveValue::Set(email_address.verified_at),
+                            entity_id: ActiveValue::Set(entity.id),
+                            ..Default::default()
+                        };
 
-                            active_model
-                                .insert(database_transaction)
-                                .await
-                                .map_err(|err| StorageError::Engine(err.to_string()))?
-                        }
-                    };
+                        active_model
+                            .insert(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
 
-                    let active_model = email_address::ActiveModel {
-                        email: ActiveValue::Set(email_address.email),
-                        is_primary: ActiveValue::Set(email_address.is_primary),
-                        is_verified: ActiveValue::Set(email_address.is_verified),
-                        verification_token: ActiveValue::Set(email_address.verification_token),
-                        verification_token_expired_at: ActiveValue::Set(
-                            email_address.verification_token_expired_at,
-                        ),
-                        verified_at: ActiveValue::Set(email_address.verified_at),
-                        user_id: ActiveValue::Set(user.id),
-                        ..Default::default()
-                    };
+                        Ok(user)
+                    }
 
-                    active_model
-                        .insert(database_transaction)
-                        .await
-                        .map_err(|err| StorageError::Engine(err.to_string()))?;
+                    #[cfg(not(feature = "entity"))]
+                    {
+                        let active_model = user::ActiveModel {
+                            name: ActiveValue::Set(user.name.unwrap_or_default()),
+                            ..Default::default()
+                        };
 
-                    Ok(user)
+                        let user = active_model
+                            .insert(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+                        let active_model = email_address::ActiveModel {
+                            email: ActiveValue::Set(email_address.email),
+                            is_primary: ActiveValue::Set(email_address.is_primary),
+                            is_verified: ActiveValue::Set(email_address.is_verified),
+                            verification_token: ActiveValue::Set(email_address.verification_token),
+                            verification_token_expired_at: ActiveValue::Set(
+                                email_address.verification_token_expired_at,
+                            ),
+                            verified_at: ActiveValue::Set(email_address.verified_at),
+                            user_id: ActiveValue::Set(user.id),
+                            ..Default::default()
+                        };
+
+                        active_model
+                            .insert(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+                        Ok(user)
+                    }
                 })
             })
             .await
@@ -145,7 +178,7 @@ impl Storage<user::Model> for SeaOrmStorage {
                     {
                         use sea_orm::ModelTrait;
 
-                        let mut entity_active_model = user_entity
+                        let mut entity_active_model: entity::ActiveModel = user_entity
                             .find_related(entity::Entity)
                             .one(database_transaction)
                             .await
@@ -153,9 +186,10 @@ impl Storage<user::Model> for SeaOrmStorage {
                             .ok_or_else(|| {
                                 StorageError::NotFound(
                                     "Entity".to_owned(),
-                                    user_entity.entity_id.clone(),
+                                    user_entity.entity_id.to_string(),
                                 )
-                            })?;
+                            })?
+                            .into();
 
                         if let Some(Some(name)) = user.name {
                             entity_active_model.name = ActiveValue::Set(name);
@@ -167,6 +201,7 @@ impl Storage<user::Model> for SeaOrmStorage {
                             .map_err(|err| StorageError::Engine(err.to_string()))?;
                     }
 
+                    #[allow(unused_mut)]
                     let mut user_active_model: user::ActiveModel = user_entity.into();
 
                     #[cfg(not(feature = "entity"))]
