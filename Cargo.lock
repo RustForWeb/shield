@@ -4502,6 +4502,7 @@ dependencies = [
  "shield-oauth",
  "shield-oidc",
  "shield-webauthn",
+ "uuid",
 ]
 
 [[package]]

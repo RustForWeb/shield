@@ -2,7 +2,8 @@ use shield::EmailAddress;
 
 #[derive(Clone, Debug)]
 pub struct User {
-    id: String,
+    pub(crate) id: String,
+    pub(crate) name: Option<String>,
     pub(crate) email_addresses: Vec<EmailAddress>,
 }
 
