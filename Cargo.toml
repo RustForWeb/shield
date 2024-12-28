@@ -7,7 +7,7 @@ authors = ["Rust For Web <info@rustforweb.org>"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/RustForWeb/shield"
-version = "0.0.1"
+version = "0.0.2"
 
 [workspace.dependencies]
 actix-files = "0.6.6"

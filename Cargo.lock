@@ -4370,7 +4370,7 @@ dependencies = [
 
 [[package]]
 name = "shield"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4383,7 +4383,7 @@ dependencies = [
 
 [[package]]
 name = "shield-actix"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "actix-session",
  "actix-utils",
@@ -4393,7 +4393,7 @@ dependencies = [
 
 [[package]]
 name = "shield-axum"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "axum",
@@ -4405,28 +4405,28 @@ dependencies = [
 
 [[package]]
 name = "shield-credentials"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "shield",
 ]
 
 [[package]]
 name = "shield-disel"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "shield",
 ]
 
 [[package]]
 name = "shield-email"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "shield",
 ]
 
 [[package]]
 name = "shield-examples-leptos-actix"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "actix-files",
  "actix-session",
@@ -4449,7 +4449,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-leptos-axum"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "axum",
  "console_error_panic_hook",
@@ -4473,7 +4473,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-seaorm"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-std",
  "sea-orm",
@@ -4483,7 +4483,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "leptos",
@@ -4493,7 +4493,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos-actix"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "leptos",
@@ -4505,7 +4505,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos-axum"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "leptos",
@@ -4517,7 +4517,7 @@ dependencies = [
 
 [[package]]
 name = "shield-memory"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "serde",
@@ -4532,7 +4532,7 @@ dependencies = [
 
 [[package]]
 name = "shield-oauth"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "oauth2",
@@ -4541,7 +4541,7 @@ dependencies = [
 
 [[package]]
 name = "shield-oidc"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4553,7 +4553,7 @@ dependencies = [
 
 [[package]]
 name = "shield-sea-orm"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "sea-orm",
@@ -4570,14 +4570,14 @@ dependencies = [
 
 [[package]]
 name = "shield-sqlx"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "shield",
 ]
 
 [[package]]
 name = "shield-tower"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "async-trait",
  "http 1.2.0",
@@ -4590,7 +4590,7 @@ dependencies = [
 
 [[package]]
 name = "shield-webauthn"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "shield",
 ]
