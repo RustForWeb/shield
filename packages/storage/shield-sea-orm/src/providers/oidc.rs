@@ -7,12 +7,13 @@ use shield_oidc::{
 };
 
 use crate::{
-    entities::{oidc_provider, oidc_provider_connection, user},
+    entities::{oidc_provider, oidc_provider_connection},
     storage::SeaOrmStorage,
+    user::User,
 };
 
 #[async_trait]
-impl OidcStorage<user::Model> for SeaOrmStorage {
+impl OidcStorage<User> for SeaOrmStorage {
     async fn oidc_subproviders(&self) -> Result<Vec<OidcSubprovider>, StorageError> {
         oidc_provider::Entity::find()
             .all(&self.database)

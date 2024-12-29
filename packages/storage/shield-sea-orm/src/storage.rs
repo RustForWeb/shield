@@ -7,15 +7,12 @@ use shield::{CreateEmailAddress, CreateUser, Storage, StorageError, UpdateUser};
 
 #[cfg(feature = "entity")]
 use crate::entities::entity;
-use crate::entities::{email_address, prelude::User, user};
+use crate::{
+    entities::{email_address, user},
+    user::User,
+};
 
 pub const SEA_ORM_STORAGE_ID: &str = "sea-orm";
-
-impl shield::User for user::Model {
-    fn id(&self) -> String {
-        self.id.to_string()
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct SeaOrmStorage {
@@ -33,39 +30,77 @@ impl SeaOrmStorage {
 }
 
 #[async_trait]
-impl Storage<user::Model> for SeaOrmStorage {
+impl Storage<User> for SeaOrmStorage {
     fn id(&self) -> String {
         SEA_ORM_STORAGE_ID.to_owned()
     }
 
-    async fn user_by_id(&self, user_id: &str) -> Result<Option<user::Model>, StorageError> {
-        User::find_by_id(Self::parse_uuid(user_id)?)
-            .one(&self.database)
-            .await
-            .map_err(|err| StorageError::Engine(err.to_string()))
+    async fn user_by_id(&self, user_id: &str) -> Result<Option<User>, StorageError> {
+        #[cfg(feature = "entity")]
+        {
+            let user_and_entity = user::Entity::find_by_id(Self::parse_uuid(user_id)?)
+                .find_also_related(entity::Entity)
+                .one(&self.database)
+                .await
+                .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+            match user_and_entity {
+                Some((user, Some(entity))) => {
+                    Ok(Some(User::new(self.database.clone(), user, entity)))
+                }
+                Some((user, None)) => Err(StorageError::NotFound(
+                    "Entity".to_owned(),
+                    user.entity_id.to_string(),
+                )),
+                None => Ok(None),
+            }
+        }
+
+        #[cfg(not(feature = "entity"))]
+        {
+            user::Entity::find_by_id(Self::parse_uuid(user_id)?)
+                .one(&self.database)
+                .await
+                .map_err(|err| StorageError::Engine(err.to_string()))
+                .map(|user| user.map(|user| User::new(self.database.clone(), user)))
+        }
     }
 
-    async fn user_by_email(&self, email: &str) -> Result<Option<user::Model>, StorageError> {
+    async fn user_by_email(&self, email: &str) -> Result<Option<User>, StorageError> {
         #[cfg(feature = "entity")]
         {
             use sea_orm::{JoinType, QuerySelect, RelationTrait};
 
-            User::find()
+            let user_and_entity = user::Entity::find()
+                .find_also_related(entity::Entity)
                 .join(JoinType::LeftJoin, user::Relation::Entity.def())
                 .join(JoinType::LeftJoin, entity::Relation::EmailAddress.def())
                 .filter(email_address::Column::Email.eq(email))
                 .one(&self.database)
                 .await
-                .map_err(|err| StorageError::Engine(err.to_string()))
+                .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+            match user_and_entity {
+                Some((user, Some(entity))) => {
+                    Ok(Some(User::new(self.database.clone(), user, entity)))
+                }
+                Some((user, None)) => Err(StorageError::NotFound(
+                    "Entity".to_owned(),
+                    user.entity_id.to_string(),
+                )),
+                None => Ok(None),
+            }
         }
+
         #[cfg(not(feature = "entity"))]
         {
-            User::find()
+            user::Entity::find()
                 .left_join(email_address::Entity)
                 .filter(email_address::Column::Email.eq(email))
                 .one(&self.database)
                 .await
                 .map_err(|err| StorageError::Engine(err.to_string()))
+                .map(|user| user.map(|user| User::new(self.database.clone(), user)))
         }
     }
 
@@ -73,9 +108,16 @@ impl Storage<user::Model> for SeaOrmStorage {
         &self,
         user: CreateUser,
         email_address: CreateEmailAddress,
-    ) -> Result<user::Model, StorageError> {
-        self.database
-            .transaction::<_, user::Model, StorageError>(|database_transaction| {
+    ) -> Result<User, StorageError> {
+        #[cfg(feature = "entity")]
+        type UserAndEntity = (user::Model, entity::Model);
+
+        #[cfg(not(feature = "entity"))]
+        type UserAndEntity = user::Model;
+
+        let user_and_entity = self
+            .database
+            .transaction::<_, UserAndEntity, StorageError>(|database_transaction| {
                 Box::pin(async move {
                     #[cfg(feature = "entity")]
                     {
@@ -117,7 +159,7 @@ impl Storage<user::Model> for SeaOrmStorage {
                             .await
                             .map_err(|err| StorageError::Engine(err.to_string()))?;
 
-                        Ok(user)
+                        Ok((user, entity))
                     }
 
                     #[cfg(not(feature = "entity"))]
@@ -158,25 +200,44 @@ impl Storage<user::Model> for SeaOrmStorage {
             .map_err(|err| match err {
                 TransactionError::Connection(err) => StorageError::Engine(err.to_string()),
                 TransactionError::Transaction(err) => err,
-            })
+            })?;
+
+        #[cfg(feature = "entity")]
+        {
+            let (user, entity) = user_and_entity;
+            Ok(User::new(self.database.clone(), user, entity))
+        }
+
+        #[cfg(not(feature = "entity"))]
+        {
+            let user = user_and_entity;
+            Ok(User::new(self.database.clone(), user))
+        }
     }
 
-    async fn update_user(&self, user: UpdateUser) -> Result<user::Model, StorageError> {
-        self.database
-            .transaction::<_, user::Model, StorageError>(|database_transaction| {
-                Box::pin(async move {
-                    let user_entity = user::Entity::find()
-                        .filter(user::Column::Id.eq(Self::parse_uuid(&user.id)?))
-                        .one(database_transaction)
-                        .await
-                        .map_err(|err| StorageError::Engine(err.to_string()))?
-                        .ok_or_else(|| {
-                            StorageError::NotFound("User".to_owned(), user.id.clone())
-                        })?;
+    async fn update_user(&self, user: UpdateUser) -> Result<User, StorageError> {
+        #[cfg(feature = "entity")]
+        type UserAndEntity = (user::Model, entity::Model);
 
+        #[cfg(not(feature = "entity"))]
+        type UserAndEntity = user::Model;
+
+        let user_and_entity = self
+            .database
+            .transaction::<_, UserAndEntity, StorageError>(|database_transaction| {
+                Box::pin(async move {
                     #[cfg(feature = "entity")]
                     {
                         use sea_orm::ModelTrait;
+
+                        let user_entity = user::Entity::find()
+                            .filter(user::Column::Id.eq(Self::parse_uuid(&user.id)?))
+                            .one(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?
+                            .ok_or_else(|| {
+                                StorageError::NotFound("User".to_owned(), user.id.clone())
+                            })?;
 
                         let mut entity_active_model: entity::ActiveModel = user_entity
                             .find_related(entity::Entity)
@@ -195,31 +256,58 @@ impl Storage<user::Model> for SeaOrmStorage {
                             entity_active_model.name = ActiveValue::Set(name);
                         }
 
-                        entity_active_model
+                        let entity = entity_active_model
                             .update(database_transaction)
                             .await
                             .map_err(|err| StorageError::Engine(err.to_string()))?;
-                    }
 
-                    #[allow(unused_mut)]
-                    let mut user_active_model: user::ActiveModel = user_entity.into();
+                        Ok((user_entity, entity))
+                    }
 
                     #[cfg(not(feature = "entity"))]
-                    if let Some(Some(name)) = user.name {
-                        user_active_model.name = ActiveValue::Set(name);
-                    }
+                    {
+                        let user_entity = user::Entity::find()
+                            .filter(user::Column::Id.eq(Self::parse_uuid(&user.id)?))
+                            .one(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?
+                            .ok_or_else(|| {
+                                StorageError::NotFound("User".to_owned(), user.id.clone())
+                            })?;
 
-                    user_active_model
-                        .update(database_transaction)
-                        .await
-                        .map_err(|err| StorageError::Engine(err.to_string()))
+                        let mut user_active_model: user::ActiveModel = user_entity.into();
+
+                        #[cfg(not(feature = "entity"))]
+                        if let Some(Some(name)) = user.name {
+                            user_active_model.name = ActiveValue::Set(name);
+                        }
+
+                        let user = user_active_model
+                            .update(database_transaction)
+                            .await
+                            .map_err(|err| StorageError::Engine(err.to_string()))?;
+
+                        Ok(user)
+                    }
                 })
             })
             .await
             .map_err(|err| match err {
                 TransactionError::Connection(err) => StorageError::Engine(err.to_string()),
                 TransactionError::Transaction(err) => err,
-            })
+            })?;
+
+        #[cfg(feature = "entity")]
+        {
+            let (user, entity) = user_and_entity;
+            Ok(User::new(self.database.clone(), user, entity))
+        }
+
+        #[cfg(not(feature = "entity"))]
+        {
+            let user = user_and_entity;
+            Ok(User::new(self.database.clone(), user))
+        }
     }
 
     async fn delete_user(&self, user_id: &str) -> Result<(), StorageError> {
