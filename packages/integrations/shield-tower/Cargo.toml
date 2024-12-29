@@ -11,7 +11,7 @@ version.workspace = true
 [dependencies]
 async-trait.workspace = true
 http.workspace = true
-shield = { path = "../../core/shield", version = "0.0.2" }
+shield = { path = "../../core/shield", version = "0.0.3" }
 tower-layer.workspace = true
 tower-service.workspace = true
 tower-sessions.workspace = true

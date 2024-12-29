@@ -14,11 +14,11 @@ sea-orm.workspace = true
 sea-orm-migration.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
-shield = { path = "../../core/shield", version = "0.0.2" }
+shield = { path = "../../core/shield", version = "0.0.3" }
 # shield-credentials = { path = "../../providers/shield-credentials", version = "0.0.2", optional = true }
 # shield-email = { path = "../../providers/shield-email", version = "0.0.2", optional = true }
 # shield-oauth = { path = "../../providers/shield-oauth", version = "0.0.2", optional = true }
-shield-oidc = { path = "../../providers/shield-oidc", version = "0.0.2", optional = true }
+shield-oidc = { path = "../../providers/shield-oidc", version = "0.0.3", optional = true }
 # shield-webauthn = { path = "../../providers/shield-webauthn", version = "0.0.2", optional = true }
 
 [features]
