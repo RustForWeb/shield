@@ -73,7 +73,7 @@ impl Storage<User> for SeaOrmStorage {
 
             let user_and_entity = user::Entity::find()
                 .find_also_related(entity::Entity)
-                .join(JoinType::LeftJoin, user::Relation::Entity.def())
+                // .join(JoinType::LeftJoin, user::Relation::Entity.def())
                 .join(JoinType::LeftJoin, entity::Relation::EmailAddress.def())
                 .filter(email_address::Column::Email.eq(email))
                 .one(&self.database)
