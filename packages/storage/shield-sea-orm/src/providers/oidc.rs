@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, Condition, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
 use shield::StorageError;
 use shield_oidc::{
     CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, OidcProviderVisibility,
@@ -31,12 +31,13 @@ impl OidcStorage<User> for SeaOrmStorage {
         &self,
         subprovider_id: &str,
     ) -> Result<Option<OidcSubprovider>, StorageError> {
+        let condition = match Self::parse_uuid(subprovider_id) {
+            Ok(subprovider_id) => oidc_provider::Column::Id.eq(subprovider_id),
+            Err(_) => oidc_provider::Column::Slug.eq(subprovider_id.to_lowercase()),
+        };
+
         oidc_provider::Entity::find()
-            .filter(
-                Condition::any()
-                    .add(oidc_provider::Column::Id.eq(Self::parse_uuid(subprovider_id)?))
-                    .add(oidc_provider::Column::Slug.eq(subprovider_id.to_lowercase())),
-            )
+            .filter(condition)
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
