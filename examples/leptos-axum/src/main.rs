@@ -45,7 +45,7 @@ async fn main() {
                 "client1",
             )
             .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(&format!(
+            .redirect_url(format!(
                 "http://localhost:{}/api/auth/sign-in/callback/oidc/keycloak",
                 addr.port()
             ))

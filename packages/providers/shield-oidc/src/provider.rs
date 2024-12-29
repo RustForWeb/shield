@@ -3,6 +3,7 @@ use chrono::{DateTime, Duration, Utc};
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
     reqwest::async_http_client,
+    url::form_urlencoded::parse,
     AccessToken, AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
 };
@@ -221,6 +222,15 @@ impl<U: User> Provider for OidcProvider<U> {
                 authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
         }
 
+        if let Some(authorization_url_params) = subprovider.authorization_url_params {
+            let params = parse(authorization_url_params.trim_start_matches('?').as_bytes());
+
+            for (name, value) in params {
+                authorization_request =
+                    authorization_request.add_extra_param(name.into_owned(), value.into_owned());
+            }
+        }
+
         let (auth_url, csrf_token, nonce) = authorization_request.url();
 
         {
@@ -290,6 +300,15 @@ impl<U: User> Provider for OidcProvider<U> {
             token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
         } else if subprovider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
+        }
+
+        if let Some(token_url_params) = subprovider.token_url_params {
+            let params = parse(token_url_params.trim_start_matches('?').as_bytes());
+
+            for (name, value) in params {
+                token_request =
+                    token_request.add_extra_param(name.into_owned(), value.into_owned());
+            }
         }
 
         let token_response = token_request
@@ -414,6 +433,18 @@ impl<U: User> Provider for OidcProvider<U> {
                 };
 
                 if let Some(revocation_request) = revocation_request {
+                    let mut revocation_request = revocation_request;
+
+                    if let Some(revocation_url_params) = subprovider.revocation_url_params {
+                        let params =
+                            parse(revocation_url_params.trim_start_matches('?').as_bytes());
+
+                        for (name, value) in params {
+                            revocation_request = revocation_request
+                                .add_extra_param(name.into_owned(), value.into_owned());
+                        }
+                    }
+
                     revocation_request
                         .request_async(async_http_client)
                         .await
