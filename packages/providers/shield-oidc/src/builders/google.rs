@@ -3,18 +3,17 @@ use crate::subprovider::{
     OidcSubprovider, OidcSubproviderBuilder,
 };
 
-pub struct Keycloak {}
+pub struct Google {}
 
-impl Keycloak {
+impl Google {
     pub fn builder(
         id: &str,
-        discovery_url: &str,
         client_id: &str,
     ) -> OidcSubproviderBuilder<SetDiscoveryUrl<SetClientId<SetName<SetId>>>> {
         OidcSubprovider::builder()
             .id(id)
-            .name("Keycloak")
+            .name("Google")
             .client_id(client_id)
-            .discovery_url(discovery_url)
+            .discovery_url("https://accounts.google.com")
     }
 }

@@ -11,7 +11,7 @@ async fn main() {
     use shield_examples_leptos_axum::app::*;
     use shield_leptos_axum::{auth_router, provide_axum_integration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
-    use shield_oidc::{KeycloakBuilder, OidcProvider};
+    use shield_oidc::{Keycloak, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
@@ -39,7 +39,7 @@ async fn main() {
     let shield = Shield::new(
         storage.clone(),
         vec![Arc::new(
-            OidcProvider::new(storage).with_subproviders([KeycloakBuilder::new(
+            OidcProvider::new(storage).with_subproviders([Keycloak::builder(
                 "keycloak",
                 "http://localhost:18080/realms/Shield",
                 "client1",

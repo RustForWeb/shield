@@ -1,3 +1,4 @@
+use bon::Builder;
 use openidconnect::{
     core::{
         CoreClient, CoreJsonWebKey, CoreJsonWebKeyType, CoreJsonWebKeyUse, CoreJwsSigningAlgorithm,
@@ -23,11 +24,13 @@ pub enum OidcProviderPkceCodeChallenge {
     S256,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Builder, Clone, Debug)]
+#[builder(on(String, into), state_mod(vis = "pub(crate)"))]
 pub struct OidcSubprovider {
     pub id: String,
     pub name: String,
     pub slug: Option<String>,
+    #[builder(default = OidcProviderVisibility::Public)]
     pub visibility: OidcProviderVisibility,
     pub client_id: String,
     pub client_secret: Option<String>,
@@ -53,6 +56,7 @@ pub struct OidcSubprovider {
             CoreJsonWebKey,
         >,
     >,
+    #[builder(default = OidcProviderPkceCodeChallenge::S256)]
     pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
 }
 
