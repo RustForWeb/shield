@@ -163,4 +163,4 @@ target/
 book/book/
 
 # SeaORM
-packages/storage/shield-seaorm/src/entities_template/
+packages/storage/shield-sea-orm/src/entities_template/

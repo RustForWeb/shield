@@ -43,8 +43,8 @@ pub enum OidcProviderVisibility {
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeUtc,
-    pub updated_at: DateTimeUtc,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
     pub name: String,
     pub slug: Option<String>,
     pub r#type: OidcProviderType,

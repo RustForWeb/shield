@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 
 use crate::error::StorageError;
@@ -33,8 +33,8 @@ pub struct EmailAddress {
     pub is_primary: bool,
     pub is_verified: bool,
     pub verification_token: Option<String>,
-    pub verification_token_expired_at: Option<DateTime<Utc>>,
-    pub verified_at: Option<DateTime<Utc>>,
+    pub verification_token_expired_at: Option<DateTime<FixedOffset>>,
+    pub verified_at: Option<DateTime<FixedOffset>>,
     pub user_id: String,
 }
 
@@ -44,8 +44,8 @@ pub struct CreateEmailAddress {
     pub is_primary: bool,
     pub is_verified: bool,
     pub verification_token: Option<String>,
-    pub verification_token_expired_at: Option<DateTime<Utc>>,
-    pub verified_at: Option<DateTime<Utc>>,
+    pub verification_token_expired_at: Option<DateTime<FixedOffset>>,
+    pub verified_at: Option<DateTime<FixedOffset>>,
 }
 
 #[derive(Clone, Debug)]
@@ -54,8 +54,8 @@ pub struct UpdateEmailAddress {
     pub is_primary: Option<bool>,
     pub is_verified: Option<bool>,
     pub verification_token: Option<Option<String>>,
-    pub verification_token_expired_at: Option<Option<DateTime<Utc>>>,
-    pub verified_at: Option<Option<DateTime<Utc>>>,
+    pub verification_token_expired_at: Option<Option<DateTime<FixedOffset>>>,
+    pub verified_at: Option<Option<DateTime<FixedOffset>>>,
 }
 
 #[cfg(test)]

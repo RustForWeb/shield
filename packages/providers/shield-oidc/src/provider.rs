@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
     reqwest::async_http_client,
@@ -463,7 +463,7 @@ type ParsedTokenResponse = (
     String,
     Option<String>,
     Option<String>,
-    Option<DateTime<Utc>>,
+    Option<DateTime<FixedOffset>>,
     Option<Vec<String>>,
 );
 
@@ -481,9 +481,10 @@ fn parse_token_response(
             .map(|id_token| id_token.to_string()),
         match token_response.expires_in() {
             Some(expires_in) => Some(
-                Utc::now()
+                (Utc::now()
                     + Duration::from_std(expires_in)
-                        .map_err(|err| ShieldError::Validation(err.to_string()))?,
+                        .map_err(|err| ShieldError::Validation(err.to_string()))?)
+                .into(),
             ),
             None => None,
         },

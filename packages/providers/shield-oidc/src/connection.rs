@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset};
 
 #[derive(Clone, Debug)]
 pub struct OidcConnection {
@@ -8,7 +8,7 @@ pub struct OidcConnection {
     pub access_token: String,
     pub refresh_token: Option<String>,
     pub id_token: Option<String>,
-    pub expired_at: Option<DateTime<Utc>>,
+    pub expired_at: Option<DateTime<FixedOffset>>,
     pub scopes: Option<Vec<String>>,
     pub subprovider_id: String,
     pub user_id: String,
@@ -21,7 +21,7 @@ pub struct CreateOidcConnection {
     pub access_token: String,
     pub refresh_token: Option<String>,
     pub id_token: Option<String>,
-    pub expired_at: Option<DateTime<Utc>>,
+    pub expired_at: Option<DateTime<FixedOffset>>,
     pub scopes: Option<Vec<String>>,
     pub subprovider_id: String,
     pub user_id: String,
@@ -34,6 +34,6 @@ pub struct UpdateOidcConnection {
     pub access_token: Option<String>,
     pub refresh_token: Option<Option<String>>,
     pub id_token: Option<Option<String>>,
-    pub expired_at: Option<Option<DateTime<Utc>>>,
+    pub expired_at: Option<Option<DateTime<FixedOffset>>>,
     pub scopes: Option<Option<Vec<String>>>,
 }

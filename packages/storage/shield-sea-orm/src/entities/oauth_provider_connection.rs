@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeUtc,
-    pub updated_at: DateTimeUtc,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
     pub identifier: String,
     #[sea_orm(column_type = "Text")]
     pub token_type: String,
@@ -17,7 +17,7 @@ pub struct Model {
     pub access_token: String,
     #[sea_orm(column_type = "Text", nullable)]
     pub refresh_token: Option<String>,
-    pub expired_at: Option<DateTimeUtc>,
+    pub expired_at: Option<DateTimeWithTimeZone>,
     #[sea_orm(column_type = "Text", nullable)]
     pub scopes: Option<String>,
     pub provider_id: Uuid,

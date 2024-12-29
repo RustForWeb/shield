@@ -8,15 +8,15 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeUtc,
-    pub updated_at: DateTimeUtc,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
     #[sea_orm(unique)]
     pub email: String,
     pub is_primary: bool,
     pub is_verified: bool,
     pub verification_token: Option<String>,
-    pub verification_token_expired_at: Option<DateTimeUtc>,
-    pub verified_at: Option<DateTimeUtc>,
+    pub verification_token_expired_at: Option<DateTimeWithTimeZone>,
+    pub verified_at: Option<DateTimeWithTimeZone>,
     #[cfg(feature = "entity")]
     pub entity_id: Uuid,
     #[cfg(not(feature = "entity"))]
