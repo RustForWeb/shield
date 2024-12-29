@@ -12,4 +12,4 @@ version.workspace = true
 async-trait.workspace = true
 leptos.workspace = true
 serde.workspace = true
-shield = { path = "../../core/shield", version = "0.0.3" }
+shield = { path = "../../core/shield", version = "0.0.4" }

@@ -11,4 +11,4 @@ version.workspace = true
 [dependencies]
 async-trait.workspace = true
 oauth2 = "4.4.2"
-shield = { path = "../../core/shield", version = "0.0.3" }
+shield = { path = "../../core/shield", version = "0.0.4" }

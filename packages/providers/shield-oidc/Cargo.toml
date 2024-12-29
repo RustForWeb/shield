@@ -14,5 +14,5 @@ bon.workspace = true
 chrono.workspace = true
 oauth2 = { version = "4.4.2", features = ["pkce-plain"] }
 openidconnect = "3.5.0"
-shield = { path = "../../core/shield", version = "0.0.3" }
+shield = { path = "../../core/shield", version = "0.0.4" }
 tracing.workspace = true
