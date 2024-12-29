@@ -151,10 +151,10 @@ impl<U: User> OidcProvider<U> {
                 id: connection_id,
                 token_type: Some(token_type),
                 access_token: Some(access_token),
-                refresh_token: Some(refresh_token),
-                id_token: Some(id_token),
-                expired_at: Some(expired_at),
-                scopes: Some(scopes),
+                refresh_token: refresh_token.map(Some),
+                id_token: id_token.map(Some),
+                expired_at: expired_at.map(Some),
+                scopes: scopes.map(Some),
             })
             .await
             .map_err(ShieldError::Storage)
