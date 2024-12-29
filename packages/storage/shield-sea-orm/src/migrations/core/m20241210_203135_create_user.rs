@@ -57,8 +57,11 @@ impl MigrationTrait for Migration {
                                 .default(false),
                         )
                         .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
-                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiredAt).timestamp())
-                        .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp())
+                        .col(
+                            ColumnDef::new(EmailAddress::VerificationTokenExpiredAt)
+                                .timestamp_with_time_zone(),
+                        )
+                        .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp_with_time_zone())
                         .col(ColumnDef::new(EmailAddress::EntityId).uuid().not_null())
                         .foreign_key(
                             ForeignKey::create()
@@ -105,8 +108,11 @@ impl MigrationTrait for Migration {
                                 .default(false),
                         )
                         .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
-                        .col(ColumnDef::new(EmailAddress::VerificationTokenExpiredAt).timestamp())
-                        .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp())
+                        .col(
+                            ColumnDef::new(EmailAddress::VerificationTokenExpiredAt)
+                                .timestamp_with_time_zone(),
+                        )
+                        .col(ColumnDef::new(EmailAddress::VerifiedAt).timestamp_with_time_zone())
                         .col(ColumnDef::new(EmailAddress::UserId).uuid().not_null())
                         .foreign_key(
                             ForeignKey::create()

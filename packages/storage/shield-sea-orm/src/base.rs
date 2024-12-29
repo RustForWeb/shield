@@ -26,13 +26,13 @@ impl BaseTable {
             )
             .col(
                 ColumnDef::new(Base::CreatedAt)
-                    .timestamp()
+                    .timestamp_with_time_zone()
                     .not_null()
                     .default(Expr::current_timestamp()),
             )
             .col(
                 ColumnDef::new(Base::UpdatedAt)
-                    .timestamp()
+                    .timestamp_with_time_zone()
                     .not_null()
                     .default(Expr::current_timestamp()),
             )

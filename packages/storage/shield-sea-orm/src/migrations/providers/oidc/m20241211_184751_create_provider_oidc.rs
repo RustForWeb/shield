@@ -140,7 +140,10 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(OidcProviderConnection::RefreshToken).text())
                     .col(ColumnDef::new(OidcProviderConnection::IdToken).text())
-                    .col(ColumnDef::new(OidcProviderConnection::ExpiredAt).timestamp())
+                    .col(
+                        ColumnDef::new(OidcProviderConnection::ExpiredAt)
+                            .timestamp_with_time_zone(),
+                    )
                     .col(ColumnDef::new(OidcProviderConnection::Scopes).text())
                     .col(
                         ColumnDef::new(OidcProviderConnection::ProviderId)

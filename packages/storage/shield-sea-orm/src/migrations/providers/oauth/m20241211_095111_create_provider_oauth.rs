@@ -137,7 +137,10 @@ impl MigrationTrait for Migration {
                             .not_null(),
                     )
                     .col(ColumnDef::new(OauthProviderConnection::RefreshToken).text())
-                    .col(ColumnDef::new(OauthProviderConnection::ExpiredAt).timestamp())
+                    .col(
+                        ColumnDef::new(OauthProviderConnection::ExpiredAt)
+                            .timestamp_with_time_zone(),
+                    )
                     .col(ColumnDef::new(OauthProviderConnection::Scopes).text())
                     .col(
                         ColumnDef::new(OauthProviderConnection::ProviderId)

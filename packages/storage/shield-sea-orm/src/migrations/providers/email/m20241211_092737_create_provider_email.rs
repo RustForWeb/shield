@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(EmailAuthToken::ExpiredAt)
-                            .timestamp()
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .index(
