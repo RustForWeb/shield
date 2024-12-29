@@ -243,10 +243,13 @@ impl<U: User> Provider for OidcProvider<U> {
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
+            session_data.authentication = None;
+
             session_data.csrf = Some(csrf_token.secret().clone());
             session_data.nonce = Some(nonce.secret().clone());
             session_data.verifier = pkce_code_challenge
                 .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone());
+            session_data.oidc_connection_id = None;
         }
 
         session.update().await?;
