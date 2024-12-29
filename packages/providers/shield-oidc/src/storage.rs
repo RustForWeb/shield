@@ -11,7 +11,7 @@ use crate::{
 pub trait OidcStorage<U: User>: Storage<U> + Sync {
     async fn oidc_subproviders(&self) -> Result<Vec<OidcSubprovider>, StorageError>;
 
-    async fn oidc_subprovider_by_id(
+    async fn oidc_subprovider_by_id_or_slug(
         &self,
         subprovider_id: &str,
     ) -> Result<Option<OidcSubprovider>, StorageError>;

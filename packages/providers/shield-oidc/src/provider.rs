@@ -42,7 +42,7 @@ impl<U: User> OidcProvider<U> {
         self
     }
 
-    async fn oidc_subprovider_by_id(
+    async fn oidc_subprovider_by_id_or_slug(
         &self,
         subprovider_id: &str,
     ) -> Result<OidcSubprovider, ShieldError> {
@@ -54,7 +54,11 @@ impl<U: User> OidcProvider<U> {
             return Ok(subprovider.clone());
         }
 
-        if let Some(subprovider) = self.storage.oidc_subprovider_by_id(subprovider_id).await? {
+        if let Some(subprovider) = self
+            .storage
+            .oidc_subprovider_by_id_or_slug(subprovider_id)
+            .await?
+        {
             return Ok(subprovider);
         }
 
@@ -183,7 +187,7 @@ impl<U: User> Provider for OidcProvider<U> {
         &self,
         subprovider_id: &str,
     ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
-        self.oidc_subprovider_by_id(subprovider_id)
+        self.oidc_subprovider_by_id_or_slug(subprovider_id)
             .await
             .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
     }
@@ -194,7 +198,7 @@ impl<U: User> Provider for OidcProvider<U> {
         session: Session,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
+            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
@@ -287,7 +291,7 @@ impl<U: User> Provider for OidcProvider<U> {
             .ok_or_else(|| ShieldError::Validation("Missing authorization code.".to_owned()))?;
 
         let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
+            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 
@@ -405,7 +409,7 @@ impl<U: User> Provider for OidcProvider<U> {
         session: Session,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id(&subprovider_id).await?,
+            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
             None => return Err(ProviderError::SubproviderMissing.into()),
         };
 

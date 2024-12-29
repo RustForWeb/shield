@@ -20,7 +20,7 @@ impl OidcStorage<User> for MemoryStorage {
         Ok(vec![])
     }
 
-    async fn oidc_subprovider_by_id(
+    async fn oidc_subprovider_by_id_or_slug(
         &self,
         _subprovider_id: &str,
     ) -> Result<Option<OidcSubprovider>, StorageError> {
