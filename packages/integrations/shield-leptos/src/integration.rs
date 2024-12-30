@@ -5,11 +5,15 @@ use shield::{Session, ShieldDyn, User};
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct LeptosUser {
     pub id: String,
+    pub name: Option<String>,
 }
 
 impl<U: User> From<U> for LeptosUser {
     fn from(value: U) -> Self {
-        Self { id: value.id() }
+        Self {
+            id: value.id(),
+            name: value.name(),
+        }
     }
 }
 
