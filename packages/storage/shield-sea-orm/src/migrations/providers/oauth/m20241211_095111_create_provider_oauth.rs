@@ -220,7 +220,11 @@ impl MigrationTrait for Migration {
                     .await?;
 
                 manager
-                    .drop_type(Type::drop().name(OauthProviderPkceCodeChallenge::Table).to_owned())
+                    .drop_type(
+                        Type::drop()
+                            .name(OauthProviderPkceCodeChallenge::Table)
+                            .to_owned(),
+                    )
                     .await?;
             }
         }
