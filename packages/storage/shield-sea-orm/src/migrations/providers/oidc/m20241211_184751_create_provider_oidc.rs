@@ -217,6 +217,14 @@ impl MigrationTrait for Migration {
                 manager
                     .drop_type(Type::drop().name(OidcProviderType::Table).to_owned())
                     .await?;
+
+                manager
+                    .drop_type(
+                        Type::drop()
+                            .name(OidcProviderPkceCodeChallenge::Table)
+                            .to_owned(),
+                    )
+                    .await?;
             }
         }
 
