@@ -20,6 +20,7 @@ const BACKENDS: &[(&str, &str)] = &[
 #[test]
 pub fn migrations() {
     for (backend, url) in BACKENDS {
+        // Check up migrations
         assert!(Command::new("sea-orm-cli")
             .arg("migrate")
             .arg("fresh")
@@ -28,7 +29,7 @@ pub fn migrations() {
             .arg("-d")
             .arg(example_path())
             .status()
-            .unwrap_or_else(|_| panic!("{} initial migrations should succeed.", backend))
+            .unwrap_or_else(|_| panic!("{} up migrations should succeed.", backend))
             .success());
 
         // Check down migrations

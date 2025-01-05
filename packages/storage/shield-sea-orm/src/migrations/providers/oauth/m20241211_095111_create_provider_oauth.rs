@@ -212,19 +212,19 @@ impl MigrationTrait for Migration {
             DatabaseBackend::MySql | DatabaseBackend::Sqlite => {}
             DatabaseBackend::Postgres => {
                 manager
-                    .drop_type(Type::drop().name(OauthProviderVisibility::Table).to_owned())
-                    .await?;
-
-                manager
-                    .drop_type(Type::drop().name(OauthProviderType::Table).to_owned())
-                    .await?;
-
-                manager
                     .drop_type(
                         Type::drop()
                             .name(OauthProviderPkceCodeChallenge::Table)
                             .to_owned(),
                     )
+                    .await?;
+
+                manager
+                    .drop_type(Type::drop().name(OauthProviderVisibility::Table).to_owned())
+                    .await?;
+
+                manager
+                    .drop_type(Type::drop().name(OauthProviderType::Table).to_owned())
                     .await?;
             }
         }
