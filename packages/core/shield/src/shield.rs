@@ -77,6 +77,21 @@ impl<U: User> Shield<U> {
         })
     }
 
+    pub async fn subprovider_by_id(
+        &self,
+        provider_id: &str,
+        subprovider_id: Option<&str>,
+    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
+        match self.provider_by_id(provider_id) {
+            Some(provider) => {
+                provider
+                    .subprovider_by_id(subprovider_id.expect("TODO"))
+                    .await
+            }
+            None => Ok(None),
+        }
+    }
+
     pub async fn sign_in(
         &self,
         request: SignInRequest,
@@ -144,6 +159,42 @@ impl<U: User> Shield<U> {
         session.purge().await?;
 
         Ok(response)
+    }
+
+    pub async fn user(&self, session: &Session) -> Result<Option<U>, ShieldError> {
+        let authentication = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.authentication.clone()
+        };
+
+        match authentication {
+            Some(authentication) => {
+                if self
+                    .subprovider_by_id(
+                        &authentication.provider_id,
+                        authentication.subprovider_id.as_deref(),
+                    )
+                    .await?
+                    .is_none()
+                {
+                    session.purge().await?;
+                    return Ok(None);
+                }
+
+                let user = self.storage().user_by_id(&authentication.user_id).await?;
+
+                if user.is_none() {
+                    session.purge().await?;
+                }
+
+                Ok(user)
+            }
+            None => Ok(None),
+        }
     }
 }
 
