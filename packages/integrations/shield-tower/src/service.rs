@@ -75,28 +75,9 @@ where
                 };
             let shield_session = Session::new(session_storage);
 
-            let authenticated = match shield_session.data().lock() {
-                Ok(session) => session.authentication.clone(),
+            let user = match shield.user(&shield_session).await {
+                Ok(user) => user,
                 Err(_err) => return Ok(Self::internal_server_error()),
-            };
-
-            let user = if let Some(authenticated) = authenticated {
-                // TODO: Verify provider and subprovider still exist.
-
-                match shield.storage().user_by_id(&authenticated.user_id).await {
-                    Ok(user) => {
-                        if user.is_none() {
-                            if let Err(_err) = shield_session.purge().await {
-                                return Ok(Self::internal_server_error());
-                            }
-                        }
-
-                        user
-                    }
-                    Err(_err) => return Ok(Self::internal_server_error()),
-                }
-            } else {
-                None
             };
 
             debug!("{:?}", user.as_ref().map(|user| user.id()));
