@@ -74,7 +74,7 @@ jobs:
               uses: cargo-bins/cargo-binstall@main
 
             - name: Install crates
-              run: cargo binstall --force -y sea-orm-cli
+              run: cargo binstall -y sea-orm-cli
 
             - name: Test
               run: cargo test --all-features
