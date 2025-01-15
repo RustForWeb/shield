@@ -8,7 +8,7 @@ pub struct RouteError(ShieldError);
 
 impl IntoResponse for RouteError {
     fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.0.to_string()).into_response()
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", self.0)).into_response()
     }
 }
 
