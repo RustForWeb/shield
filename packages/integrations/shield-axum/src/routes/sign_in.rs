@@ -4,15 +4,31 @@ use shield::{SignInRequest, User};
 use crate::{
     error::RouteError,
     extract::{ExtractSession, ExtractShield},
-    path::AuthPath,
+    path::AuthPathParams,
     response::RouteResponse,
 };
 
+#[cfg_attr(
+    feature = "utoipa",
+    utoipa::path(
+        post,
+        path = "/sign-in/{providerId}/{subproviderId}",
+        description = "Sign in to an account with the specified authentication provider.",
+        params(
+            AuthPathParams,
+        ),
+        responses(
+            (status = 200, description = "Successfully signed in."),
+            (status = 303, description = "Redirect to authentication provider for sign in."),
+            (status = 500, description = "Internal server error."),
+        )
+    )
+)]
 pub async fn sign_in<U: User>(
-    Path(AuthPath {
+    Path(AuthPathParams {
         provider_id,
         subprovider_id,
-    }): Path<AuthPath>,
+    }): Path<AuthPathParams>,
     ExtractShield(shield): ExtractShield<U>,
     ExtractSession(session): ExtractSession,
 ) -> Result<RouteResponse, RouteError> {

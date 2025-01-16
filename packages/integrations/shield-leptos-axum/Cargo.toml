@@ -15,3 +15,7 @@ leptos_axum.workspace = true
 shield = { path = "../../core/shield", version = "0.0.4" }
 shield-axum = { path = "../../integrations/shield-axum", version = "0.0.4" }
 shield-leptos = { path = "../../integrations/shield-leptos", version = "0.0.4" }
+
+[features]
+default = []
+utoipa = ["shield/utoipa", "shield-axum/utoipa"]
