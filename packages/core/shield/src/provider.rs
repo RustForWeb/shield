@@ -50,6 +50,8 @@ pub trait Subprovider: Send + Sync {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SubproviderVisualisation {
     pub key: String,
     pub provider_id: String,

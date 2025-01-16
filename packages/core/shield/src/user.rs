@@ -27,6 +27,7 @@ pub struct UpdateUser {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EmailAddress {
     pub id: String,
     pub email: String,
