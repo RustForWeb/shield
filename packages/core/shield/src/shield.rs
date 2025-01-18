@@ -71,6 +71,7 @@ impl<U: User> Shield<U> {
                         provider_id,
                         subprovider_id,
                         name: subprovider.name(),
+                        icon_url: subprovider.icon_url(),
                     }
                 })
                 .collect()

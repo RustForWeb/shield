@@ -179,6 +179,7 @@ impl TryFrom<oidc_provider::Model> for OidcSubprovider {
             id: value.id.to_string(),
             name: value.name,
             slug: value.slug,
+            icon_url: value.icon_url,
             visibility: value.visibility.into(),
             client_id: value.client_id,
             client_secret: value.client_secret,

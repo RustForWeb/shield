@@ -78,6 +78,8 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub revocation_url_params: Option<String>,
     pub pkce_code_challenge: OauthProviderPkceCodeChallenge,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub icon_url: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

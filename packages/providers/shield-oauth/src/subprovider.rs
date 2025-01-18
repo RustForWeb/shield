@@ -36,6 +36,7 @@ pub struct OauthSubprovider {
     pub(crate) revocation_url: Option<String>,
     pub(crate) revocation_url_params: Option<String>,
     pub(crate) pkce_code_challenge: OauthProviderPkceCodeChallenge,
+    pub(crate) icon_url: Option<String>,
 }
 
 impl Subprovider for OauthSubprovider {
@@ -49,6 +50,10 @@ impl Subprovider for OauthSubprovider {
 
     fn name(&self) -> String {
         self.name.clone()
+    }
+
+    fn icon_url(&self) -> Option<String> {
+        self.icon_url.clone()
     }
 
     fn form(&self) -> Option<Form> {
