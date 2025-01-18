@@ -34,6 +34,7 @@ impl UserBody {
     utoipa::path(
         get,
         path = "/user",
+        operation_id = "getUser",
         description = "Get the current user account.",
         responses(
             (status = 200, description = "Current user account.", body = UserBody),

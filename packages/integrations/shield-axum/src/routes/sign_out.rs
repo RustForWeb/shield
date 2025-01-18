@@ -11,6 +11,7 @@ use crate::{
     utoipa::path(
         post,
         path = "/sign-out",
+        operation_id = "signOut",
         description = "Sign out of the current account.",
         responses(
             (status = 201, description = "Successfully signed out."),
