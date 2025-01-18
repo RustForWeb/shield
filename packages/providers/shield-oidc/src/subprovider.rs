@@ -30,6 +30,7 @@ pub struct OidcSubprovider {
     pub id: String,
     pub name: String,
     pub slug: Option<String>,
+    pub icon_url: Option<String>,
     #[builder(default = OidcProviderVisibility::Public)]
     pub visibility: OidcProviderVisibility,
     pub client_id: String,
@@ -138,6 +139,10 @@ impl Subprovider for OidcSubprovider {
 
     fn name(&self) -> String {
         self.name.clone()
+    }
+
+    fn icon_url(&self) -> Option<String> {
+        self.icon_url.clone()
     }
 
     fn form(&self) -> Option<shield::Form> {

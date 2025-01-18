@@ -84,6 +84,8 @@ pub struct Model {
     #[sea_orm(column_type = "JsonBinary", nullable)]
     pub json_web_key_set: Option<Json>,
     pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub icon_url: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

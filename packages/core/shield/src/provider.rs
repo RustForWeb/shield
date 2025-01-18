@@ -46,6 +46,8 @@ pub trait Subprovider: Send + Sync {
 
     fn name(&self) -> String;
 
+    fn icon_url(&self) -> Option<String>;
+
     fn form(&self) -> Option<Form>;
 }
 
@@ -57,6 +59,7 @@ pub struct SubproviderVisualisation {
     pub provider_id: String,
     pub subprovider_id: Option<String>,
     pub name: String,
+    pub icon_url: Option<String>,
 }
 
 #[cfg(test)]
