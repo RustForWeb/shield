@@ -8,6 +8,7 @@ use crate::{error::RouteError, extract::ExtractShield};
     utoipa::path(
         get,
         path = "/subproviders",
+        operation_id = "getSubproviders",
         description = "Get a list of authentication subproviders.",
         responses(
             (status = 200, description = "List of authentication subproviders.", body = Vec<SubproviderVisualisation>),

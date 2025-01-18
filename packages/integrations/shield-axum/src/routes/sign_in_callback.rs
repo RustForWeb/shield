@@ -14,6 +14,7 @@ use crate::{
     utoipa::path(
         post,
         path = "/sign-in/callback/{providerId}/{subproviderId}",
+        operation_id = "signInCallback",
         description = "Callback after signing in with authentication provider.",
         params(
             AuthPathParams,

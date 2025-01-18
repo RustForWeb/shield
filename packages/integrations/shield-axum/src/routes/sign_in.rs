@@ -13,6 +13,7 @@ use crate::{
     utoipa::path(
         post,
         path = "/sign-in/{providerId}/{subproviderId}",
+        operation_id = "signIn",
         description = "Sign in to an account with the specified authentication provider.",
         params(
             AuthPathParams,
