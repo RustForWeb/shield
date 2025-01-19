@@ -8,7 +8,7 @@ async fn main() -> std::io::Result<()> {
     use actix_web::{cookie::Key, web::Data, App, HttpServer};
     use leptos::config::get_configuration;
     use leptos_actix::{generate_route_list, LeptosRoutes};
-    use shield::Shield;
+    use shield::{Shield, ShieldOptions};
     use shield_examples_leptos_actix::app::*;
     use shield_leptos_actix::{provide_actix_integration, ShieldMiddleware};
     use shield_memory::{MemoryStorage, User};
@@ -52,6 +52,7 @@ async fn main() -> std::io::Result<()> {
                 .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
                 .build()]),
             )],
+            ShieldOptions::default(),
         );
         let shield_middleware = ShieldMiddleware::new(shield.clone());
 

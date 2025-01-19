@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use shield::{
-    Provider, ProviderError, Response, Session, ShieldError, SignInCallbackRequest, SignInRequest,
-    SignOutRequest, Subprovider, User,
+    Provider, ProviderError, Response, Session, ShieldError, ShieldOptions, SignInCallbackRequest,
+    SignInRequest, SignOutRequest, Subprovider, User,
 };
 
 use crate::{storage::OauthStorage, subprovider::OauthSubprovider};
@@ -80,6 +80,7 @@ impl<U: User> Provider for OauthProvider<U> {
         &self,
         request: SignInRequest,
         _session: Session,
+        _options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let _subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,
@@ -93,6 +94,7 @@ impl<U: User> Provider for OauthProvider<U> {
         &self,
         request: SignInCallbackRequest,
         _session: Session,
+        _options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let _subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,
@@ -106,6 +108,7 @@ impl<U: User> Provider for OauthProvider<U> {
         &self,
         request: SignOutRequest,
         _session: Session,
+        _options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let _subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oauth_subprovider_by_id(&subprovider_id).await?,

@@ -5,6 +5,7 @@ use tracing::debug;
 
 use crate::{
     error::{ProviderError, SessionError, ShieldError},
+    options::ShieldOptions,
     provider::{Provider, Subprovider, SubproviderVisualisation},
     request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
@@ -17,10 +18,11 @@ use crate::{
 pub struct Shield<U: User> {
     storage: Arc<dyn Storage<U>>,
     providers: Arc<HashMap<String, Arc<dyn Provider>>>,
+    options: ShieldOptions,
 }
 
 impl<U: User> Shield<U> {
-    pub fn new<S>(storage: S, providers: Vec<Arc<dyn Provider>>) -> Self
+    pub fn new<S>(storage: S, providers: Vec<Arc<dyn Provider>>, options: ShieldOptions) -> Self
     where
         S: Storage<U> + 'static,
     {
@@ -32,6 +34,7 @@ impl<U: User> Shield<U> {
                     .map(|provider| (provider.id(), provider))
                     .collect(),
             ),
+            options,
         }
     }
 
@@ -105,7 +108,7 @@ impl<U: User> Shield<U> {
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
-        provider.sign_in(request, session).await
+        provider.sign_in(request, session, &self.options).await
     }
 
     pub async fn sign_in_callback(
@@ -120,7 +123,9 @@ impl<U: User> Shield<U> {
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
-        provider.sign_in_callback(request, session).await
+        provider
+            .sign_in_callback(request, session, &self.options)
+            .await
     }
 
     pub async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
@@ -150,11 +155,11 @@ impl<U: User> Shield<U> {
                         subprovider_id: authenticated.subprovider_id,
                     },
                     session.clone(),
+                    &self.options,
                 )
                 .await?
         } else {
-            // TODO: Should be configurable.
-            Response::Redirect("/".to_owned())
+            Response::Redirect(self.options.sign_out_redirect.clone())
         };
 
         session.purge().await?;
@@ -206,13 +211,14 @@ mod tests {
     use crate::{
         provider::tests::{TestProvider, TEST_PROVIDER_ID},
         storage::tests::{TestStorage, TEST_STORAGE_ID},
+        ShieldOptions,
     };
 
     use super::Shield;
 
     #[test]
     fn test_storage() {
-        let shield = Shield::new(TestStorage::default(), vec![]);
+        let shield = Shield::new(TestStorage::default(), vec![], ShieldOptions::default());
 
         assert_eq!(TEST_STORAGE_ID, shield.storage().id());
     }
@@ -225,6 +231,7 @@ mod tests {
                 Arc::new(TestProvider::default().with_id("test1")),
                 Arc::new(TestProvider::default().with_id("test2")),
             ],
+            ShieldOptions::default(),
         );
 
         assert_eq!(
