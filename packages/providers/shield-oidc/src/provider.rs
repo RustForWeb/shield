@@ -9,8 +9,8 @@ use openidconnect::{
 };
 use shield::{
     Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError,
-    Response, Session, SessionError, ShieldError, SignInCallbackRequest, SignInRequest,
-    SignOutRequest, Subprovider, UpdateUser, User,
+    Response, Session, SessionError, ShieldError, ShieldOptions, SignInCallbackRequest,
+    SignInRequest, SignOutRequest, Subprovider, UpdateUser, User,
 };
 use tracing::debug;
 
@@ -196,6 +196,7 @@ impl<U: User> Provider for OidcProvider<U> {
         &self,
         request: SignInRequest,
         session: Session,
+        _options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
@@ -261,6 +262,7 @@ impl<U: User> Provider for OidcProvider<U> {
         &self,
         request: SignInCallbackRequest,
         session: Session,
+        options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let (pkce_verifier, csrf, nonce) = {
             let session_data = session.data();
@@ -402,14 +404,14 @@ impl<U: User> Provider for OidcProvider<U> {
 
         session.update().await?;
 
-        // TODO: Should be configurable.
-        Ok(Response::Redirect("/".to_owned()))
+        Ok(Response::Redirect(options.sign_in_redirect.clone()))
     }
 
     async fn sign_out(
         &self,
         request: SignOutRequest,
         session: Session,
+        options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
         let subprovider = match request.subprovider_id {
             Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
@@ -460,8 +462,7 @@ impl<U: User> Provider for OidcProvider<U> {
             }
         }
 
-        // TODO: Should be configurable.
-        Ok(Response::Redirect("/".to_owned()))
+        Ok(Response::Redirect(options.sign_out_redirect.clone()))
     }
 }
 

@@ -7,7 +7,7 @@ async fn main() {
     use leptos::config::{get_configuration, LeptosOptions};
     use leptos::logging::log;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use shield::Shield;
+    use shield::{Shield, ShieldOptions};
     use shield_examples_leptos_axum::app::*;
     use shield_leptos_axum::{provide_axum_integration, AuthRoutes, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
@@ -53,6 +53,7 @@ async fn main() {
             ))
             .build()]),
         )],
+        ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());
 

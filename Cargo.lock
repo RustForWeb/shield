@@ -4621,6 +4621,7 @@ name = "shield"
 version = "0.0.4"
 dependencies = [
  "async-trait",
+ "bon",
  "chrono",
  "futures",
  "serde",
