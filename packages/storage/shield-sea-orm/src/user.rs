@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use async_trait::async_trait;
 use sea_orm::{prelude::Uuid, DatabaseConnection, ModelTrait};
 use shield::{EmailAddress, StorageError};
@@ -26,6 +28,19 @@ impl User {
             #[cfg(feature = "entity")]
             entity,
         }
+    }
+
+    #[cfg(feature = "entity")]
+    pub fn entity(&self) -> &entity::Model {
+        &self.entity
+    }
+}
+
+impl Deref for User {
+    type Target = user::Model;
+
+    fn deref(&self) -> &Self::Target {
+        &self.user
     }
 }
 
