@@ -42,6 +42,10 @@ impl<U: User> Shield<U> {
         &*self.storage
     }
 
+    pub fn options(&self) -> &ShieldOptions {
+        &self.options
+    }
+
     pub fn provider_by_id(&self, provider_id: &str) -> Option<&dyn Provider> {
         self.providers.get(provider_id).map(|v| &**v)
     }
