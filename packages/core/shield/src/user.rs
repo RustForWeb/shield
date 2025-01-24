@@ -27,15 +27,20 @@ pub struct UpdateUser {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct EmailAddress {
     pub id: String,
     pub email: String,
     pub is_primary: bool,
     pub is_verified: bool,
+    #[serde(skip)]
     pub verification_token: Option<String>,
+    #[serde(skip)]
     pub verification_token_expired_at: Option<DateTime<FixedOffset>>,
+    #[serde(skip)]
     pub verified_at: Option<DateTime<FixedOffset>>,
+    #[serde(skip)]
     pub user_id: String,
 }
 

@@ -55,4 +55,6 @@ pub enum ShieldError {
     Request(String),
     #[error("{0}")]
     Validation(String),
+    #[error("Unauthorized")]
+    Unauthorized,
 }
