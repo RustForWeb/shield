@@ -22,4 +22,8 @@ impl shield::User for User {
     async fn email_addresses(&self) -> Result<Vec<EmailAddress>, StorageError> {
         Ok(self.email_addresses.clone())
     }
+
+    fn additional(&self) -> Option<impl Serialize> {
+        None::<()>
+    }
 }

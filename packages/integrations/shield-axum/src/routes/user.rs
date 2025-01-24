@@ -1,6 +1,7 @@
 use axum::Json;
 use serde::{Deserialize, Serialize};
-use shield::{EmailAddress, ShieldError, User};
+use serde_json::Value;
+use shield::{ConfigurationError, EmailAddress, ShieldError, User};
 
 use crate::{
     error::{ErrorBody, RouteError},
@@ -15,6 +16,7 @@ pub struct UserBody {
     id: String,
     name: Option<String>,
     email_addresses: Vec<EmailAddress>,
+    additional: Value,
 }
 
 impl UserBody {
@@ -25,6 +27,11 @@ impl UserBody {
             id: user.id(),
             name: user.name(),
             email_addresses,
+            additional: serde_json::to_value(user.additional()).map_err(|err| {
+                ConfigurationError::Invalid(format!(
+                    "additional user data is not serializable: {err}"
+                ))
+            })?,
         })
     }
 }
