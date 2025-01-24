@@ -13,6 +13,8 @@ pub trait User: Debug + Send + Sync {
     fn name(&self) -> Option<String>;
 
     async fn email_addresses(&self) -> Result<Vec<EmailAddress>, StorageError>;
+
+    fn additional(&self) -> Option<impl Serialize>;
 }
 
 #[derive(Clone, Debug)]
@@ -91,6 +93,10 @@ pub(crate) mod tests {
 
         async fn email_addresses(&self) -> Result<Vec<EmailAddress>, StorageError> {
             Ok(vec![])
+        }
+
+        fn additional(&self) -> Option<impl Serialize> {
+            None::<()>
         }
     }
 }

@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use async_trait::async_trait;
 use sea_orm::{prelude::Uuid, DatabaseConnection, ModelTrait};
+use serde::Serialize;
 use shield::{EmailAddress, StorageError};
 
 #[cfg(feature = "entity")]
@@ -42,6 +43,12 @@ impl Deref for User {
     fn deref(&self) -> &Self::Target {
         &self.user
     }
+}
+
+#[derive(Serialize)]
+pub struct Additional {
+    #[cfg(feature = "entity")]
+    entity_id: String,
 }
 
 #[async_trait]
@@ -94,6 +101,13 @@ impl shield::User for User {
                         .collect()
                 })
         }
+    }
+
+    fn additional(&self) -> Option<impl Serialize> {
+        Some(Additional {
+            #[cfg(feature = "entity")]
+            entity_id: self.user.entity_id.to_string(),
+        })
     }
 }
 
