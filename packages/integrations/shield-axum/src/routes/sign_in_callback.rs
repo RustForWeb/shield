@@ -3,7 +3,7 @@ use serde_json::Value;
 use shield::{SignInCallbackRequest, User};
 
 use crate::{
-    error::RouteError,
+    error::{ErrorBody, RouteError},
     extract::{ExtractSession, ExtractShield},
     path::AuthPathParams,
     response::RouteResponse,
@@ -21,7 +21,9 @@ use crate::{
         ),
         responses(
             (status = 200, description = "Successfully signed in."),
-            (status = 500, description = "Internal server error."),
+            (status = 400, description = "Bad request.", body = ErrorBody),
+            (status = 404, description = "Not found.", body = ErrorBody),
+            (status = 500, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]

@@ -1,7 +1,10 @@
 use axum::Json;
 use shield::{SubproviderVisualisation, User};
 
-use crate::{error::RouteError, extract::ExtractShield};
+use crate::{
+    error::{ErrorBody, RouteError},
+    extract::ExtractShield,
+};
 
 #[cfg_attr(
     feature = "utoipa",
@@ -12,7 +15,7 @@ use crate::{error::RouteError, extract::ExtractShield};
         description = "Get a list of authentication subproviders.",
         responses(
             (status = 200, description = "List of authentication subproviders.", body = Vec<SubproviderVisualisation>),
-            (status = 500, description = "Internal server error.")
+            (status = 500, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]

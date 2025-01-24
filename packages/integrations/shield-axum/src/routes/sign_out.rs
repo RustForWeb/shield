@@ -1,7 +1,7 @@
 use shield::User;
 
 use crate::{
-    error::RouteError,
+    error::{ErrorBody, RouteError},
     extract::{ExtractSession, ExtractShield},
     response::RouteResponse,
 };
@@ -15,7 +15,8 @@ use crate::{
         description = "Sign out of the current account.",
         responses(
             (status = 201, description = "Successfully signed out."),
-            (status = 500, description = "Internal server error.")
+            (status = 400, description = "Bad request.", body = ErrorBody),
+            (status = 500, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]
