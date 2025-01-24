@@ -61,3 +61,23 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractU
             ))
     }
 }
+
+pub struct UserRequired<U: User>(pub U);
+
+#[async_trait]
+impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for UserRequired<U> {
+    type Rejection = (StatusCode, &'static str);
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        parts
+            .extensions
+            .get::<Option<U>>()
+            .cloned()
+            .ok_or((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Can't extract Shield user. Is `ShieldLayer` enabled?",
+            ))
+            .and_then(|user| user.ok_or((StatusCode::UNAUTHORIZED, "Unauthorized")))
+            .map(UserRequired)
+    }
+}
