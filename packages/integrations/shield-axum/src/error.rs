@@ -32,6 +32,7 @@ impl ErrorBody {
     }
 }
 
+#[derive(Debug)]
 pub struct RouteError(ShieldError);
 
 impl IntoResponse for RouteError {

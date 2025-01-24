@@ -1,15 +1,14 @@
 use async_trait::async_trait;
-use axum::{
-    extract::FromRequestParts,
-    http::{request::Parts, StatusCode},
-};
-use shield::{Session, Shield, User};
+use axum::{extract::FromRequestParts, http::request::Parts};
+use shield::{ConfigurationError, Session, Shield, ShieldError, User};
+
+use crate::error::RouteError;
 
 pub struct ExtractShield<U: User>(pub Shield<U>);
 
 #[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractShield<U> {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = RouteError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
@@ -17,10 +16,10 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractS
             .get::<Shield<U>>()
             .cloned()
             .map(ExtractShield)
-            .ok_or((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Can't extract Shield. Is `ShieldLayer` enabled?",
-            ))
+            .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
+                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+            )))
+            .map_err(RouteError::from)
     }
 }
 
@@ -28,7 +27,7 @@ pub struct ExtractSession(pub Session);
 
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = RouteError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
@@ -36,10 +35,10 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
             .get::<Session>()
             .cloned()
             .map(ExtractSession)
-            .ok_or((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Can't extract Shield session. Is `ShieldLayer` enabled?",
-            ))
+            .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
+                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+            )))
+            .map_err(RouteError::from)
     }
 }
 
@@ -47,7 +46,7 @@ pub struct ExtractUser<U: User>(pub Option<U>);
 
 #[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractUser<U> {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = RouteError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
@@ -55,10 +54,10 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractU
             .get::<Option<U>>()
             .cloned()
             .map(ExtractUser)
-            .ok_or((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Can't extract Shield user. Is `ShieldLayer` enabled?",
-            ))
+            .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
+                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+            )))
+            .map_err(RouteError::from)
     }
 }
 
@@ -66,18 +65,18 @@ pub struct UserRequired<U: User>(pub U);
 
 #[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for UserRequired<U> {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = RouteError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
             .extensions
             .get::<Option<U>>()
             .cloned()
-            .ok_or((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Can't extract Shield user. Is `ShieldLayer` enabled?",
-            ))
-            .and_then(|user| user.ok_or((StatusCode::UNAUTHORIZED, "Unauthorized")))
+            .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
+                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+            )))
+            .and_then(|user| user.ok_or(ShieldError::Unauthorized))
             .map(UserRequired)
+            .map_err(RouteError::from)
     }
 }
