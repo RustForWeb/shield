@@ -8,7 +8,13 @@ use shield::{ShieldError, StorageError};
 
 #[derive(Serialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[cfg_attr(feature = "utoipa", schema(as = Error))]
+#[cfg_attr(feature = "utoipa", schema(as = Error, examples(
+    json!({
+        "status_code": 500,
+        "status_reason": "Internal Server Error",
+        "message": "Unknown"
+    })
+)))]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorBody {
     status_code: u16,

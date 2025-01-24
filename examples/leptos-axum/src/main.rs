@@ -3,19 +3,18 @@
 async fn main() {
     use std::sync::Arc;
 
-    use axum::Router;
+    use axum::{middleware::from_fn, routing::get, Router};
     use leptos::config::{get_configuration, LeptosOptions};
-    use leptos::logging::log;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use shield::{Shield, ShieldOptions};
     use shield_examples_leptos_axum::app::*;
-    use shield_leptos_axum::{provide_axum_integration, AuthRoutes, ShieldLayer};
+    use shield_leptos_axum::{auth_required, provide_axum_integration, AuthRoutes, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcProvider};
     use time::Duration;
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
-    use tracing::level_filters::LevelFilter;
+    use tracing::{info, level_filters::LevelFilter};
     use utoipa::OpenApi;
     use utoipa_swagger_ui::SwaggerUi;
 
@@ -66,6 +65,8 @@ async fn main() {
 
     // Initialize router
     let router = Router::new()
+        .route("/api/protected", get(|| async { "Protected" }))
+        .route_layer(from_fn(auth_required::<User>))
         .nest("/api/auth", AuthRoutes::router::<User, LeptosOptions>())
         .merge(SwaggerUi::new("/api-docs").url("/api/openapi.json", Docs::openapi()))
         .leptos_routes_with_context(
@@ -85,7 +86,7 @@ async fn main() {
         .layer(session_layer);
 
     // Start app
-    log!("listening on http://{}", &addr);
+    info!("listening on http://{}", &addr);
     let listener = TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, router.into_make_service())
         .await
