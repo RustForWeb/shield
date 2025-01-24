@@ -46,6 +46,7 @@ impl Deref for User {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Additional {
     #[cfg(feature = "entity")]
     entity_id: String,
