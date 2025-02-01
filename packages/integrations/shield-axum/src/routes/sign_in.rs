@@ -1,4 +1,4 @@
-use axum::{extract::Path, Json};
+use axum::{extract::Path, Form};
 use serde::{Deserialize, Serialize};
 use shield::{SignInRequest, User};
 
@@ -42,7 +42,7 @@ pub async fn sign_in<U: User>(
     }): Path<AuthPathParams>,
     ExtractShield(shield): ExtractShield<U>,
     ExtractSession(session): ExtractSession,
-    Json(data): Json<SignInData>,
+    Form(data): Form<SignInData>,
 ) -> Result<RouteResponse, RouteError> {
     let response = shield
         .sign_in(
