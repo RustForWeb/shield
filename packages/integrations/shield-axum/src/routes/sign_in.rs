@@ -11,6 +11,7 @@ use crate::{
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SignInData {
     redirect_url: Option<String>,
 }
