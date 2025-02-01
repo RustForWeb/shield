@@ -253,8 +253,6 @@ impl<U: User> Provider for OidcProvider<U> {
             session_data.oidc_connection_id = None;
         }
 
-        session.update().await?;
-
         Ok(Response::Redirect(auth_url.to_string()))
     }
 
@@ -402,9 +400,11 @@ impl<U: User> Provider for OidcProvider<U> {
             session_data.oidc_connection_id = Some(connection.id);
         }
 
-        session.update().await?;
-
-        Ok(Response::Redirect(options.sign_in_redirect.clone()))
+        Ok(Response::Redirect(
+            request
+                .redirect_url
+                .unwrap_or(options.sign_in_redirect.clone()),
+        ))
     }
 
     async fn sign_out(

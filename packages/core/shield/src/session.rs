@@ -45,6 +45,8 @@ impl Session {
 pub struct SessionData {
     pub authentication: Option<Authentication>,
 
+    pub redirect_url: Option<String>,
+
     // TODO: Allow arbitrary data to be stored by providers?
     pub csrf: Option<String>,
     pub nonce: Option<String>,

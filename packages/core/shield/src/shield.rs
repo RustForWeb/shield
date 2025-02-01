@@ -112,7 +112,24 @@ impl<U: User> Shield<U> {
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
-        provider.sign_in(request, session, &self.options).await
+        // TODO: validate redirect URL
+
+        {
+            let session_data = session.data();
+            let mut session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.redirect_url = request.redirect_url.clone();
+        };
+
+        let response = provider
+            .sign_in(request, session.clone(), &self.options)
+            .await;
+
+        session.update().await?;
+
+        response
     }
 
     pub async fn sign_in_callback(
@@ -127,9 +144,29 @@ impl<U: User> Shield<U> {
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
         };
 
-        provider
-            .sign_in_callback(request, session, &self.options)
-            .await
+        let redirect_url = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.redirect_url.clone()
+        };
+
+        let response = provider
+            .sign_in_callback(
+                SignInCallbackRequest {
+                    redirect_url: request.redirect_url.or(redirect_url),
+                    ..request
+                },
+                session.clone(),
+                &self.options,
+            )
+            .await;
+
+        session.update().await?;
+
+        response
     }
 
     pub async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
