@@ -6,6 +6,7 @@ use serde_json::Value;
 pub struct SignInRequest {
     pub provider_id: String,
     pub subprovider_id: Option<String>,
+    pub redirect_url: Option<String>,
     pub data: Option<Value>,
     pub form_data: Option<Value>,
 }
@@ -15,6 +16,7 @@ pub struct SignInRequest {
 pub struct SignInCallbackRequest {
     pub provider_id: String,
     pub subprovider_id: Option<String>,
+    pub redirect_url: Option<String>,
     pub query: Option<Value>,
     pub data: Option<Value>,
 }

@@ -31,6 +31,7 @@ pub async fn sign_in(
             SignInRequest {
                 provider_id,
                 subprovider_id,
+                redirect_url: None,
                 data: None,
                 form_data: None,
             },

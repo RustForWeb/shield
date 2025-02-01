@@ -1,4 +1,5 @@
-use axum::extract::Path;
+use axum::{extract::Path, Json};
+use serde::{Deserialize, Serialize};
 use shield::{SignInRequest, User};
 
 use crate::{
@@ -7,6 +8,12 @@ use crate::{
     path::AuthPathParams,
     response::RouteResponse,
 };
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+pub struct SignInData {
+    redirect_url: Option<String>,
+}
 
 #[cfg_attr(
     feature = "utoipa",
@@ -18,6 +25,7 @@ use crate::{
         params(
             AuthPathParams,
         ),
+        request_body = SignInData,
         responses(
             (status = 200, description = "Successfully signed in."),
             (status = 303, description = "Redirect to authentication provider for sign in."),
@@ -34,12 +42,14 @@ pub async fn sign_in<U: User>(
     }): Path<AuthPathParams>,
     ExtractShield(shield): ExtractShield<U>,
     ExtractSession(session): ExtractSession,
+    Json(data): Json<SignInData>,
 ) -> Result<RouteResponse, RouteError> {
     let response = shield
         .sign_in(
             SignInRequest {
                 provider_id,
                 subprovider_id,
+                redirect_url: data.redirect_url,
                 data: None,
                 form_data: None,
             },

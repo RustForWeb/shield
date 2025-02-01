@@ -41,6 +41,7 @@ pub async fn sign_in_callback<U: User>(
             SignInCallbackRequest {
                 provider_id,
                 subprovider_id,
+                redirect_url: None,
                 query: Some(query),
                 data: None,
             },
