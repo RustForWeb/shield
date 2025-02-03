@@ -2,9 +2,8 @@ use async_trait::async_trait;
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
-    reqwest::async_http_client,
     url::form_urlencoded::parse,
-    AccessToken, AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
+    AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
 };
 use shield::{
@@ -15,8 +14,8 @@ use shield::{
 use tracing::debug;
 
 use crate::{
-    claims::Claims, storage::OidcStorage, subprovider::OidcSubprovider, CreateOidcConnection,
-    OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
+    claims::Claims, client::async_http_client, storage::OidcStorage, subprovider::OidcSubprovider,
+    CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
 };
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
@@ -300,8 +299,11 @@ impl<U: User> Provider for OidcProvider<U> {
 
         let client = subprovider.oidc_client().await?;
 
-        let mut token_request =
-            client.exchange_code(AuthorizationCode::new(authorization_code.to_owned()));
+        let mut token_request = client
+            .exchange_code(AuthorizationCode::new(authorization_code.to_owned()))
+            .map_err(|err| {
+                ShieldError::Configuration(ConfigurationError::Missing(err.to_string()))
+            })?;
 
         if let Some(pkce_verifier) = pkce_verifier {
             token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
@@ -318,8 +320,10 @@ impl<U: User> Provider for OidcProvider<U> {
             }
         }
 
+        let async_http_client = async_http_client()?;
+
         let token_response = token_request
-            .request_async(async_http_client)
+            .request_async(&async_http_client)
             .await
             .map_err(|err| ShieldError::Request(err.to_string()))?;
 
@@ -339,7 +343,7 @@ impl<U: User> Provider for OidcProvider<U> {
             let claims: UserInfoClaims<EmptyAdditionalClaims, CoreGenderClaim> = client
                 .user_info(token_response.access_token().to_owned(), None)
                 .map_err(|err| ConfigurationError::Missing(err.to_string()))?
-                .request_async(async_http_client)
+                .request_async(&async_http_client)
                 .await
                 .map_err(|err| ShieldError::Request(err.to_string()))?;
 
@@ -409,58 +413,61 @@ impl<U: User> Provider for OidcProvider<U> {
 
     async fn sign_out(
         &self,
-        request: SignOutRequest,
-        session: Session,
+        _request: SignOutRequest,
+        _session: Session,
         options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
-        let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
-            None => return Err(ProviderError::SubproviderMissing.into()),
-        };
+        // TODO: Revocation URL is always `EndpointNotSet` when using `from_provider_metadata`,
+        //       because `ProviderMetadata` does not support `introspection_endpoint` and `revocation_endpoint`.
 
-        let connection_id = {
-            let session_data = session.data();
-            let session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
+        // let subprovider = match request.subprovider_id {
+        //     Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
+        //     None => return Err(ProviderError::SubproviderMissing.into()),
+        // };
 
-            session_data.oidc_connection_id.clone()
-        };
+        // let connection_id = {
+        //     let session_data = session.data();
+        //     let session_data = session_data
+        //         .lock()
+        //         .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-        if let Some(connection_id) = connection_id {
-            if let Some(connection) = self.storage.oidc_connection_by_id(&connection_id).await? {
-                debug!("revoking access token {:?}", connection.access_token);
+        //     session_data.oidc_connection_id.clone()
+        // };
 
-                let token = AccessToken::new(connection.access_token);
+        // if let Some(connection_id) = connection_id {
+        //     if let Some(connection) = self.storage.oidc_connection_by_id(&connection_id).await? {
+        //         debug!("revoking access token {:?}", connection.access_token);
 
-                let client = subprovider.oidc_client().await?;
+        //         let token = AccessToken::new(connection.access_token);
 
-                let revocation_request = match client.revoke_token(token.into()) {
-                    Ok(revocation_request) => Some(revocation_request),
-                    Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
-                    Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
-                };
+        //         let client = subprovider.oidc_client().await?;
 
-                if let Some(revocation_request) = revocation_request {
-                    let mut revocation_request = revocation_request;
+        //         let revocation_request = match client.revoke_token(token.into()) {
+        //             Ok(revocation_request) => Some(revocation_request),
+        //             Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
+        //             Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
+        //         };
 
-                    if let Some(revocation_url_params) = subprovider.revocation_url_params {
-                        let params =
-                            parse(revocation_url_params.trim_start_matches('?').as_bytes());
+        //         if let Some(revocation_request) = revocation_request {
+        //             let mut revocation_request = revocation_request;
 
-                        for (name, value) in params {
-                            revocation_request = revocation_request
-                                .add_extra_param(name.into_owned(), value.into_owned());
-                        }
-                    }
+        //             if let Some(revocation_url_params) = subprovider.revocation_url_params {
+        //                 let params =
+        //                     parse(revocation_url_params.trim_start_matches('?').as_bytes());
 
-                    revocation_request
-                        .request_async(async_http_client)
-                        .await
-                        .map_err(|err| ShieldError::Request(err.to_string()))?;
-                }
-            }
-        }
+        //                 for (name, value) in params {
+        //                     revocation_request = revocation_request
+        //                         .add_extra_param(name.into_owned(), value.into_owned());
+        //                 }
+        //             }
+
+        //             revocation_request
+        //                 .request_async(async_http_client)
+        //                 .await
+        //                 .map_err(|err| ShieldError::Request(err.to_string()))?;
+        //         }
+        //     }
+        // }
 
         Ok(Response::Redirect(options.sign_out_redirect.clone()))
     }

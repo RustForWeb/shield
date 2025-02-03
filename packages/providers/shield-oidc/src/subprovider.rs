@@ -1,15 +1,39 @@
 use bon::Builder;
 use openidconnect::{
     core::{
-        CoreClient, CoreJsonWebKey, CoreJsonWebKeyType, CoreJsonWebKeyUse, CoreJwsSigningAlgorithm,
-        CoreProviderMetadata,
+        CoreAuthDisplay, CoreAuthPrompt, CoreClient, CoreErrorResponseType, CoreGenderClaim,
+        CoreJsonWebKey, CoreJweContentEncryptionAlgorithm, CoreJwsSigningAlgorithm,
+        CoreProviderMetadata, CoreRevocableToken, CoreRevocationErrorResponse,
+        CoreTokenIntrospectionResponse, CoreTokenResponse,
     },
-    reqwest::async_http_client,
-    AuthUrl, ClientId, ClientSecret, IssuerUrl, JsonWebKeySet, RedirectUrl, TokenUrl, UserInfoUrl,
+    AuthUrl, Client, ClientId, ClientSecret, EmptyAdditionalClaims,
+    EmptyAdditionalProviderMetadata, EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl,
+    JsonWebKeySet, JsonWebKeySetUrl, ProviderMetadata, RedirectUrl, StandardErrorResponse,
+    TokenUrl, UserInfoUrl,
 };
 use shield::{ConfigurationError, Subprovider};
 
-use crate::provider::OIDC_PROVIDER_ID;
+use crate::{client::async_http_client, provider::OIDC_PROVIDER_ID};
+
+type OidcClient = Client<
+    EmptyAdditionalClaims,
+    CoreAuthDisplay,
+    CoreGenderClaim,
+    CoreJweContentEncryptionAlgorithm,
+    CoreJsonWebKey,
+    CoreAuthPrompt,
+    StandardErrorResponse<CoreErrorResponseType>,
+    CoreTokenResponse,
+    CoreTokenIntrospectionResponse,
+    CoreRevocableToken,
+    CoreRevocationErrorResponse,
+    EndpointSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointMaybeSet,
+    EndpointMaybeSet,
+>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OidcProviderVisibility {
@@ -49,39 +73,26 @@ pub struct OidcSubprovider {
     pub revocation_url_params: Option<String>,
     pub user_info_url: Option<String>,
     pub json_web_key_set_url: Option<String>,
-    pub json_web_key_set: Option<
-        JsonWebKeySet<
-            CoreJwsSigningAlgorithm,
-            CoreJsonWebKeyType,
-            CoreJsonWebKeyUse,
-            CoreJsonWebKey,
-        >,
-    >,
+    pub json_web_key_set: Option<JsonWebKeySet<CoreJsonWebKey>>,
     #[builder(default = OidcProviderPkceCodeChallenge::S256)]
     pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
 }
 
 impl OidcSubprovider {
-    pub async fn oidc_client(&self) -> Result<CoreClient, ConfigurationError> {
-        let mut client = if let Some(discovery_url) = &self.discovery_url {
-            let provider_metadata = CoreProviderMetadata::discover_async(
+    pub async fn oidc_client(&self) -> Result<OidcClient, ConfigurationError> {
+        let async_http_client = async_http_client()?;
+
+        let provider_metadata = if let Some(discovery_url) = &self.discovery_url {
+            CoreProviderMetadata::discover_async(
                 // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
                 IssuerUrl::new(discovery_url.clone())
                     .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
-                async_http_client,
+                &async_http_client,
             )
             .await
-            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?;
-
-            CoreClient::from_provider_metadata(
-                provider_metadata,
-                ClientId::new(self.client_id.clone()),
-                self.client_secret.clone().map(ClientSecret::new),
-            )
+            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?
         } else {
-            CoreClient::new(
-                ClientId::new(self.client_id.clone()),
-                self.client_secret.clone().map(ClientSecret::new),
+            let mut provider_metadata = ProviderMetadata::new(
                 IssuerUrl::new(
                     self.issuer_url
                         .clone()
@@ -95,25 +106,59 @@ impl OidcSubprovider {
                         AuthUrl::new(authorization_url.clone())
                             .map_err(|err| ConfigurationError::Invalid(err.to_string()))
                     })?,
-                match &self.token_url {
-                    Some(token_url) => Some(
-                        TokenUrl::new(token_url.clone())
-                            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
-                    ),
-                    None => None,
-                },
-                match &self.user_info_url {
-                    Some(user_info_url) => Some(
-                        UserInfoUrl::new(user_info_url.clone())
-                            .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
-                    ),
-                    None => None,
-                },
+                // Dummy URL, never requested.
+                JsonWebKeySetUrl::new("http://127.0.0.1/never-requested".to_owned())
+                    .expect("Valid URL."),
+                vec![],
+                vec![],
+                // By default, signing algorithm is not checked, so allowing all possible values should behave the same.
+                vec![
+                    CoreJwsSigningAlgorithm::HmacSha256,
+                    CoreJwsSigningAlgorithm::HmacSha384,
+                    CoreJwsSigningAlgorithm::HmacSha512,
+                    CoreJwsSigningAlgorithm::RsaSsaPkcs1V15Sha256,
+                    CoreJwsSigningAlgorithm::RsaSsaPkcs1V15Sha384,
+                    CoreJwsSigningAlgorithm::RsaSsaPkcs1V15Sha512,
+                    CoreJwsSigningAlgorithm::EcdsaP256Sha256,
+                    CoreJwsSigningAlgorithm::EcdsaP384Sha384,
+                    CoreJwsSigningAlgorithm::EcdsaP521Sha512,
+                    CoreJwsSigningAlgorithm::RsaSsaPssSha256,
+                    CoreJwsSigningAlgorithm::RsaSsaPssSha384,
+                    CoreJwsSigningAlgorithm::RsaSsaPssSha512,
+                    CoreJwsSigningAlgorithm::EdDsa,
+                    CoreJwsSigningAlgorithm::None,
+                ],
+                EmptyAdditionalProviderMetadata {},
+            );
+
+            provider_metadata = provider_metadata.set_jwks(
                 self.json_web_key_set
                     .clone()
                     .ok_or(ConfigurationError::Missing("JSON Web Key Set".to_owned()))?,
-            )
+            );
+
+            if let Some(token_url) = &self.token_url {
+                provider_metadata = provider_metadata.set_token_endpoint(Some(
+                    TokenUrl::new(token_url.clone())
+                        .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                ));
+            }
+
+            if let Some(user_info_url) = &self.user_info_url {
+                provider_metadata = provider_metadata.set_userinfo_endpoint(Some(
+                    UserInfoUrl::new(user_info_url.clone())
+                        .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
+                ));
+            }
+
+            provider_metadata
         };
+
+        let mut client = CoreClient::from_provider_metadata(
+            provider_metadata,
+            ClientId::new(self.client_id.clone()),
+            self.client_secret.clone().map(ClientSecret::new),
+        );
 
         if let Some(redirect_url) = &self.redirect_url {
             client = client.set_redirect_uri(

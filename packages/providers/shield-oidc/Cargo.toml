@@ -12,7 +12,7 @@ version.workspace = true
 async-trait.workspace = true
 bon.workspace = true
 chrono.workspace = true
-oauth2 = { version = "4.4.2", features = ["pkce-plain"] }
+oauth2 = { version = "5.0.0", features = ["pkce-plain"] }
 openidconnect = "4.0.0"
 shield = { path = "../../core/shield", version = "0.0.4" }
 tracing.workspace = true

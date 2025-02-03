@@ -1,5 +1,6 @@
 mod builders;
 mod claims;
+mod client;
 mod connection;
 mod provider;
 mod storage;
