@@ -14,8 +14,9 @@ use shield::{
 use tracing::debug;
 
 use crate::{
-    claims::Claims, client::async_http_client, storage::OidcStorage, subprovider::OidcSubprovider,
-    CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
+    claims::Claims, client::async_http_client, session::OidcSession, storage::OidcStorage,
+    subprovider::OidcSubprovider, CreateOidcConnection, OidcConnection,
+    OidcProviderPkceCodeChallenge, UpdateOidcConnection,
 };
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";
@@ -245,11 +246,16 @@ impl<U: User> Provider for OidcProvider<U> {
 
             session_data.authentication = None;
 
-            session_data.csrf = Some(csrf_token.secret().clone());
-            session_data.nonce = Some(nonce.secret().clone());
-            session_data.verifier = pkce_code_challenge
-                .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone());
-            session_data.oidc_connection_id = None;
+            session_data.set_provider(
+                OIDC_PROVIDER_ID,
+                OidcSession {
+                    csrf: Some(csrf_token.secret().clone()),
+                    nonce: Some(nonce.secret().clone()),
+                    pkce_verifier: pkce_code_challenge
+                        .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
+                    oidc_connection_id: None,
+                },
+            )?;
         }
 
         Ok(Response::Redirect(auth_url.to_string()))
@@ -261,17 +267,18 @@ impl<U: User> Provider for OidcProvider<U> {
         session: Session,
         options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
-        let (pkce_verifier, csrf, nonce) = {
+        let OidcSession {
+            csrf,
+            nonce,
+            pkce_verifier,
+            ..
+        } = {
             let session_data = session.data();
             let session_data = session_data
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-            (
-                session_data.verifier.clone(),
-                session_data.csrf.clone(),
-                session_data.nonce.clone(),
-            )
+            session_data.provider(OIDC_PROVIDER_ID)?
         };
 
         let state = request
@@ -392,16 +399,21 @@ impl<U: User> Provider for OidcProvider<U> {
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-            session_data.csrf = None;
-            session_data.nonce = None;
-            session_data.verifier = None;
-
             session_data.authentication = Some(Authentication {
                 provider_id: self.id(),
                 subprovider_id: Some(subprovider.id),
                 user_id: user.id(),
             });
-            session_data.oidc_connection_id = Some(connection.id);
+
+            session_data.set_provider(
+                OIDC_PROVIDER_ID,
+                OidcSession {
+                    csrf: None,
+                    nonce: None,
+                    pkce_verifier: None,
+                    oidc_connection_id: Some(connection.id),
+                },
+            )?;
         }
 
         Ok(Response::Redirect(
