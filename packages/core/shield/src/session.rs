@@ -1,7 +1,10 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::error::SessionError;
 
@@ -43,15 +46,36 @@ impl Session {
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct SessionData {
-    pub authentication: Option<Authentication>,
-
     pub redirect_url: Option<String>,
+    pub authentication: Option<Authentication>,
+    pub providers: HashMap<String, String>,
+}
 
-    // TODO: Allow arbitrary data to be stored by providers?
-    pub csrf: Option<String>,
-    pub nonce: Option<String>,
-    pub verifier: Option<String>,
-    pub oidc_connection_id: Option<String>,
+impl SessionData {
+    pub fn provider<T: Default + DeserializeOwned>(
+        &self,
+        provider_id: &str,
+    ) -> Result<T, SessionError> {
+        match self.providers.get(provider_id) {
+            Some(value) => serde_json::from_str(value)
+                .map_err(|err| SessionError::Serialization(err.to_string())),
+            None => Ok(T::default()),
+        }
+    }
+
+    pub fn set_provider<T: Serialize>(
+        &mut self,
+        provider_id: &str,
+        value: T,
+    ) -> Result<(), SessionError> {
+        self.providers.insert(
+            provider_id.to_owned(),
+            serde_json::to_string(&value)
+                .map_err(|err| SessionError::Serialization(err.to_string()))?,
+        );
+
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]

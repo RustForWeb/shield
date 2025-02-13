@@ -3,6 +3,7 @@ mod claims;
 mod client;
 mod connection;
 mod provider;
+mod session;
 mod storage;
 mod subprovider;
 

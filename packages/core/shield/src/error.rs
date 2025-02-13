@@ -38,6 +38,8 @@ pub enum SessionError {
     Engine(String),
     #[error("{0}")]
     Lock(String),
+    #[error("{0}")]
+    Serialization(String),
 }
 
 #[derive(Debug, Error)]
