@@ -25,7 +25,9 @@ shield-leptos-axum = { path = "../../packages/integrations/shield-leptos-axum", 
     "utoipa",
 ], optional = true }
 shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
-shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
+shield-oidc = { path = "../../packages/providers/shield-oidc", features = [
+    "native-tls",
+], optional = true }
 time = "0.3.37"
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 tower-sessions = { workspace = true, optional = true }

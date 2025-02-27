@@ -27,7 +27,9 @@ shield = { path = "../../packages/core/shield" }
 shield-leptos = { path = "../../packages/integrations/shield-leptos" }
 shield-leptos-actix = { path = "../../packages/integrations/shield-leptos-actix", optional = true }
 shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
-shield-oidc = { path = "../../packages/providers/shield-oidc", optional = true }
+shield-oidc = { path = "../../packages/providers/shield-oidc", features = [
+    "native-tls",
+], optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 wasm-bindgen.workspace = true
