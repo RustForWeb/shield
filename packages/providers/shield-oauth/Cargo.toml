@@ -10,5 +10,10 @@ version.workspace = true
 
 [dependencies]
 async-trait.workspace = true
-oauth2 = "5.0.0"
+oauth2 = { version = "5.0.0", default-features = false, features = ["reqwest"] }
 shield = { path = "../../core/shield", version = "0.0.4" }
+
+[features]
+default = ["rustls-tls"]
+native-tls = ["oauth2/native-tls"]
+rustls-tls = ["oauth2/rustls-tls"]

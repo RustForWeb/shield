@@ -12,8 +12,17 @@ version.workspace = true
 async-trait.workspace = true
 bon.workspace = true
 chrono.workspace = true
-oauth2 = { version = "5.0.0", features = ["pkce-plain"] }
-openidconnect = "4.0.0"
+oauth2 = { version = "5.0.0", default-features = false, features = [
+    "pkce-plain",
+] }
+openidconnect = { version = "4.0.0", default-features = false, features = [
+    "reqwest",
+] }
 serde.workspace = true
 shield = { path = "../../core/shield", version = "0.0.4" }
 tracing.workspace = true
+
+[features]
+default = ["rustls-tls"]
+native-tls = ["oauth2/native-tls", "openidconnect/native-tls"]
+rustls-tls = ["oauth2/rustls-tls", "openidconnect/native-tls"]
