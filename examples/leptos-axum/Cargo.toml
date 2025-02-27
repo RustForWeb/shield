@@ -34,11 +34,7 @@ tracing-subscriber.workspace = true
 wasm-bindgen.workspace = true
 wasm-tracing.workspace = true
 utoipa.workspace = true
-utoipa-swagger-ui = { version = "=8.1.0", features = [
-    "axum",
-    "reqwest",
-    "vendored",
-] }
+utoipa-swagger-ui = { version = "=8.1.0", features = ["axum", "vendored"] }
 
 [features]
 default = ["ssr"]
