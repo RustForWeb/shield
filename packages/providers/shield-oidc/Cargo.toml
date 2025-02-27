@@ -23,6 +23,6 @@ shield = { path = "../../core/shield", version = "0.0.4" }
 tracing.workspace = true
 
 [features]
-default = ["rustls-tls"]
+default = []
 native-tls = ["oauth2/native-tls", "openidconnect/native-tls"]
 rustls-tls = ["oauth2/rustls-tls", "openidconnect/native-tls"]
