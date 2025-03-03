@@ -35,7 +35,7 @@ serde_json = "1.0.133"
 tokio = "1.42.0"
 tower-layer = "0.3.3"
 tower-service = "0.3.3"
-tower-sessions = "0.13.0"
+tower-sessions = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 utoipa = { version = "5.3.1", features = ["chrono", "uuid"] }
