@@ -3691,15 +3691,14 @@ dependencies = [
 
 [[package]]
 name = "ring"
-version = "0.17.8"
+version = "0.17.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c17fa4cb658e3583423e915b9f3acc01cceaee1860e33d59ebae66adc3a2dc0d"
+checksum = "a4689e6c2294d81e88dc6261c768b63bc4fcdb852be6d1352498b114f61383b7"
 dependencies = [
  "cc",
  "cfg-if",
  "getrandom 0.2.15",
  "libc",
- "spin",
  "untrusted",
  "windows-sys 0.52.0",
 ]
@@ -4404,27 +4403,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shield-credentials"
-version = "0.0.4"
-dependencies = [
- "shield",
-]
-
-[[package]]
-name = "shield-diesel"
-version = "0.0.4"
-dependencies = [
- "shield",
-]
-
-[[package]]
-name = "shield-email"
-version = "0.0.4"
-dependencies = [
- "shield",
-]
-
-[[package]]
 name = "shield-examples-leptos-actix"
 version = "0.0.4"
 dependencies = [
@@ -4529,15 +4507,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shield-oauth"
-version = "0.0.4"
-dependencies = [
- "async-trait",
- "oauth2",
- "shield",
-]
-
-[[package]]
 name = "shield-oidc"
 version = "0.0.4"
 dependencies = [
@@ -4565,13 +4534,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shield-sqlx"
-version = "0.0.4"
-dependencies = [
- "shield",
-]
-
-[[package]]
 name = "shield-tower"
 version = "0.0.4"
 dependencies = [
@@ -4581,13 +4543,6 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tower-sessions",
-]
-
-[[package]]
-name = "shield-webauthn"
-version = "0.0.4"
-dependencies = [
- "shield",
 ]
 
 [[package]]
