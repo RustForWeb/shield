@@ -1,5 +1,5 @@
 [package]
-name = "shield-disel"
+name = "shield-diesel"
 description = "Diesel storage for Shield."
 
 authors.workspace = true

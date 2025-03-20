@@ -389,8 +389,6 @@ impl<U: User> Provider for OidcProvider<U> {
             }
         };
 
-        debug!("signed in {:?} {:?}", user.id(), connection);
-
         session.renew().await?;
 
         {

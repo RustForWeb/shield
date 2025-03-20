@@ -7,7 +7,6 @@ use std::{
 use http::{Request, Response};
 use shield::{Session, Shield, User};
 use tower_service::Service;
-use tracing::debug;
 
 use crate::session::TowerSessionStorage;
 
@@ -79,8 +78,6 @@ where
                 Ok(user) => user,
                 Err(_err) => return Ok(Self::internal_server_error()),
             };
-
-            debug!("{:?}", user.as_ref().map(|user| user.id()));
 
             req.extensions_mut().insert(shield);
             req.extensions_mut().insert(shield_session);
