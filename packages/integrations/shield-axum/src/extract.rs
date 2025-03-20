@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use axum::{extract::FromRequestParts, http::request::Parts};
 use shield::{ConfigurationError, Session, Shield, ShieldError, User};
 
@@ -6,7 +5,6 @@ use crate::error::RouteError;
 
 pub struct ExtractShield<U: User>(pub Shield<U>);
 
-#[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractShield<U> {
     type Rejection = RouteError;
 
@@ -25,7 +23,6 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractS
 
 pub struct ExtractSession(pub Session);
 
-#[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
     type Rejection = RouteError;
 
@@ -44,7 +41,6 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
 
 pub struct ExtractUser<U: User>(pub Option<U>);
 
-#[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractUser<U> {
     type Rejection = RouteError;
 
@@ -63,7 +59,6 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractU
 
 pub struct UserRequired<U: User>(pub U);
 
-#[async_trait]
 impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for UserRequired<U> {
     type Rejection = RouteError;
 

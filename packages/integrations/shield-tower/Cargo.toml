@@ -15,4 +15,3 @@ shield = { path = "../../core/shield", version = "0.0.4" }
 tower-layer.workspace = true
 tower-service.workspace = true
 tower-sessions.workspace = true
-tracing.workspace = true

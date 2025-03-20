@@ -10,7 +10,6 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-async-std = { workspace = true, features = ["attributes", "tokio1"] }
 sea-orm = { workspace = true, features = [
     "macros",
     "runtime-tokio-native-tls",
@@ -27,3 +26,4 @@ sea-orm-migration = { workspace = true, features = [
 shield-sea-orm = { path = "../../packages/storage/shield-sea-orm", features = [
     "all-providers",
 ] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

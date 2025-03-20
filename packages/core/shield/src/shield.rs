@@ -1,7 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
 use futures::future::try_join_all;
-use tracing::debug;
 
 use crate::{
     error::{ProviderError, SessionError, ShieldError},
@@ -105,8 +104,6 @@ impl<U: User> Shield<U> {
         request: SignInRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        debug!("sign in {:?}", request);
-
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
@@ -137,8 +134,6 @@ impl<U: User> Shield<U> {
         request: SignInCallbackRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        debug!("sign in callback {:?}", request);
-
         let provider = match self.providers.get(&request.provider_id) {
             Some(provider) => provider,
             None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
@@ -170,8 +165,6 @@ impl<U: User> Shield<U> {
     }
 
     pub async fn sign_out(&self, session: Session) -> Result<Response, ShieldError> {
-        debug!("sign out");
-
         let authenticated = {
             let session_data = session.data();
             let session_data = session_data
