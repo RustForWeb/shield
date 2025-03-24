@@ -482,9 +482,9 @@ dependencies = [
 
 [[package]]
 name = "async-trait"
-version = "0.1.86"
+version = "0.1.88"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "644dd749086bf3771a2fbc5f256fdb982d53f011c7d5d560304eafeecebce79d"
+checksum = "e539d3fca749fcee5236ab05e93a52867dd549cc157c8cb7f99595f3cedffdb5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4403,6 +4403,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-credentials"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-diesel"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-email"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-examples-leptos-actix"
 version = "0.0.4"
 dependencies = [
@@ -4507,6 +4528,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-oauth"
+version = "0.0.4"
+dependencies = [
+ "async-trait",
+ "oauth2",
+ "shield",
+]
+
+[[package]]
 name = "shield-oidc"
 version = "0.0.4"
 dependencies = [
@@ -4534,6 +4564,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-sqlx"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-tower"
 version = "0.0.4"
 dependencies = [
@@ -4543,6 +4580,13 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tower-sessions",
+]
+
+[[package]]
+name = "shield-webauthn"
+version = "0.0.4"
+dependencies = [
+ "shield",
 ]
 
 [[package]]
