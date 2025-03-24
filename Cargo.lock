@@ -4179,9 +4179,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.139"
+version = "1.0.140"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44f86c3acccc9c65b153fe1b85a3be07fe5515274ec9f0653b4a0875731c72a6"
+checksum = "20068b6e96dc6c9bd23e01df8827e6c7e1f2fddd43c21810382803c136b99373"
 dependencies = [
  "itoa",
  "memchr",
@@ -4403,6 +4403,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-credentials"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-diesel"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-email"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-examples-leptos-actix"
 version = "0.0.4"
 dependencies = [
@@ -4507,6 +4528,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-oauth"
+version = "0.0.4"
+dependencies = [
+ "async-trait",
+ "oauth2",
+ "shield",
+]
+
+[[package]]
 name = "shield-oidc"
 version = "0.0.4"
 dependencies = [
@@ -4534,6 +4564,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-sqlx"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-tower"
 version = "0.0.4"
 dependencies = [
@@ -4543,6 +4580,13 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tower-sessions",
+]
+
+[[package]]
+name = "shield-webauthn"
+version = "0.0.4"
+dependencies = [
+ "shield",
 ]
 
 [[package]]
