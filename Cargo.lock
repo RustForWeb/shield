@@ -4403,6 +4403,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-credentials"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-diesel"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
+name = "shield-email"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-examples-leptos-actix"
 version = "0.0.4"
 dependencies = [
@@ -4507,6 +4528,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-oauth"
+version = "0.0.4"
+dependencies = [
+ "async-trait",
+ "oauth2",
+ "shield",
+]
+
+[[package]]
 name = "shield-oidc"
 version = "0.0.4"
 dependencies = [
@@ -4534,6 +4564,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-sqlx"
+version = "0.0.4"
+dependencies = [
+ "shield",
+]
+
+[[package]]
 name = "shield-tower"
 version = "0.0.4"
 dependencies = [
@@ -4543,6 +4580,13 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tower-sessions",
+]
+
+[[package]]
+name = "shield-webauthn"
+version = "0.0.4"
+dependencies = [
+ "shield",
 ]
 
 [[package]]
@@ -5614,9 +5658,9 @@ checksum = "e2eebbbfe4093922c2b6734d7c679ebfebd704a0d7e56dfcb0d05818ce28977d"
 
 [[package]]
 name = "uuid"
-version = "1.14.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93d59ca99a559661b96bf898d8fce28ed87935fd2bea9f05983c1464dd6c71b1"
+checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
 dependencies = [
  "getrandom 0.3.1",
  "serde",
