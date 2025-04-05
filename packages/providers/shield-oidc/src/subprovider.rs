@@ -1,15 +1,15 @@
 use bon::Builder;
 use openidconnect::{
+    AuthUrl, Client, ClientId, ClientSecret, EmptyAdditionalClaims,
+    EmptyAdditionalProviderMetadata, EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl,
+    JsonWebKeySet, JsonWebKeySetUrl, ProviderMetadata, RedirectUrl, StandardErrorResponse,
+    TokenUrl, UserInfoUrl,
     core::{
         CoreAuthDisplay, CoreAuthPrompt, CoreClient, CoreErrorResponseType, CoreGenderClaim,
         CoreJsonWebKey, CoreJweContentEncryptionAlgorithm, CoreJwsSigningAlgorithm,
         CoreProviderMetadata, CoreRevocableToken, CoreRevocationErrorResponse,
         CoreTokenIntrospectionResponse, CoreTokenResponse,
     },
-    AuthUrl, Client, ClientId, ClientSecret, EmptyAdditionalClaims,
-    EmptyAdditionalProviderMetadata, EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl,
-    JsonWebKeySet, JsonWebKeySetUrl, ProviderMetadata, RedirectUrl, StandardErrorResponse,
-    TokenUrl, UserInfoUrl,
 };
 use shield::{ConfigurationError, Subprovider};
 

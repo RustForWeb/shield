@@ -1,6 +1,6 @@
 use crate::subprovider::{
-    oidc_subprovider_builder::{SetClientId, SetDiscoveryUrl, SetIconUrl, SetId, SetName},
     OidcSubprovider, OidcSubproviderBuilder,
+    oidc_subprovider_builder::{SetClientId, SetDiscoveryUrl, SetIconUrl, SetId, SetName},
 };
 
 pub struct Google {}

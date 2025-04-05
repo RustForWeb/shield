@@ -5,7 +5,7 @@ use axum::{
 };
 use shield::{ShieldError, User};
 
-use crate::{error::RouteError, ExtractShield, ExtractUser};
+use crate::{ExtractShield, ExtractUser, error::RouteError};
 
 pub async fn auth_required<U: User>(
     ExtractUser(user): ExtractUser<U>,

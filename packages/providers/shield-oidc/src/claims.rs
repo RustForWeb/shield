@@ -1,6 +1,6 @@
 use openidconnect::{
-    core::CoreGenderClaim, EmptyAdditionalClaims, EndUserEmail, EndUserName, IdTokenClaims,
-    LocalizedClaim, SubjectIdentifier, UserInfoClaims,
+    EmptyAdditionalClaims, EndUserEmail, EndUserName, IdTokenClaims, LocalizedClaim,
+    SubjectIdentifier, UserInfoClaims, core::CoreGenderClaim,
 };
 
 /// Unified interface for [`IdTokenClaims`] and [`UserInfoClaims`].

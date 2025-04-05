@@ -178,7 +178,7 @@ impl<U: User> Shield<U> {
             let provider = match self.providers.get(&authenticated.provider_id) {
                 Some(provider) => provider,
                 None => {
-                    return Err(ProviderError::ProviderNotFound(authenticated.provider_id).into())
+                    return Err(ProviderError::ProviderNotFound(authenticated.provider_id).into());
                 }
             };
 
@@ -243,9 +243,9 @@ mod tests {
     use std::sync::Arc;
 
     use crate::{
-        provider::tests::{TestProvider, TEST_PROVIDER_ID},
-        storage::tests::{TestStorage, TEST_STORAGE_ID},
         ShieldOptions,
+        provider::tests::{TEST_PROVIDER_ID, TestProvider},
+        storage::tests::{TEST_STORAGE_ID, TestStorage},
     };
 
     use super::Shield;

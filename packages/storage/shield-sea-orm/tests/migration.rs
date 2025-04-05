@@ -21,39 +21,45 @@ const BACKENDS: &[(&str, &str)] = &[
 pub fn migrations() {
     for (backend, url) in BACKENDS {
         // Check up migrations
-        assert!(Command::new("sea-orm-cli")
-            .arg("migrate")
-            .arg("fresh")
-            .arg("-u")
-            .arg(url)
-            .arg("-d")
-            .arg(example_path())
-            .status()
-            .unwrap_or_else(|_| panic!("{} up migrations should succeed.", backend))
-            .success());
+        assert!(
+            Command::new("sea-orm-cli")
+                .arg("migrate")
+                .arg("fresh")
+                .arg("-u")
+                .arg(url)
+                .arg("-d")
+                .arg(example_path())
+                .status()
+                .unwrap_or_else(|_| panic!("{} up migrations should succeed.", backend))
+                .success()
+        );
 
         // Check down migrations
-        assert!(Command::new("sea-orm-cli")
-            .arg("migrate")
-            .arg("refresh")
-            .arg("-u")
-            .arg(url)
-            .arg("-d")
-            .arg(example_path())
-            .status()
-            .unwrap_or_else(|_| panic!("{} down migrations should succeed.", backend))
-            .success());
+        assert!(
+            Command::new("sea-orm-cli")
+                .arg("migrate")
+                .arg("refresh")
+                .arg("-u")
+                .arg(url)
+                .arg("-d")
+                .arg(example_path())
+                .status()
+                .unwrap_or_else(|_| panic!("{} down migrations should succeed.", backend))
+                .success()
+        );
 
         // Cleanup
-        assert!(Command::new("sea-orm-cli")
-            .arg("migrate")
-            .arg("reset")
-            .arg("-u")
-            .arg(url)
-            .arg("-d")
-            .arg(example_path())
-            .status()
-            .unwrap_or_else(|_| panic!("{} cleanup should succeed.", backend))
-            .success());
+        assert!(
+            Command::new("sea-orm-cli")
+                .arg("migrate")
+                .arg("reset")
+                .arg("-u")
+                .arg(url)
+                .arg("-d")
+                .arg(example_path())
+                .status()
+                .unwrap_or_else(|_| panic!("{} cleanup should succeed.", backend))
+                .success()
+        );
     }
 }
