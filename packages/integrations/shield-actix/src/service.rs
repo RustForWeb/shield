@@ -1,8 +1,8 @@
 use std::task::{Context, Poll};
 
 use actix_web::{
-    dev::{Service, ServiceRequest, ServiceResponse},
     Error, HttpMessage,
+    dev::{Service, ServiceRequest, ServiceResponse},
 };
 use shield::{Shield, User};
 

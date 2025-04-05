@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use async_trait::async_trait;
-use sea_orm::{prelude::Uuid, DatabaseConnection, ModelTrait};
+use sea_orm::{DatabaseConnection, ModelTrait, prelude::Uuid};
 use serde::Serialize;
 use shield::{EmailAddress, StorageError};
 

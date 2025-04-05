@@ -1,6 +1,6 @@
-use actix_utils::future::{ready, Ready};
+use actix_utils::future::{Ready, ready};
 use actix_web::{
-    dev::Payload, error::ErrorInternalServerError, Error, FromRequest, HttpMessage, HttpRequest,
+    Error, FromRequest, HttpMessage, HttpRequest, dev::Payload, error::ErrorInternalServerError,
 };
 use shield::{Session, Shield, User};
 

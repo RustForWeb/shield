@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use sea_orm::{
-    prelude::Uuid, ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait,
-    QueryFilter, TransactionError, TransactionTrait,
+    ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
+    TransactionError, TransactionTrait, prelude::Uuid,
 };
 use shield::{CreateEmailAddress, CreateUser, Storage, StorageError, UpdateUser};
 

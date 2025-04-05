@@ -4,7 +4,7 @@ use std::{
 };
 
 use async_trait::async_trait;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 use crate::error::SessionError;
 

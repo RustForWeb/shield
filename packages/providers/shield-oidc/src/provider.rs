@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use openidconnect::{
-    core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
-    url::form_urlencoded::parse,
     AuthorizationCode, CsrfToken, EmptyAdditionalClaims, Nonce, OAuth2TokenResponse,
     PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse, UserInfoClaims,
+    core::{CoreAuthenticationFlow, CoreGenderClaim, CoreTokenResponse},
+    url::form_urlencoded::parse,
 };
 use shield::{
     Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError,
@@ -14,9 +14,9 @@ use shield::{
 use tracing::debug;
 
 use crate::{
+    CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
     claims::Claims, client::async_http_client, session::OidcSession, storage::OidcStorage,
-    subprovider::OidcSubprovider, CreateOidcConnection, OidcConnection,
-    OidcProviderPkceCodeChallenge, UpdateOidcConnection,
+    subprovider::OidcSubprovider,
 };
 
 pub const OIDC_PROVIDER_ID: &str = "oidc";

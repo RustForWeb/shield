@@ -3,12 +3,12 @@
 async fn main() {
     use std::sync::Arc;
 
-    use axum::{middleware::from_fn, routing::get, Router};
-    use leptos::config::{get_configuration, LeptosOptions};
-    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use axum::{Router, middleware::from_fn, routing::get};
+    use leptos::config::{LeptosOptions, get_configuration};
+    use leptos_axum::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
     use shield_examples_leptos_axum::app::*;
-    use shield_leptos_axum::{auth_required, provide_axum_integration, AuthRoutes, ShieldLayer};
+    use shield_leptos_axum::{AuthRoutes, ShieldLayer, auth_required, provide_axum_integration};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcProvider};
     use time::Duration;
@@ -65,7 +65,7 @@ async fn main() {
 
     // Initialize router
     let router = Router::new()
-        .route("/api/protected", get(|| async { "Protected" }))
+        .route("/api/protected", get(async || "Protected"))
         .route_layer(from_fn(auth_required::<User>))
         .nest("/api/auth", AuthRoutes::router::<User, LeptosOptions>())
         .merge(SwaggerUi::new("/api-docs").url("/api/openapi.json", Docs::openapi()))

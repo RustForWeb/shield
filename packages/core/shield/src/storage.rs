@@ -33,7 +33,7 @@ pub(crate) mod tests {
     use crate::{
         error::StorageError,
         storage::Storage,
-        user::{tests::TestUser, CreateEmailAddress, CreateUser, UpdateUser},
+        user::{CreateEmailAddress, CreateUser, UpdateUser, tests::TestUser},
     };
 
     pub const TEST_STORAGE_ID: &str = "test";

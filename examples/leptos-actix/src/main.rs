@@ -4,13 +4,13 @@ async fn main() -> std::io::Result<()> {
     use std::sync::Arc;
 
     use actix_files::Files;
-    use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-    use actix_web::{cookie::Key, web::Data, App, HttpServer};
+    use actix_session::{SessionMiddleware, storage::CookieSessionStore};
+    use actix_web::{App, HttpServer, cookie::Key, web::Data};
     use leptos::config::get_configuration;
-    use leptos_actix::{generate_route_list, LeptosRoutes};
+    use leptos_actix::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
     use shield_examples_leptos_actix::app::*;
-    use shield_leptos_actix::{provide_actix_integration, ShieldMiddleware};
+    use shield_leptos_actix::{ShieldMiddleware, provide_actix_integration};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcProvider};
     use tracing::{info, level_filters::LevelFilter};

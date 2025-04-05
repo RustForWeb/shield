@@ -1,7 +1,7 @@
-use actix_utils::future::{ready, Ready};
+use actix_utils::future::{Ready, ready};
 use actix_web::{
-    dev::{Service, ServiceRequest, ServiceResponse, Transform},
     Error,
+    dev::{Service, ServiceRequest, ServiceResponse, Transform},
 };
 use shield::{Shield, User};
 

@@ -71,11 +71,11 @@ pub(crate) mod tests {
     use async_trait::async_trait;
 
     use crate::{
+        ShieldOptions,
         error::ShieldError,
         request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
         response::Response,
         session::Session,
-        ShieldOptions,
     };
 
     use super::{Provider, Subprovider};
