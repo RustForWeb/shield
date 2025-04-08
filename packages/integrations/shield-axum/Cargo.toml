@@ -18,4 +18,4 @@ utoipa = { workspace = true, features = ["axum_extras"], optional = true }
 
 [features]
 default = []
-utoipa = ["dep:utoipa"]
+utoipa = ["dep:utoipa", "shield/utoipa"]
