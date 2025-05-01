@@ -10,6 +10,7 @@ version.workspace = true
 
 [dependencies]
 async-trait.workspace = true
+chrono.workspace = true
 sea-orm.workspace = true
 sea-orm-migration.workspace = true
 serde = { workspace = true, features = ["derive"] }
@@ -20,6 +21,7 @@ shield = { path = "../../core/shield", version = "0.0.4" }
 # shield-oauth = { path = "../../providers/shield-oauth", version = "0.0.2", optional = true }
 shield-oidc = { path = "../../providers/shield-oidc", version = "0.0.4", optional = true }
 # shield-webauthn = { path = "../../providers/shield-webauthn", version = "0.0.2", optional = true }
+utoipa = { workspace = true, optional = true }
 
 [features]
 default = []
@@ -39,3 +41,4 @@ provider-email = []
 provider-oauth = []
 provider-oidc = ["dep:shield-oidc"]
 # provider-webauthn = ["dep:shield-webauthn"]
+utoipa = ["dep:utoipa", "shield/utoipa"]

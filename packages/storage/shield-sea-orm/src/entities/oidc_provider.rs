@@ -4,6 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
@@ -19,6 +20,7 @@ pub enum OidcProviderPkceCodeChallenge {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "oidc_provider_type")]
 pub enum OidcProviderType {
     #[sea_orm(string_value = "custom")]
@@ -26,6 +28,7 @@ pub enum OidcProviderType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
@@ -39,12 +42,13 @@ pub enum OidcProviderVisibility {
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema), schema(as = OidcProvider))]
 #[sea_orm(table_name = "oidc_provider")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeWithTimeZone,
-    pub updated_at: DateTimeWithTimeZone,
+    pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub updated_at: chrono::DateTime<chrono::FixedOffset>,
     pub name: String,
     pub slug: Option<String>,
     pub r#type: OidcProviderType,
