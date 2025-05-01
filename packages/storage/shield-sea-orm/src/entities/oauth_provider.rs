@@ -4,6 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
@@ -19,6 +20,7 @@ pub enum OauthProviderPkceCodeChallenge {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
@@ -30,6 +32,7 @@ pub enum OauthProviderType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[sea_orm(
     rs_type = "String",
     db_type = "Enum",
@@ -43,12 +46,13 @@ pub enum OauthProviderVisibility {
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema), schema(as = OauthProvider))]
 #[sea_orm(table_name = "oauth_provider")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeWithTimeZone,
-    pub updated_at: DateTimeWithTimeZone,
+    pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub updated_at: chrono::DateTime<chrono::FixedOffset>,
     pub name: String,
     pub slug: Option<String>,
     pub r#type: OauthProviderType,

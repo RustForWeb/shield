@@ -4,15 +4,16 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema), schema(as = EmailAuthToken))]
 #[sea_orm(table_name = "email_auth_token")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTimeWithTimeZone,
-    pub updated_at: DateTimeWithTimeZone,
+    pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub updated_at: chrono::DateTime<chrono::FixedOffset>,
     pub email: String,
     pub token: String,
-    pub expired_at: DateTimeWithTimeZone,
+    pub expired_at: chrono::DateTime<chrono::FixedOffset>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

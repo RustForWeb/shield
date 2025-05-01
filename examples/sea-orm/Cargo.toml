@@ -25,5 +25,6 @@ sea-orm-migration = { workspace = true, features = [
 ] }
 shield-sea-orm = { path = "../../packages/storage/shield-sea-orm", features = [
     "all-providers",
+    "utoipa",
 ] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

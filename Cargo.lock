@@ -4562,12 +4562,14 @@ name = "shield-sea-orm"
 version = "0.0.4"
 dependencies = [
  "async-trait",
+ "chrono",
  "sea-orm",
  "sea-orm-migration",
  "serde",
  "serde_json",
  "shield",
  "shield-oidc",
+ "utoipa",
 ]
 
 [[package]]
