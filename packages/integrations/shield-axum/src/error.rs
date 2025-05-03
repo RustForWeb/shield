@@ -35,6 +35,12 @@ impl ErrorBody {
 #[derive(Debug)]
 pub struct RouteError(ShieldError);
 
+impl RouteError {
+    pub fn inner(&self) -> &ShieldError {
+        &self.0
+    }
+}
+
 impl IntoResponse for RouteError {
     fn into_response(self) -> Response {
         let status_code = match &self.0 {
