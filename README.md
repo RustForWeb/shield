@@ -14,8 +14,8 @@ Inspired by [Auth.js](https://authjs.dev/).
 
 This project is available under the [MIT license](LICENSE.md).
 
-## Rust For Web
+## Rust for Web
 
-The Shield project is part of [Rust For Web](https://github.com/RustForWeb).
+The Shield project is part of [Rust for Web](https://github.com/RustForWeb).
 
-[Rust For Web](https://github.com/RustForWeb) creates and ports web libraries for Rust. All projects are free and open source.
+[Rust for Web](https://github.com/RustForWeb) creates and ports web libraries for Rust. All projects are free and open source.
