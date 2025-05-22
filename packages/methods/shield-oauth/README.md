@@ -1,6 +1,6 @@
-<h1 align="center">Shield Email</h1>
+<h1 align="center">Shield OAuth</h1>
 
-Email provider for Shield.
+OAuth method for Shield.
 
 ## Documentation
 

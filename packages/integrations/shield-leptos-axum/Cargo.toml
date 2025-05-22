@@ -12,9 +12,9 @@ version.workspace = true
 async-trait.workspace = true
 leptos.workspace = true
 leptos_axum.workspace = true
-shield = { path = "../../core/shield", version = "0.0.4" }
-shield-axum = { path = "../../integrations/shield-axum", version = "0.0.4" }
-shield-leptos = { path = "../../integrations/shield-leptos", version = "0.0.4" }
+shield.workspace = true
+shield-axum.workspace = true
+shield-leptos.workspace = true
 
 [features]
 default = []

@@ -12,7 +12,7 @@ async fn main() -> std::io::Result<()> {
     use shield_examples_leptos_actix::app::*;
     use shield_leptos_actix::{ShieldMiddleware, provide_actix_integration};
     use shield_memory::{MemoryStorage, User};
-    use shield_oidc::{Keycloak, OidcProvider};
+    use shield_oidc::{Keycloak, OidcMethod};
     use tracing::{info, level_filters::LevelFilter};
 
     // Initialize tracing
@@ -44,7 +44,7 @@ async fn main() -> std::io::Result<()> {
         let shield = Shield::new(
             shield_storage.clone(),
             vec![Arc::new(
-                OidcProvider::new(shield_storage).with_subproviders([Keycloak::builder(
+                OidcMethod::new(shield_storage).with_providers([Keycloak::builder(
                     "keycloak",
                     "http://localhost:18080/realms/Shield",
                     "client1",

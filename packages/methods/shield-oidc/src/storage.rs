@@ -4,17 +4,17 @@ use shield::{Storage, StorageError, User};
 
 use crate::{
     connection::{CreateOidcConnection, OidcConnection, UpdateOidcConnection},
-    subprovider::OidcSubprovider,
+    provider::OidcProvider,
 };
 
 #[async_trait]
 pub trait OidcStorage<U: User>: Storage<U> + Sync {
-    async fn oidc_subproviders(&self) -> Result<Vec<OidcSubprovider>, StorageError>;
+    async fn oidc_providers(&self) -> Result<Vec<OidcProvider>, StorageError>;
 
-    async fn oidc_subprovider_by_id_or_slug(
+    async fn oidc_provider_by_id_or_slug(
         &self,
-        subprovider_id: &str,
-    ) -> Result<Option<OidcSubprovider>, StorageError>;
+        provider_id: &str,
+    ) -> Result<Option<OidcProvider>, StorageError>;
 
     async fn oidc_connection_by_id(
         &self,
@@ -23,7 +23,7 @@ pub trait OidcStorage<U: User>: Storage<U> + Sync {
 
     async fn oidc_connection_by_identifier(
         &self,
-        subprovider_id: &str,
+        provider_id: &str,
         identifier: &str,
     ) -> Result<Option<OidcConnection>, StorageError>;
 

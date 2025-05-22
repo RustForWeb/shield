@@ -1,6 +1,6 @@
-<h1 align="center">Shield WebAuthn</h1>
+<h1 align="center">Shield OpenID Connect</h1>
 
-WebAuthn provider for Shield.
+OpenID Connect method for Shield.
 
 ## Documentation
 

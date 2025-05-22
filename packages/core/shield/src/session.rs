@@ -48,28 +48,28 @@ impl Session {
 pub struct SessionData {
     pub redirect_url: Option<String>,
     pub authentication: Option<Authentication>,
-    pub providers: HashMap<String, String>,
+    pub methods: HashMap<String, String>,
 }
 
 impl SessionData {
-    pub fn provider<T: Default + DeserializeOwned>(
+    pub fn method<T: Default + DeserializeOwned>(
         &self,
-        provider_id: &str,
+        method_id: &str,
     ) -> Result<T, SessionError> {
-        match self.providers.get(provider_id) {
+        match self.methods.get(method_id) {
             Some(value) => serde_json::from_str(value)
                 .map_err(|err| SessionError::Serialization(err.to_string())),
             None => Ok(T::default()),
         }
     }
 
-    pub fn set_provider<T: Serialize>(
+    pub fn set_method<T: Serialize>(
         &mut self,
-        provider_id: &str,
+        method_id: &str,
         value: T,
     ) -> Result<(), SessionError> {
-        self.providers.insert(
-            provider_id.to_owned(),
+        self.methods.insert(
+            method_id.to_owned(),
             serde_json::to_string(&value)
                 .map_err(|err| SessionError::Serialization(err.to_string()))?,
         );
@@ -80,7 +80,7 @@ impl SessionData {
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Authentication {
-    pub provider_id: String,
-    pub subprovider_id: Option<String>,
+    pub method_id: String,
+    pub provider_id: Option<String>,
     pub user_id: String,
 }

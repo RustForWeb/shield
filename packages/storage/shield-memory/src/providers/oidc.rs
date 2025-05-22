@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use shield::StorageError;
 use shield_oidc::{
-    CreateOidcConnection, OidcConnection, OidcStorage, OidcSubprovider, UpdateOidcConnection,
+    CreateOidcConnection, OidcConnection, OidcProvider, OidcStorage, UpdateOidcConnection,
 };
 use uuid::Uuid;
 
@@ -16,14 +16,14 @@ pub struct OidcMemoryStorage {
 
 #[async_trait]
 impl OidcStorage<User> for MemoryStorage {
-    async fn oidc_subproviders(&self) -> Result<Vec<OidcSubprovider>, StorageError> {
+    async fn oidc_providers(&self) -> Result<Vec<OidcProvider>, StorageError> {
         Ok(vec![])
     }
 
-    async fn oidc_subprovider_by_id_or_slug(
+    async fn oidc_provider_by_id_or_slug(
         &self,
-        _subprovider_id: &str,
-    ) -> Result<Option<OidcSubprovider>, StorageError> {
+        _provider_id: &str,
+    ) -> Result<Option<OidcProvider>, StorageError> {
         Ok(None)
     }
 
@@ -43,7 +43,7 @@ impl OidcStorage<User> for MemoryStorage {
 
     async fn oidc_connection_by_identifier(
         &self,
-        subprovider_id: &str,
+        provider_id: &str,
         identifier: &str,
     ) -> Result<Option<OidcConnection>, StorageError> {
         Ok(self
@@ -53,7 +53,7 @@ impl OidcStorage<User> for MemoryStorage {
             .map_err(|err| StorageError::Engine(err.to_string()))?
             .iter()
             .find(|connection| {
-                connection.subprovider_id == subprovider_id && connection.identifier == identifier
+                connection.provider_id == provider_id && connection.identifier == identifier
             })
             .cloned())
     }
@@ -71,7 +71,7 @@ impl OidcStorage<User> for MemoryStorage {
             id_token: connection.id_token,
             expired_at: connection.expired_at,
             scopes: connection.scopes,
-            subprovider_id: connection.subprovider_id,
+            provider_id: connection.provider_id,
             user_id: connection.user_id,
         };
 

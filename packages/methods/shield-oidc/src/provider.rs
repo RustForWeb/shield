@@ -11,9 +11,9 @@ use openidconnect::{
         CoreTokenIntrospectionResponse, CoreTokenResponse,
     },
 };
-use shield::{ConfigurationError, Subprovider};
+use shield::{ConfigurationError, Provider};
 
-use crate::{client::async_http_client, provider::OIDC_PROVIDER_ID};
+use crate::{client::async_http_client, method::OIDC_METHOD_ID};
 
 type OidcClient = Client<
     EmptyAdditionalClaims,
@@ -50,7 +50,7 @@ pub enum OidcProviderPkceCodeChallenge {
 
 #[derive(Builder, Clone, Debug)]
 #[builder(on(String, into), state_mod(vis = "pub(crate)"))]
-pub struct OidcSubprovider {
+pub struct OidcProvider {
     pub id: String,
     pub name: String,
     pub slug: Option<String>,
@@ -78,7 +78,7 @@ pub struct OidcSubprovider {
     pub pkce_code_challenge: OidcProviderPkceCodeChallenge,
 }
 
-impl OidcSubprovider {
+impl OidcProvider {
     pub async fn oidc_client(&self) -> Result<OidcClient, ConfigurationError> {
         let async_http_client = async_http_client()?;
 
@@ -173,9 +173,9 @@ impl OidcSubprovider {
     }
 }
 
-impl Subprovider for OidcSubprovider {
-    fn provider_id(&self) -> String {
-        OIDC_PROVIDER_ID.to_owned()
+impl Provider for OidcProvider {
+    fn method_id(&self) -> String {
+        OIDC_METHOD_ID.to_owned()
     }
 
     fn id(&self) -> Option<String> {

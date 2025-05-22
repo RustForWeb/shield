@@ -10,7 +10,7 @@ pub struct OidcConnection {
     pub id_token: Option<String>,
     pub expired_at: Option<DateTime<FixedOffset>>,
     pub scopes: Option<Vec<String>>,
-    pub subprovider_id: String,
+    pub provider_id: String,
     pub user_id: String,
 }
 
@@ -23,7 +23,7 @@ pub struct CreateOidcConnection {
     pub id_token: Option<String>,
     pub expired_at: Option<DateTime<FixedOffset>>,
     pub scopes: Option<Vec<String>>,
-    pub subprovider_id: String,
+    pub provider_id: String,
     pub user_id: String,
 }
 

@@ -1,5 +1,6 @@
 mod error;
 mod form;
+mod method;
 mod options;
 mod provider;
 mod request;
@@ -12,6 +13,7 @@ mod user;
 
 pub use error::*;
 pub use form::*;
+pub use method::*;
 pub use options::*;
 pub use provider::*;
 pub use request::*;

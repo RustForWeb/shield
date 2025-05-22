@@ -13,7 +13,7 @@ use crate::{
     feature = "utoipa",
     utoipa::path(
         post,
-        path = "/sign-in/callback/{providerId}/{subproviderId}",
+        path = "/sign-in/callback/{methodId}/{providerId}",
         operation_id = "signInCallback",
         description = "Callback after signing in with authentication provider.",
         params(
@@ -29,8 +29,8 @@ use crate::{
 )]
 pub async fn sign_in_callback<U: User>(
     Path(AuthPathParams {
+        method_id,
         provider_id,
-        subprovider_id,
     }): Path<AuthPathParams>,
     Query(query): Query<Value>,
     ExtractShield(shield): ExtractShield<U>,
@@ -39,8 +39,8 @@ pub async fn sign_in_callback<U: User>(
     let response = shield
         .sign_in_callback(
             SignInCallbackRequest {
+                method_id,
                 provider_id,
-                subprovider_id,
                 redirect_url: None,
                 query: Some(query),
                 data: None,

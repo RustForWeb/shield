@@ -1,7 +1,7 @@
+mod method;
 mod provider;
 mod storage;
-mod subprovider;
 
+pub use method::*;
 pub use provider::*;
 pub use storage::*;
-pub use subprovider::*;

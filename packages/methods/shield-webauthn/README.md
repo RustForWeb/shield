@@ -1,6 +1,6 @@
-<h1 align="center">Shield OAuth</h1>
+<h1 align="center">Shield WebAuthn</h1>
 
-OAuth provider for Shield.
+WebAuthn method for Shield.
 
 ## Documentation
 

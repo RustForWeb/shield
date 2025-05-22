@@ -6,15 +6,15 @@ pub mod user;
 #[cfg(feature = "entity")]
 pub mod entity;
 
-#[cfg(feature = "provider-email")]
+#[cfg(feature = "method-email")]
 pub mod email_auth_token;
 
-#[cfg(feature = "provider-oauth")]
+#[cfg(feature = "method-oauth")]
 pub mod oauth_provider;
-#[cfg(feature = "provider-oauth")]
+#[cfg(feature = "method-oauth")]
 pub mod oauth_provider_connection;
 
-#[cfg(feature = "provider-oidc")]
+#[cfg(feature = "method-oidc")]
 pub mod oidc_provider;
-#[cfg(feature = "provider-oidc")]
+#[cfg(feature = "method-oidc")]
 pub mod oidc_provider_connection;

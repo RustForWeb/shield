@@ -4,8 +4,8 @@ use serde_json::Value;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignInRequest {
-    pub provider_id: String,
-    pub subprovider_id: Option<String>,
+    pub method_id: String,
+    pub provider_id: Option<String>,
     pub redirect_url: Option<String>,
     pub data: Option<Value>,
     pub form_data: Option<Value>,
@@ -14,8 +14,8 @@ pub struct SignInRequest {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignInCallbackRequest {
-    pub provider_id: String,
-    pub subprovider_id: Option<String>,
+    pub method_id: String,
+    pub provider_id: Option<String>,
     pub redirect_url: Option<String>,
     pub query: Option<Value>,
     pub data: Option<Value>,
@@ -24,6 +24,6 @@ pub struct SignInCallbackRequest {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignOutRequest {
-    pub provider_id: String,
-    pub subprovider_id: Option<String>,
+    pub method_id: String,
+    pub provider_id: Option<String>,
 }

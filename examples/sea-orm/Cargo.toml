@@ -23,8 +23,5 @@ sea-orm-migration = { workspace = true, features = [
     "sqlx-postgres",
     "sqlx-sqlite",
 ] }
-shield-sea-orm = { path = "../../packages/storage/shield-sea-orm", features = [
-    "all-providers",
-    "utoipa",
-] }
+shield-sea-orm = { workspace = true, features = ["all-methods", "utoipa"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

@@ -12,8 +12,8 @@ version.workspace = true
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-shield = { path = "../../core/shield", version = "0.0.4" }
-shield-tower = { path = "../shield-tower", version = "0.0.4" }
+shield.workspace = true
+shield-tower.workspace = true
 utoipa = { workspace = true, features = ["axum_extras"], optional = true }
 
 [features]
