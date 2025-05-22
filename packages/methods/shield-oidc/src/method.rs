@@ -7,62 +7,59 @@ use openidconnect::{
     url::form_urlencoded::parse,
 };
 use shield::{
-    Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Provider, ProviderError,
-    Response, Session, SessionError, ShieldError, ShieldOptions, SignInCallbackRequest,
-    SignInRequest, SignOutRequest, Subprovider, UpdateUser, User,
+    Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Method, Provider,
+    ProviderError, Response, Session, SessionError, ShieldError, ShieldOptions,
+    SignInCallbackRequest, SignInRequest, SignOutRequest, UpdateUser, User,
 };
 use tracing::debug;
 
 use crate::{
     CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, UpdateOidcConnection,
-    claims::Claims, client::async_http_client, session::OidcSession, storage::OidcStorage,
-    subprovider::OidcSubprovider,
+    claims::Claims, client::async_http_client, provider::OidcProvider, session::OidcSession,
+    storage::OidcStorage,
 };
 
-pub const OIDC_PROVIDER_ID: &str = "oidc";
+pub const OIDC_METHOD_ID: &str = "oidc";
 
-pub struct OidcProvider<U: User> {
-    subproviders: Vec<OidcSubprovider>,
+pub struct OidcMethod<U: User> {
+    providers: Vec<OidcProvider>,
     storage: Box<dyn OidcStorage<U>>,
 }
 
-impl<U: User> OidcProvider<U> {
+impl<U: User> OidcMethod<U> {
     pub fn new<S: OidcStorage<U> + 'static>(storage: S) -> Self {
         Self {
-            subproviders: vec![],
+            providers: vec![],
             storage: Box::new(storage),
         }
     }
 
-    pub fn with_subproviders<I: IntoIterator<Item = OidcSubprovider>>(
-        mut self,
-        subproviders: I,
-    ) -> Self {
-        self.subproviders = subproviders.into_iter().collect();
+    pub fn with_providers<I: IntoIterator<Item = OidcProvider>>(mut self, providers: I) -> Self {
+        self.providers = providers.into_iter().collect();
         self
     }
 
-    async fn oidc_subprovider_by_id_or_slug(
+    async fn oidc_provider_by_id_or_slug(
         &self,
-        subprovider_id: &str,
-    ) -> Result<OidcSubprovider, ShieldError> {
-        if let Some(subprovider) = self
-            .subproviders
+        provider_id: &str,
+    ) -> Result<OidcProvider, ShieldError> {
+        if let Some(provider) = self
+            .providers
             .iter()
-            .find(|subprovider| subprovider.id == subprovider_id)
+            .find(|provider| provider.id == provider_id)
         {
-            return Ok(subprovider.clone());
+            return Ok(provider.clone());
         }
 
-        if let Some(subprovider) = self
+        if let Some(provider) = self
             .storage
-            .oidc_subprovider_by_id_or_slug(subprovider_id)
+            .oidc_provider_by_id_or_slug(provider_id)
             .await?
         {
-            return Ok(subprovider);
+            return Ok(provider);
         }
 
-        Err(ProviderError::SubproviderNotFound(subprovider_id.to_owned()).into())
+        Err(ProviderError::ProviderNotFound(provider_id.to_owned()).into())
     }
 
     async fn create_user(&self, claims: &Claims) -> Result<U, ShieldError> {
@@ -118,7 +115,7 @@ impl<U: User> OidcProvider<U> {
 
     async fn create_oidc_connection(
         &self,
-        subprovider_id: String,
+        provider_id: String,
         user_id: String,
         identifier: String,
         token_response: CoreTokenResponse,
@@ -135,7 +132,7 @@ impl<U: User> OidcProvider<U> {
                 id_token,
                 expired_at,
                 scopes,
-                subprovider_id,
+                provider_id,
                 user_id,
             })
             .await
@@ -166,30 +163,30 @@ impl<U: User> OidcProvider<U> {
 }
 
 #[async_trait]
-impl<U: User> Provider for OidcProvider<U> {
+impl<U: User> Method for OidcMethod<U> {
     fn id(&self) -> String {
-        OIDC_PROVIDER_ID.to_owned()
+        OIDC_METHOD_ID.to_owned()
     }
 
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        let subproviders = self
-            .subproviders
+    async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError> {
+        let providers = self
+            .providers
             .iter()
             .cloned()
-            .chain(self.storage.oidc_subproviders().await?);
+            .chain(self.storage.oidc_providers().await?);
 
-        Ok(subproviders
-            .map(|subprovider| Box::new(subprovider) as Box<dyn Subprovider>)
+        Ok(providers
+            .map(|provider| Box::new(provider) as Box<dyn Provider>)
             .collect())
     }
 
-    async fn subprovider_by_id(
+    async fn provider_by_id(
         &self,
-        subprovider_id: &str,
-    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
-        self.oidc_subprovider_by_id_or_slug(subprovider_id)
+        provider_id: &str,
+    ) -> Result<Option<Box<dyn Provider>>, ShieldError> {
+        self.oidc_provider_by_id_or_slug(provider_id)
             .await
-            .map(|subprovider| Some(Box::new(subprovider) as Box<dyn Subprovider>))
+            .map(|provider| Some(Box::new(provider) as Box<dyn Provider>))
     }
 
     async fn sign_in(
@@ -198,12 +195,12 @@ impl<U: User> Provider for OidcProvider<U> {
         session: Session,
         _options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
-        let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
-            None => return Err(ProviderError::SubproviderMissing.into()),
+        let provider = match request.provider_id {
+            Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
+            None => return Err(ProviderError::ProviderMissing.into()),
         };
 
-        let client = subprovider.oidc_client().await?;
+        let client = provider.oidc_client().await?;
 
         let mut authorization_request = client.authorize_url(
             CoreAuthenticationFlow::AuthorizationCode,
@@ -211,7 +208,7 @@ impl<U: User> Provider for OidcProvider<U> {
             Nonce::new_random,
         );
 
-        let pkce_code_challenge = match subprovider.pkce_code_challenge {
+        let pkce_code_challenge = match provider.pkce_code_challenge {
             OidcProviderPkceCodeChallenge::None => None,
             OidcProviderPkceCodeChallenge::Plain => Some(PkceCodeChallenge::new_random_plain()),
             OidcProviderPkceCodeChallenge::S256 => Some(PkceCodeChallenge::new_random_sha256()),
@@ -222,12 +219,12 @@ impl<U: User> Provider for OidcProvider<U> {
                 authorization_request.set_pkce_challenge(pkce_code_challenge.clone());
         }
 
-        if let Some(scopes) = subprovider.scopes {
+        if let Some(scopes) = provider.scopes {
             authorization_request =
                 authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
         }
 
-        if let Some(authorization_url_params) = subprovider.authorization_url_params {
+        if let Some(authorization_url_params) = provider.authorization_url_params {
             let params = parse(authorization_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -246,8 +243,8 @@ impl<U: User> Provider for OidcProvider<U> {
 
             session_data.authentication = None;
 
-            session_data.set_provider(
-                OIDC_PROVIDER_ID,
+            session_data.set_method(
+                OIDC_METHOD_ID,
                 OidcSession {
                     csrf: Some(csrf_token.secret().clone()),
                     nonce: Some(nonce.secret().clone()),
@@ -278,7 +275,7 @@ impl<U: User> Provider for OidcProvider<U> {
                 .lock()
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-            session_data.provider(OIDC_PROVIDER_ID)?
+            session_data.method(OIDC_METHOD_ID)?
         };
 
         let state = request
@@ -299,12 +296,12 @@ impl<U: User> Provider for OidcProvider<U> {
             .and_then(|code| code.as_str())
             .ok_or_else(|| ShieldError::Validation("Missing authorization code.".to_owned()))?;
 
-        let subprovider = match request.subprovider_id {
-            Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
-            None => return Err(ProviderError::SubproviderMissing.into()),
+        let provider = match request.provider_id {
+            Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
+            None => return Err(ProviderError::ProviderMissing.into()),
         };
 
-        let client = subprovider.oidc_client().await?;
+        let client = provider.oidc_client().await?;
 
         let mut token_request = client
             .exchange_code(AuthorizationCode::new(authorization_code.to_owned()))
@@ -314,11 +311,11 @@ impl<U: User> Provider for OidcProvider<U> {
 
         if let Some(pkce_verifier) = pkce_verifier {
             token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
-        } else if subprovider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
+        } else if provider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
 
-        if let Some(token_url_params) = subprovider.token_url_params {
+        if let Some(token_url_params) = provider.token_url_params {
             let params = parse(token_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -361,7 +358,7 @@ impl<U: User> Provider for OidcProvider<U> {
 
         let (connection, user) = match self
             .storage
-            .oidc_connection_by_identifier(&subprovider.id, claims.subject())
+            .oidc_connection_by_identifier(&provider.id, claims.subject())
             .await?
         {
             Some(connection) => {
@@ -378,7 +375,7 @@ impl<U: User> Provider for OidcProvider<U> {
 
                 let connection = self
                     .create_oidc_connection(
-                        subprovider.id.clone(),
+                        provider.id.clone(),
                         user.id(),
                         claims.subject().to_string(),
                         token_response,
@@ -398,13 +395,13 @@ impl<U: User> Provider for OidcProvider<U> {
                 .map_err(|err| SessionError::Lock(err.to_string()))?;
 
             session_data.authentication = Some(Authentication {
-                provider_id: self.id(),
-                subprovider_id: Some(subprovider.id),
+                method_id: self.id(),
+                provider_id: Some(provider.id),
                 user_id: user.id(),
             });
 
-            session_data.set_provider(
-                OIDC_PROVIDER_ID,
+            session_data.set_method(
+                OIDC_METHOD_ID,
                 OidcSession {
                     csrf: None,
                     nonce: None,
@@ -430,9 +427,9 @@ impl<U: User> Provider for OidcProvider<U> {
         // TODO: Revocation URL is always `EndpointNotSet` when using `from_provider_metadata`,
         //       because `ProviderMetadata` does not support `introspection_endpoint` and `revocation_endpoint`.
 
-        // let subprovider = match request.subprovider_id {
-        //     Some(subprovider_id) => self.oidc_subprovider_by_id_or_slug(&subprovider_id).await?,
-        //     None => return Err(ProviderError::SubproviderMissing.into()),
+        // let provider = match request.provider_id {
+        //     Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
+        //     None => return Err(ProviderError::ProviderMissing.into()),
         // };
 
         // let connection_id = {

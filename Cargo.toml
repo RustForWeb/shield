@@ -32,6 +32,22 @@ sea-orm = "1.1.2"
 sea-orm-migration = "1.1.2"
 serde = "1.0.215"
 serde_json = "1.0.133"
+shield = { path = "./packages/core/shield", version = "0.0.4" }
+shield-actix = { path = "./packages/integrations/shield-actix", version = "0.0.4" }
+shield-axum = { path = "./packages/integrations/shield-axum", version = "0.0.4" }
+shield-credentials = { path = "./packages/methods/shield-credentials", version = "0.0.4" }
+shield-diesel = { path = "./packages/storage/shield-diesel", version = "0.0.4" }
+shield-email = { path = "./packages/methods/shield-email", version = "0.0.4" }
+shield-leptos = { path = "./packages/integrations/shield-leptos", version = "0.0.4" }
+shield-leptos-actix = { path = "./packages/integrations/shield-leptos-actix", version = "0.0.4" }
+shield-leptos-axum = { path = "./packages/integrations/shield-leptos-axum", version = "0.0.4" }
+shield-memory = { path = "./packages/storage/shield-memory", version = "0.0.4" }
+shield-oauth = { path = "./packages/methods/shield-oauth", version = "0.0.4" }
+shield-oidc = { path = "./packages/methods/shield-oidc", version = "0.0.4" }
+shield-sea-orm = { path = "./packages/storage/shield-sea-orm", version = "0.0.4" }
+shield-sqlx = { path = "./packages/storage/shield-sqlx", version = "0.0.4" }
+shield-tower = { path = "./packages/integrations/shield-tower", version = "0.0.4" }
+shield-webauthn = { path = "./packages/methods/shield-webauthn", version = "0.0.4" }
 tokio = "1.42.0"
 tower-layer = "0.3.3"
 tower-service = "0.3.3"

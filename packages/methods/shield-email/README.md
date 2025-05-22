@@ -1,6 +1,6 @@
-<h1 align="center">Shield Credentials</h1>
+<h1 align="center">Shield Email</h1>
 
-Credentials provider for Shield.
+Email method for Shield.
 
 ## Documentation
 

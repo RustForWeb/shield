@@ -1,23 +1,20 @@
 use leptos::{either::Either, prelude::*};
-use shield::SubproviderVisualisation;
+use shield::ProviderVisualisation;
 
 #[server]
-pub async fn subproviders() -> Result<Vec<SubproviderVisualisation>, ServerFnError> {
+pub async fn providers() -> Result<Vec<ProviderVisualisation>, ServerFnError> {
     use crate::context::extract_shield;
 
     let shield = extract_shield().await;
 
     shield
-        .subprovider_visualisations()
+        .provider_visualisations()
         .await
         .map_err(|err| err.into())
 }
 
 #[server]
-pub async fn sign_in(
-    provider_id: String,
-    subprovider_id: Option<String>,
-) -> Result<(), ServerFnError> {
+pub async fn sign_in(method_id: String, provider_id: Option<String>) -> Result<(), ServerFnError> {
     use shield::{Response, ShieldError, SignInRequest};
 
     use crate::context::expect_server_integration;
@@ -29,8 +26,8 @@ pub async fn sign_in(
     let response = shield
         .sign_in(
             SignInRequest {
+                method_id,
                 provider_id,
-                subprovider_id,
                 redirect_url: None,
                 data: None,
                 form_data: None,
@@ -51,25 +48,25 @@ pub async fn sign_in(
 
 #[component]
 pub fn SignIn() -> impl IntoView {
-    let subproviders = OnceResource::new(subproviders());
+    let providers = OnceResource::new(providers());
     let sign_in = ServerAction::<SignIn>::new();
 
     view! {
         <h1>"Sign in"</h1>
 
         <Suspense fallback=|| view! { "Loading..." }>
-            {move || Suspend::new(async move { match subproviders.await {
-                Ok(subproviders) => Either::Left(view! {
+            {move || Suspend::new(async move { match providers.await {
+                Ok(providers) => Either::Left(view! {
                     <For
-                        each=move || subproviders.clone()
-                        key=move |subprovider| subprovider.key.clone()
-                        let:subprovider
+                        each=move || providers.clone()
+                        key=move |provider| provider.key.clone()
+                        let:provider
                     >
                         <ActionForm action=sign_in>
-                            <input name="provider_id" type="hidden" value=subprovider.provider_id />
-                            <input name="subprovider_id" type="hidden" value=subprovider.subprovider_id />
+                            <input name="method_id" type="hidden" value=provider.method_id />
+                            <input name="provider_id" type="hidden" value=provider.provider_id />
 
-                            <button type="submit">{move || format!("Sign in with {}", &subprovider.name)}</button>
+                            <button type="submit">{move || format!("Sign in with {}", &provider.name)}</button>
                         </ActionForm>
                     </For>
                 }),

@@ -2,8 +2,8 @@ use async_trait::async_trait;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
 use shield::StorageError;
 use shield_oidc::{
-    CreateOidcConnection, OidcConnection, OidcProviderPkceCodeChallenge, OidcProviderVisibility,
-    OidcStorage, OidcSubprovider, UpdateOidcConnection,
+    CreateOidcConnection, OidcConnection, OidcProvider, OidcProviderPkceCodeChallenge,
+    OidcProviderVisibility, OidcStorage, UpdateOidcConnection,
 };
 
 use crate::{
@@ -14,26 +14,21 @@ use crate::{
 
 #[async_trait]
 impl OidcStorage<User> for SeaOrmStorage {
-    async fn oidc_subproviders(&self) -> Result<Vec<OidcSubprovider>, StorageError> {
+    async fn oidc_providers(&self) -> Result<Vec<OidcProvider>, StorageError> {
         oidc_provider::Entity::find()
             .all(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .and_then(|subproviders| {
-                subproviders
-                    .into_iter()
-                    .map(OidcSubprovider::try_from)
-                    .collect()
-            })
+            .and_then(|providers| providers.into_iter().map(OidcProvider::try_from).collect())
     }
 
-    async fn oidc_subprovider_by_id_or_slug(
+    async fn oidc_provider_by_id_or_slug(
         &self,
-        subprovider_id: &str,
-    ) -> Result<Option<OidcSubprovider>, StorageError> {
-        let condition = match Self::parse_uuid(subprovider_id) {
-            Ok(subprovider_id) => oidc_provider::Column::Id.eq(subprovider_id),
-            Err(_) => oidc_provider::Column::Slug.eq(subprovider_id.to_lowercase()),
+        provider_id: &str,
+    ) -> Result<Option<OidcProvider>, StorageError> {
+        let condition = match Self::parse_uuid(provider_id) {
+            Ok(provider_id) => oidc_provider::Column::Id.eq(provider_id),
+            Err(_) => oidc_provider::Column::Slug.eq(provider_id.to_lowercase()),
         };
 
         oidc_provider::Entity::find()
@@ -41,8 +36,8 @@ impl OidcStorage<User> for SeaOrmStorage {
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .and_then(|subprovider| match subprovider {
-                Some(subprovider) => OidcSubprovider::try_from(subprovider).map(Option::Some),
+            .and_then(|provider| match provider {
+                Some(provider) => OidcProvider::try_from(provider).map(Option::Some),
                 None => Ok(None),
             })
     }
@@ -60,13 +55,11 @@ impl OidcStorage<User> for SeaOrmStorage {
 
     async fn oidc_connection_by_identifier(
         &self,
-        subprovider_id: &str,
+        provider_id: &str,
         identifier: &str,
     ) -> Result<Option<OidcConnection>, StorageError> {
         oidc_provider_connection::Entity::find()
-            .filter(
-                oidc_provider_connection::Column::ProviderId.eq(Self::parse_uuid(subprovider_id)?),
-            )
+            .filter(oidc_provider_connection::Column::ProviderId.eq(Self::parse_uuid(provider_id)?))
             .filter(oidc_provider_connection::Column::Identifier.eq(identifier))
             .one(&self.database)
             .await
@@ -86,7 +79,7 @@ impl OidcStorage<User> for SeaOrmStorage {
             id_token: ActiveValue::Set(connection.id_token),
             expired_at: ActiveValue::Set(connection.expired_at),
             scopes: ActiveValue::Set(connection.scopes.map(|scopes| scopes.join(","))),
-            provider_id: ActiveValue::Set(Self::parse_uuid(&connection.subprovider_id)?),
+            provider_id: ActiveValue::Set(Self::parse_uuid(&connection.provider_id)?),
             user_id: ActiveValue::Set(Self::parse_uuid(&connection.user_id)?),
             ..Default::default()
         };
@@ -171,11 +164,11 @@ impl From<oidc_provider::OidcProviderPkceCodeChallenge> for OidcProviderPkceCode
     }
 }
 
-impl TryFrom<oidc_provider::Model> for OidcSubprovider {
+impl TryFrom<oidc_provider::Model> for OidcProvider {
     type Error = StorageError;
 
     fn try_from(value: oidc_provider::Model) -> Result<Self, Self::Error> {
-        Ok(OidcSubprovider {
+        Ok(OidcProvider {
             id: value.id.to_string(),
             name: value.name,
             slug: value.slug,
@@ -222,7 +215,7 @@ impl From<oidc_provider_connection::Model> for OidcConnection {
             scopes: value
                 .scopes
                 .map(|scopes| scopes.split(',').map(|s| s.to_string()).collect()),
-            subprovider_id: value.provider_id.to_string(),
+            provider_id: value.provider_id.to_string(),
             user_id: value.user_id.to_string(),
         }
     }

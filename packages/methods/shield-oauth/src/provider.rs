@@ -1,6 +1,6 @@
-use shield::{Form, Subprovider};
+use shield::{Form, Provider};
 
-use crate::provider::OAUTH_PROVIDER_ID;
+use crate::method::OAUTH_METHOD_ID;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OauthProviderVisibility {
@@ -18,7 +18,7 @@ pub enum OauthProviderPkceCodeChallenge {
 // TODO: Remove allow dead code.
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct OauthSubprovider {
+pub struct OauthProvider {
     pub(crate) id: String,
     pub(crate) name: String,
     pub(crate) slug: Option<String>,
@@ -39,9 +39,9 @@ pub struct OauthSubprovider {
     pub(crate) icon_url: Option<String>,
 }
 
-impl Subprovider for OauthSubprovider {
-    fn provider_id(&self) -> String {
-        OAUTH_PROVIDER_ID.to_owned()
+impl Provider for OauthProvider {
+    fn method_id(&self) -> String {
+        OAUTH_METHOD_ID.to_owned()
     }
 
     fn id(&self) -> Option<String> {

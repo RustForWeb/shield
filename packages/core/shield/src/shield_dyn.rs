@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use crate::{
     error::ShieldError,
-    provider::{Subprovider, SubproviderVisualisation},
+    provider::{Provider, ProviderVisualisation},
     request::{SignInCallbackRequest, SignInRequest},
     response::Response,
     session::Session,
@@ -14,11 +14,9 @@ use crate::{
 
 #[async_trait]
 pub trait DynShield: Send + Sync {
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError>;
+    async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError>;
 
-    async fn subprovider_visualisations(
-        &self,
-    ) -> Result<Vec<SubproviderVisualisation>, ShieldError>;
+    async fn provider_visualisations(&self) -> Result<Vec<ProviderVisualisation>, ShieldError>;
 
     async fn sign_in(
         &self,
@@ -37,14 +35,12 @@ pub trait DynShield: Send + Sync {
 
 #[async_trait]
 impl<U: User> DynShield for Shield<U> {
-    async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        self.subproviders().await
+    async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError> {
+        self.providers().await
     }
 
-    async fn subprovider_visualisations(
-        &self,
-    ) -> Result<Vec<SubproviderVisualisation>, ShieldError> {
-        self.subprovider_visualisations().await
+    async fn provider_visualisations(&self) -> Result<Vec<ProviderVisualisation>, ShieldError> {
+        self.provider_visualisations().await
     }
 
     async fn sign_in(
@@ -75,14 +71,12 @@ impl ShieldDyn {
         Self(Arc::new(shield))
     }
 
-    pub async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        self.0.subproviders().await
+    pub async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError> {
+        self.0.providers().await
     }
 
-    pub async fn subprovider_visualisations(
-        &self,
-    ) -> Result<Vec<SubproviderVisualisation>, ShieldError> {
-        self.0.subprovider_visualisations().await
+    pub async fn provider_visualisations(&self) -> Result<Vec<ProviderVisualisation>, ShieldError> {
+        self.0.provider_visualisations().await
     }
 
     pub async fn sign_in(

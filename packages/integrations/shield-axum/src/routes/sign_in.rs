@@ -20,7 +20,7 @@ pub struct SignInData {
     feature = "utoipa",
     utoipa::path(
         post,
-        path = "/sign-in/{providerId}/{subproviderId}",
+        path = "/sign-in/{methodId}/{providerId}",
         operation_id = "signIn",
         description = "Sign in to an account with the specified authentication provider.",
         params(
@@ -38,8 +38,8 @@ pub struct SignInData {
 )]
 pub async fn sign_in<U: User>(
     Path(AuthPathParams {
+        method_id,
         provider_id,
-        subprovider_id,
     }): Path<AuthPathParams>,
     ExtractShield(shield): ExtractShield<U>,
     ExtractSession(session): ExtractSession,
@@ -48,8 +48,8 @@ pub async fn sign_in<U: User>(
     let response = shield
         .sign_in(
             SignInRequest {
+                method_id,
                 provider_id,
-                subprovider_id,
                 redirect_url: data.redirect_url,
                 data: None,
                 form_data: None,

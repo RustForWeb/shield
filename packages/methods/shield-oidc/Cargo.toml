@@ -1,6 +1,6 @@
 [package]
 name = "shield-oidc"
-description = "OpenID Connect provider for Shield."
+description = "OpenID Connect method for Shield."
 
 authors.workspace = true
 edition.workspace = true
@@ -19,7 +19,7 @@ openidconnect = { version = "4.0.0", default-features = false, features = [
     "reqwest",
 ] }
 serde.workspace = true
-shield = { path = "../../core/shield", version = "0.0.4" }
+shield.workspace = true
 tracing.workspace = true
 
 [features]

@@ -12,4 +12,4 @@ version.workspace = true
 actix-session.workspace = true
 actix-utils.workspace = true
 actix-web.workspace = true
-shield = { path = "../../core/shield", version = "0.0.4" }
+shield.workspace = true

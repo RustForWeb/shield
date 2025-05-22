@@ -1,13 +1,17 @@
 use thiserror::Error;
 
 #[derive(Debug, Error)]
+pub enum MethodError {
+    #[error("method `{0}` not found")]
+    MethodNotFound(String),
+}
+
+#[derive(Debug, Error)]
 pub enum ProviderError {
+    #[error("provider is missing")]
+    ProviderMissing,
     #[error("provider `{0}` not found")]
     ProviderNotFound(String),
-    #[error("subprovider is missing")]
-    SubproviderMissing,
-    #[error("subprovider `{0}` not found")]
-    SubproviderNotFound(String),
 }
 
 #[derive(Debug, Error)]
@@ -45,6 +49,8 @@ pub enum SessionError {
 #[derive(Debug, Error)]
 
 pub enum ShieldError {
+    #[error(transparent)]
+    Method(#[from] MethodError),
     #[error(transparent)]
     Provider(#[from] ProviderError),
     #[error(transparent)]

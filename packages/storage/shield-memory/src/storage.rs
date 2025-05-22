@@ -13,7 +13,7 @@ pub const MEMORY_STORAGE_ID: &str = "memory";
 #[derive(Clone, Debug, Default)]
 pub struct MemoryStorage {
     pub(crate) users: Arc<Mutex<Vec<User>>>,
-    #[cfg(feature = "provider-oidc")]
+    #[cfg(feature = "method-oidc")]
     pub(crate) oidc: crate::providers::oidc::OidcMemoryStorage,
 }
 

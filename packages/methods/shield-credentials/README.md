@@ -1,6 +1,6 @@
-<h1 align="center">Shield OpenID Connect</h1>
+<h1 align="center">Shield Credentials</h1>
 
-OpenID Connect provider for Shield.
+Credentials method for Shield.
 
 ## Documentation
 

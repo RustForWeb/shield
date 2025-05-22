@@ -23,13 +23,11 @@ leptos.workspace = true
 leptos_actix = { workspace = true, optional = true }
 leptos_meta.workspace = true
 leptos_router.workspace = true
-shield = { path = "../../packages/core/shield" }
-shield-leptos = { path = "../../packages/integrations/shield-leptos" }
-shield-leptos-actix = { path = "../../packages/integrations/shield-leptos-actix", optional = true }
-shield-memory = { path = "../../packages/storage/shield-memory", optional = true }
-shield-oidc = { path = "../../packages/providers/shield-oidc", features = [
-    "native-tls",
-], optional = true }
+shield.workspace = true
+shield-leptos.workspace = true
+shield-leptos-actix = { workspace = true, optional = true }
+shield-memory = { workspace = true, optional = true }
+shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 wasm-bindgen.workspace = true
@@ -49,7 +47,7 @@ ssr = [
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "shield-memory/provider-oidc",
+    "shield-memory/method-oidc",
 ]
 
 [package.metadata.leptos]

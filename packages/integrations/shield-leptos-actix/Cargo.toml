@@ -12,6 +12,6 @@ version.workspace = true
 async-trait.workspace = true
 leptos.workspace = true
 leptos_actix.workspace = true
-shield = { path = "../../core/shield", version = "0.0.4" }
-shield-actix = { path = "../../integrations/shield-actix", version = "0.0.4" }
-shield-leptos = { path = "../../integrations/shield-leptos", version = "0.0.4" }
+shield.workspace = true
+shield-actix.workspace = true
+shield-leptos.workspace = true

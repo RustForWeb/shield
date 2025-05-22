@@ -1,2 +1,2 @@
-#[cfg(feature = "provider-oidc")]
+#[cfg(feature = "method-oidc")]
 pub mod oidc;

@@ -1,6 +1,6 @@
 [package]
 name = "shield-oauth"
-description = "OAuth provider for Shield."
+description = "OAuth method for Shield."
 
 authors.workspace = true
 edition.workspace = true
@@ -11,7 +11,7 @@ version.workspace = true
 [dependencies]
 async-trait.workspace = true
 oauth2 = { version = "5.0.0", default-features = false, features = ["reqwest"] }
-shield = { path = "../../core/shield", version = "0.0.4" }
+shield.workspace = true
 
 [features]
 default = []

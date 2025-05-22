@@ -3,9 +3,11 @@ use std::{collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
-    error::{ProviderError, SessionError, ShieldError},
+    MethodError,
+    error::{SessionError, ShieldError},
+    method::Method,
     options::ShieldOptions,
-    provider::{Provider, Subprovider, SubproviderVisualisation},
+    provider::{Provider, ProviderVisualisation},
     request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
     response::Response,
     session::Session,
@@ -16,18 +18,18 @@ use crate::{
 #[derive(Clone)]
 pub struct Shield<U: User> {
     storage: Arc<dyn Storage<U>>,
-    providers: Arc<HashMap<String, Arc<dyn Provider>>>,
+    methods: Arc<HashMap<String, Arc<dyn Method>>>,
     options: ShieldOptions,
 }
 
 impl<U: User> Shield<U> {
-    pub fn new<S>(storage: S, providers: Vec<Arc<dyn Provider>>, options: ShieldOptions) -> Self
+    pub fn new<S>(storage: S, providers: Vec<Arc<dyn Method>>, options: ShieldOptions) -> Self
     where
         S: Storage<U> + 'static,
     {
         Self {
             storage: Arc::new(storage),
-            providers: Arc::new(
+            methods: Arc::new(
                 providers
                     .into_iter()
                     .map(|provider| (provider.id(), provider))
@@ -45,56 +47,46 @@ impl<U: User> Shield<U> {
         &self.options
     }
 
-    pub fn provider_by_id(&self, provider_id: &str) -> Option<&dyn Provider> {
-        self.providers.get(provider_id).map(|v| &**v)
+    pub fn method_by_id(&self, provider_id: &str) -> Option<&dyn Method> {
+        self.methods.get(provider_id).map(|v| &**v)
     }
 
-    pub async fn subproviders(&self) -> Result<Vec<Box<dyn Subprovider>>, ShieldError> {
-        try_join_all(
-            self.providers
-                .values()
-                .map(|provider| provider.subproviders()),
-        )
-        .await
-        .map(|subproviders| subproviders.into_iter().flatten().collect::<Vec<_>>())
+    pub async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError> {
+        try_join_all(self.methods.values().map(|provider| provider.providers()))
+            .await
+            .map(|providers| providers.into_iter().flatten().collect::<Vec<_>>())
     }
 
-    pub async fn subprovider_visualisations(
-        &self,
-    ) -> Result<Vec<SubproviderVisualisation>, ShieldError> {
-        self.subproviders().await.map(|subproviders| {
-            subproviders
+    pub async fn provider_visualisations(&self) -> Result<Vec<ProviderVisualisation>, ShieldError> {
+        self.providers().await.map(|providers| {
+            providers
                 .into_iter()
-                .map(|subprovider| {
-                    let provider_id = subprovider.provider_id();
-                    let subprovider_id = subprovider.id();
+                .map(|provider| {
+                    let method_id = provider.method_id();
+                    let provider_id = provider.id();
 
-                    SubproviderVisualisation {
-                        key: match &subprovider_id {
-                            Some(subprovider_id) => format!("{provider_id}-{subprovider_id}"),
-                            None => provider_id.clone(),
+                    ProviderVisualisation {
+                        key: match &provider_id {
+                            Some(provider_id) => format!("{method_id}-{provider_id}"),
+                            None => method_id.clone(),
                         },
+                        method_id,
                         provider_id,
-                        subprovider_id,
-                        name: subprovider.name(),
-                        icon_url: subprovider.icon_url(),
+                        name: provider.name(),
+                        icon_url: provider.icon_url(),
                     }
                 })
                 .collect()
         })
     }
 
-    pub async fn subprovider_by_id(
+    pub async fn provider_by_id(
         &self,
-        provider_id: &str,
-        subprovider_id: Option<&str>,
-    ) -> Result<Option<Box<dyn Subprovider>>, ShieldError> {
-        match self.provider_by_id(provider_id) {
-            Some(provider) => {
-                provider
-                    .subprovider_by_id(subprovider_id.expect("TODO"))
-                    .await
-            }
+        method_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Option<Box<dyn Provider>>, ShieldError> {
+        match self.method_by_id(method_id) {
+            Some(provider) => provider.provider_by_id(provider_id.expect("TODO")).await,
             None => Ok(None),
         }
     }
@@ -104,9 +96,9 @@ impl<U: User> Shield<U> {
         request: SignInRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        let provider = match self.providers.get(&request.provider_id) {
+        let provider = match self.methods.get(&request.method_id) {
             Some(provider) => provider,
-            None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
+            None => return Err(MethodError::MethodNotFound(request.method_id).into()),
         };
 
         // TODO: validate redirect URL
@@ -134,9 +126,9 @@ impl<U: User> Shield<U> {
         request: SignInCallbackRequest,
         session: Session,
     ) -> Result<Response, ShieldError> {
-        let provider = match self.providers.get(&request.provider_id) {
+        let provider = match self.methods.get(&request.method_id) {
             Some(provider) => provider,
-            None => return Err(ProviderError::ProviderNotFound(request.provider_id).into()),
+            None => return Err(MethodError::MethodNotFound(request.method_id).into()),
         };
 
         let redirect_url = {
@@ -175,18 +167,18 @@ impl<U: User> Shield<U> {
         };
 
         let response = if let Some(authenticated) = authenticated {
-            let provider = match self.providers.get(&authenticated.provider_id) {
+            let provider = match self.methods.get(&authenticated.method_id) {
                 Some(provider) => provider,
                 None => {
-                    return Err(ProviderError::ProviderNotFound(authenticated.provider_id).into());
+                    return Err(MethodError::MethodNotFound(authenticated.method_id).into());
                 }
             };
 
             provider
                 .sign_out(
                     SignOutRequest {
+                        method_id: authenticated.method_id,
                         provider_id: authenticated.provider_id,
-                        subprovider_id: authenticated.subprovider_id,
                     },
                     session.clone(),
                     &self.options,
@@ -214,9 +206,9 @@ impl<U: User> Shield<U> {
         match authentication {
             Some(authentication) => {
                 if self
-                    .subprovider_by_id(
-                        &authentication.provider_id,
-                        authentication.subprovider_id.as_deref(),
+                    .provider_by_id(
+                        &authentication.method_id,
+                        authentication.provider_id.as_deref(),
                     )
                     .await?
                     .is_none()
@@ -244,7 +236,7 @@ mod tests {
 
     use crate::{
         ShieldOptions,
-        provider::tests::{TEST_PROVIDER_ID, TestProvider},
+        method::tests::{TEST_METHOD_ID, TestMethod},
         storage::tests::{TEST_STORAGE_ID, TestStorage},
     };
 
@@ -262,8 +254,8 @@ mod tests {
         let shield = Shield::new(
             TestStorage::default(),
             vec![
-                Arc::new(TestProvider::default().with_id("test1")),
-                Arc::new(TestProvider::default().with_id("test2")),
+                Arc::new(TestMethod::default().with_id("test1")),
+                Arc::new(TestMethod::default().with_id("test2")),
             ],
             ShieldOptions::default(),
         );
@@ -271,16 +263,16 @@ mod tests {
         assert_eq!(
             None,
             shield
-                .provider_by_id(TEST_PROVIDER_ID)
+                .method_by_id(TEST_METHOD_ID)
                 .map(|provider| provider.id())
         );
         assert_eq!(
             Some("test1".to_owned()),
-            shield.provider_by_id("test1").map(|provider| provider.id())
+            shield.method_by_id("test1").map(|provider| provider.id())
         );
         assert_eq!(
             Some("test2".to_owned()),
-            shield.provider_by_id("test2").map(|provider| provider.id())
+            shield.method_by_id("test2").map(|provider| provider.id())
         );
     }
 }

@@ -1,8 +1,8 @@
-#[cfg(feature = "provider-email")]
+#[cfg(feature = "method-email")]
 pub mod email;
-#[cfg(feature = "provider-oauth")]
+#[cfg(feature = "method-oauth")]
 pub mod oauth;
-#[cfg(feature = "provider-oidc")]
+#[cfg(feature = "method-oidc")]
 pub mod oidc;
 
 use async_trait::async_trait;
@@ -16,17 +16,17 @@ impl MigratorTrait for ProvidersMigrator {
         #[allow(unused_mut)]
         let mut migrations = vec![];
 
-        #[cfg(feature = "provider-email")]
+        #[cfg(feature = "method-email")]
         {
             use self::email::ProviderEmailMigrator;
             migrations.extend(ProviderEmailMigrator::migrations());
         }
-        #[cfg(feature = "provider-oauth")]
+        #[cfg(feature = "method-oauth")]
         {
             use self::oauth::ProviderOauthMigrator;
             migrations.extend(ProviderOauthMigrator::migrations());
         }
-        #[cfg(feature = "provider-oidc")]
+        #[cfg(feature = "method-oidc")]
         {
             use self::oidc::ProviderOidcMigrator;
             migrations.extend(ProviderOidcMigrator::migrations());

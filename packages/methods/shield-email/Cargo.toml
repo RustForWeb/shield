@@ -1,6 +1,6 @@
 [package]
 name = "shield-email"
-description = "Email provider for Shield."
+description = "Email method for Shield."
 
 authors.workspace = true
 edition.workspace = true
@@ -9,4 +9,4 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-shield = { path = "../../core/shield", version = "0.0.4" }
+shield.workspace = true
