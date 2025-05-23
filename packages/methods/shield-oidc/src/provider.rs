@@ -1,19 +1,22 @@
 use bon::Builder;
 use openidconnect::{
-    AuthUrl, Client, ClientId, ClientSecret, EmptyAdditionalClaims,
-    EmptyAdditionalProviderMetadata, EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl,
-    JsonWebKeySet, JsonWebKeySetUrl, ProviderMetadata, RedirectUrl, StandardErrorResponse,
-    TokenUrl, UserInfoUrl,
+    AuthUrl, Client, ClientId, ClientSecret, EmptyAdditionalClaims, EndpointMaybeSet,
+    EndpointNotSet, EndpointSet, IntrospectionUrl, IssuerUrl, JsonWebKeySet, JsonWebKeySetUrl,
+    RedirectUrl, RevocationUrl, StandardErrorResponse, TokenUrl, UserInfoUrl,
     core::{
         CoreAuthDisplay, CoreAuthPrompt, CoreClient, CoreErrorResponseType, CoreGenderClaim,
         CoreJsonWebKey, CoreJweContentEncryptionAlgorithm, CoreJwsSigningAlgorithm,
-        CoreProviderMetadata, CoreRevocableToken, CoreRevocationErrorResponse,
-        CoreTokenIntrospectionResponse, CoreTokenResponse,
+        CoreRevocableToken, CoreRevocationErrorResponse, CoreTokenIntrospectionResponse,
+        CoreTokenResponse,
     },
 };
 use shield::{ConfigurationError, Provider};
 
-use crate::{client::async_http_client, method::OIDC_METHOD_ID};
+use crate::{
+    client::async_http_client,
+    metadata::{NonStandardProviderMetadata, OidcProviderMetadata},
+    method::OIDC_METHOD_ID,
+};
 
 type OidcClient = Client<
     EmptyAdditionalClaims,
@@ -83,7 +86,7 @@ impl OidcProvider {
         let async_http_client = async_http_client()?;
 
         let provider_metadata = if let Some(discovery_url) = &self.discovery_url {
-            CoreProviderMetadata::discover_async(
+            OidcProviderMetadata::discover_async(
                 // TODO: Consider stripping `/.well-known/openid-configuration` so `openidconnect` doesn't error.
                 IssuerUrl::new(discovery_url.clone())
                     .map_err(|err| ConfigurationError::Invalid(err.to_string()))?,
@@ -92,7 +95,7 @@ impl OidcProvider {
             .await
             .map_err(|err| ConfigurationError::Invalid(err.to_string()))?
         } else {
-            let mut provider_metadata = ProviderMetadata::new(
+            let mut provider_metadata = OidcProviderMetadata::new(
                 IssuerUrl::new(
                     self.issuer_url
                         .clone()
@@ -128,7 +131,24 @@ impl OidcProvider {
                     CoreJwsSigningAlgorithm::EdDsa,
                     CoreJwsSigningAlgorithm::None,
                 ],
-                EmptyAdditionalProviderMetadata {},
+                NonStandardProviderMetadata {
+                    introspection_endpoint: self
+                        .introspection_url
+                        .as_ref()
+                        .map(|introspection_url| {
+                            IntrospectionUrl::new(introspection_url.clone())
+                                .map_err(|err| ConfigurationError::Invalid(err.to_string()))
+                        })
+                        .transpose()?,
+                    revocation_endpoint: self
+                        .revocation_url
+                        .as_ref()
+                        .map(|revocation_url| {
+                            RevocationUrl::new(revocation_url.clone())
+                                .map_err(|err| ConfigurationError::Invalid(err.to_string()))
+                        })
+                        .transpose()?,
+                },
             );
 
             provider_metadata = provider_metadata.set_jwks(
@@ -160,6 +180,18 @@ impl OidcProvider {
             self.client_secret.clone().map(ClientSecret::new),
         );
 
+        // TODO: Upstream: _option version of these (and other) functions which set the type to EndpointMaybeSet.
+
+        // if let Some(introspection_endpoint) = provider_metadata
+        //     .additional_metadata()
+        //     .introspection_endpoint
+        // {
+        //     client = client.set_introspection_url(introspection_endpoint);
+        // }
+        // if let Some(revocation_url) = provider_metadata.additional_metadata().revocation_endpoint {
+        //     client = client.set_introspection_url(revocation_url);
+        // }
+
         if let Some(redirect_url) = &self.redirect_url {
             client = client.set_redirect_uri(
                 RedirectUrl::new(redirect_url.clone())
@@ -167,7 +199,7 @@ impl OidcProvider {
             );
         }
 
-        // TODO: Common client options.
+        // TODO: Client options.
 
         Ok(client)
     }
