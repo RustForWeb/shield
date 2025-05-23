@@ -1,82 +1,83 @@
 use async_trait::async_trait;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
 use shield::StorageError;
-use shield_oidc::{
-    CreateOidcConnection, OidcConnection, OidcProvider, OidcProviderPkceCodeChallenge,
-    OidcProviderVisibility, OidcStorage, UpdateOidcConnection,
+use shield_oauth::{
+    CreateOauthConnection, OauthConnection, OauthProvider, OauthProviderPkceCodeChallenge,
+    OauthProviderVisibility, OauthStorage, UpdateOauthConnection,
 };
 
 use crate::{
-    entities::{oidc_provider, oidc_provider_connection},
+    entities::{oauth_provider, oauth_provider_connection},
     storage::SeaOrmStorage,
     user::User,
 };
 
 #[async_trait]
-impl OidcStorage<User> for SeaOrmStorage {
-    async fn oidc_providers(&self) -> Result<Vec<OidcProvider>, StorageError> {
-        oidc_provider::Entity::find()
+impl OauthStorage<User> for SeaOrmStorage {
+    async fn oauth_providers(&self) -> Result<Vec<OauthProvider>, StorageError> {
+        oauth_provider::Entity::find()
             .all(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .and_then(|providers| providers.into_iter().map(OidcProvider::try_from).collect())
+            .and_then(|providers| providers.into_iter().map(OauthProvider::try_from).collect())
     }
 
-    async fn oidc_provider_by_id_or_slug(
+    async fn oauth_provider_by_id_or_slug(
         &self,
         provider_id: &str,
-    ) -> Result<Option<OidcProvider>, StorageError> {
+    ) -> Result<Option<OauthProvider>, StorageError> {
         let condition = match Self::parse_uuid(provider_id) {
-            Ok(provider_id) => oidc_provider::Column::Id.eq(provider_id),
-            Err(_) => oidc_provider::Column::Slug.eq(provider_id.to_lowercase()),
+            Ok(provider_id) => oauth_provider::Column::Id.eq(provider_id),
+            Err(_) => oauth_provider::Column::Slug.eq(provider_id.to_lowercase()),
         };
 
-        oidc_provider::Entity::find()
+        oauth_provider::Entity::find()
             .filter(condition)
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
             .and_then(|provider| match provider {
-                Some(provider) => OidcProvider::try_from(provider).map(Option::Some),
+                Some(provider) => OauthProvider::try_from(provider).map(Option::Some),
                 None => Ok(None),
             })
     }
 
-    async fn oidc_connection_by_id(
+    async fn oauth_connection_by_id(
         &self,
         connection_id: &str,
-    ) -> Result<Option<OidcConnection>, StorageError> {
-        oidc_provider_connection::Entity::find_by_id(Self::parse_uuid(connection_id)?)
+    ) -> Result<Option<OauthConnection>, StorageError> {
+        oauth_provider_connection::Entity::find_by_id(Self::parse_uuid(connection_id)?)
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .map(|connection| connection.map(OidcConnection::from))
+            .map(|connection| connection.map(OauthConnection::from))
     }
 
-    async fn oidc_connection_by_identifier(
+    async fn oauth_connection_by_identifier(
         &self,
         provider_id: &str,
         identifier: &str,
-    ) -> Result<Option<OidcConnection>, StorageError> {
-        oidc_provider_connection::Entity::find()
-            .filter(oidc_provider_connection::Column::ProviderId.eq(Self::parse_uuid(provider_id)?))
-            .filter(oidc_provider_connection::Column::Identifier.eq(identifier))
+    ) -> Result<Option<OauthConnection>, StorageError> {
+        oauth_provider_connection::Entity::find()
+            .filter(
+                oauth_provider_connection::Column::ProviderId.eq(Self::parse_uuid(provider_id)?),
+            )
+            .filter(oauth_provider_connection::Column::Identifier.eq(identifier))
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .map(|connection| connection.map(OidcConnection::from))
+            .map(|connection| connection.map(OauthConnection::from))
     }
 
-    async fn create_oidc_connection(
+    async fn create_oauth_connection(
         &self,
-        connection: CreateOidcConnection,
-    ) -> Result<OidcConnection, StorageError> {
-        let active_model = oidc_provider_connection::ActiveModel {
+        connection: CreateOauthConnection,
+    ) -> Result<OauthConnection, StorageError> {
+        let active_model = oauth_provider_connection::ActiveModel {
             identifier: ActiveValue::Set(connection.identifier),
             token_type: ActiveValue::Set(connection.token_type),
             access_token: ActiveValue::Set(connection.access_token),
             refresh_token: ActiveValue::Set(connection.refresh_token),
-            id_token: ActiveValue::Set(connection.id_token),
             expired_at: ActiveValue::Set(connection.expired_at),
             scopes: ActiveValue::Set(connection.scopes.map(|scopes| scopes.join(","))),
             provider_id: ActiveValue::Set(Self::parse_uuid(&connection.provider_id)?),
@@ -88,20 +89,20 @@ impl OidcStorage<User> for SeaOrmStorage {
             .insert(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .map(OidcConnection::from)
+            .map(OauthConnection::from)
     }
 
-    async fn update_oidc_connection(
+    async fn update_oauth_connection(
         &self,
-        connection: UpdateOidcConnection,
-    ) -> Result<OidcConnection, StorageError> {
-        let mut active_model: oidc_provider_connection::ActiveModel =
-            oidc_provider_connection::Entity::find()
-                .filter(oidc_provider_connection::Column::Id.eq(Self::parse_uuid(&connection.id)?))
+        connection: UpdateOauthConnection,
+    ) -> Result<OauthConnection, StorageError> {
+        let mut active_model: oauth_provider_connection::ActiveModel =
+            oauth_provider_connection::Entity::find()
+                .filter(oauth_provider_connection::Column::Id.eq(Self::parse_uuid(&connection.id)?))
                 .one(&self.database)
                 .await
                 .map_err(|err| StorageError::Engine(err.to_string()))?
-                .ok_or_else(|| StorageError::NotFound("OidcConnection".to_owned(), connection.id))?
+                .ok_or_else(|| StorageError::NotFound("OauthConnection".to_owned(), connection.id))?
                 .into();
 
         if let Some(token_type) = connection.token_type {
@@ -112,9 +113,6 @@ impl OidcStorage<User> for SeaOrmStorage {
         }
         if let Some(refresh_token) = connection.refresh_token {
             active_model.refresh_token = ActiveValue::Set(refresh_token);
-        }
-        if let Some(id_token) = connection.id_token {
-            active_model.id_token = ActiveValue::Set(id_token);
         }
         if let Some(expired_at) = connection.expired_at {
             active_model.expired_at = ActiveValue::Set(expired_at);
@@ -127,11 +125,11 @@ impl OidcStorage<User> for SeaOrmStorage {
             .update(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
-            .map(OidcConnection::from)
+            .map(OauthConnection::from)
     }
 
-    async fn delete_oidc_connection(&self, connection_id: &str) -> Result<(), StorageError> {
-        oidc_provider_connection::Entity::delete_by_id(Self::parse_uuid(connection_id)?)
+    async fn delete_oauth_connection(&self, connection_id: &str) -> Result<(), StorageError> {
+        oauth_provider_connection::Entity::delete_by_id(Self::parse_uuid(connection_id)?)
             .exec(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))
@@ -139,36 +137,36 @@ impl OidcStorage<User> for SeaOrmStorage {
     }
 }
 
-impl From<oidc_provider::OidcProviderVisibility> for OidcProviderVisibility {
-    fn from(value: oidc_provider::OidcProviderVisibility) -> Self {
+impl From<oauth_provider::OauthProviderVisibility> for OauthProviderVisibility {
+    fn from(value: oauth_provider::OauthProviderVisibility) -> Self {
         match value {
-            oidc_provider::OidcProviderVisibility::Public => OidcProviderVisibility::Public,
-            oidc_provider::OidcProviderVisibility::Unlisted => OidcProviderVisibility::Unlisted,
+            oauth_provider::OauthProviderVisibility::Public => OauthProviderVisibility::Public,
+            oauth_provider::OauthProviderVisibility::Unlisted => OauthProviderVisibility::Unlisted,
         }
     }
 }
 
-impl From<oidc_provider::OidcProviderPkceCodeChallenge> for OidcProviderPkceCodeChallenge {
-    fn from(value: oidc_provider::OidcProviderPkceCodeChallenge) -> Self {
+impl From<oauth_provider::OauthProviderPkceCodeChallenge> for OauthProviderPkceCodeChallenge {
+    fn from(value: oauth_provider::OauthProviderPkceCodeChallenge) -> Self {
         match value {
-            oidc_provider::OidcProviderPkceCodeChallenge::None => {
-                OidcProviderPkceCodeChallenge::None
+            oauth_provider::OauthProviderPkceCodeChallenge::None => {
+                OauthProviderPkceCodeChallenge::None
             }
-            oidc_provider::OidcProviderPkceCodeChallenge::Plain => {
-                OidcProviderPkceCodeChallenge::Plain
+            oauth_provider::OauthProviderPkceCodeChallenge::Plain => {
+                OauthProviderPkceCodeChallenge::Plain
             }
-            oidc_provider::OidcProviderPkceCodeChallenge::S256 => {
-                OidcProviderPkceCodeChallenge::S256
+            oauth_provider::OauthProviderPkceCodeChallenge::S256 => {
+                OauthProviderPkceCodeChallenge::S256
             }
         }
     }
 }
 
-impl TryFrom<oidc_provider::Model> for OidcProvider {
+impl TryFrom<oauth_provider::Model> for OauthProvider {
     type Error = StorageError;
 
-    fn try_from(value: oidc_provider::Model) -> Result<Self, Self::Error> {
-        Ok(OidcProvider {
+    fn try_from(value: oauth_provider::Model) -> Result<Self, Self::Error> {
+        Ok(OauthProvider {
             id: value.id.to_string(),
             name: value.name,
             slug: value.slug,
@@ -180,8 +178,6 @@ impl TryFrom<oidc_provider::Model> for OidcProvider {
                 .scopes
                 .map(|scopes| scopes.split(',').map(|s| s.to_string()).collect()),
             redirect_url: value.redirect_url,
-            discovery_url: value.discovery_url,
-            issuer_url: value.issuer_url,
             authorization_url: value.authorization_url,
             authorization_url_params: value.authorization_url_params,
             token_url: value.token_url,
@@ -190,27 +186,19 @@ impl TryFrom<oidc_provider::Model> for OidcProvider {
             introspection_url_params: value.introspection_url_params,
             revocation_url: value.revocation_url,
             revocation_url_params: value.revocation_url_params,
-            user_info_url: value.user_info_url,
-            json_web_key_set_url: value.json_web_key_set_url,
-            json_web_key_set: match value.json_web_key_set {
-                Some(json_web_key_set) => serde_json::from_value(json_web_key_set)
-                    .map_err(|err| StorageError::Validation(err.to_string()))?,
-                None => None,
-            },
             pkce_code_challenge: value.pkce_code_challenge.into(),
         })
     }
 }
 
-impl From<oidc_provider_connection::Model> for OidcConnection {
-    fn from(value: oidc_provider_connection::Model) -> Self {
-        OidcConnection {
+impl From<oauth_provider_connection::Model> for OauthConnection {
+    fn from(value: oauth_provider_connection::Model) -> Self {
+        OauthConnection {
             id: value.id.to_string(),
             identifier: value.identifier,
             token_type: value.token_type,
             access_token: value.access_token,
             refresh_token: value.refresh_token,
-            id_token: value.id_token,
             expired_at: value.expired_at,
             scopes: value
                 .scopes

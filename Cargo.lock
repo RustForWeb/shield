@@ -4540,7 +4540,9 @@ name = "shield-oauth"
 version = "0.0.4"
 dependencies = [
  "async-trait",
+ "chrono",
  "oauth2",
+ "serde",
  "shield",
 ]
 
@@ -4569,6 +4571,7 @@ dependencies = [
  "serde",
  "serde_json",
  "shield",
+ "shield-oauth",
  "shield-oidc",
  "utoipa",
 ]

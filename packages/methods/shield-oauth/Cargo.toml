@@ -10,7 +10,9 @@ version.workspace = true
 
 [dependencies]
 async-trait.workspace = true
+chrono.workspace = true
 oauth2 = { version = "5.0.0", default-features = false, features = ["reqwest"] }
+serde.workspace = true
 shield.workspace = true
 
 [features]

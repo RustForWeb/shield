@@ -107,7 +107,8 @@ impl<U: User> OidcMethod<U> {
                 id: user_id.to_owned(),
                 name: claims
                     .name()
-                    .map(|name| name.get(None).map(|name| name.to_string())),
+                    .and_then(|name| name.get(None).map(|name| name.to_string()))
+                    .map(Some),
             })
             .await
             .map_err(ShieldError::Storage)
