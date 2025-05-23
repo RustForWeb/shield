@@ -2,6 +2,7 @@ mod builders;
 mod claims;
 mod client;
 mod connection;
+mod metadata;
 mod method;
 mod provider;
 mod session;

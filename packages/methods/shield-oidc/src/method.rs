@@ -425,8 +425,7 @@ impl<U: User> Method for OidcMethod<U> {
         _session: Session,
         options: &ShieldOptions,
     ) -> Result<Response, ShieldError> {
-        // TODO: Revocation URL is always `EndpointNotSet` when using `from_provider_metadata`,
-        //       because `ProviderMetadata` does not support `introspection_endpoint` and `revocation_endpoint`.
+        // TODO: See [`OidcProvider::oidc_client`].
 
         // let provider = match request.provider_id {
         //     Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
