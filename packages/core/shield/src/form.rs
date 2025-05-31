@@ -18,6 +18,7 @@ pub struct Form {
 #[derive(Clone, Debug)]
 pub struct Input {
     pub name: String,
+    pub label: Option<String>,
     pub r#type: InputType,
     pub value: Option<String>,
     pub attributes: Option<HashMap<String, Attribute>>,

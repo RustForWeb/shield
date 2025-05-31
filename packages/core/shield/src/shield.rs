@@ -185,8 +185,11 @@ impl<U: User> Shield<U> {
                 )
                 .await?
         } else {
-            Response::Redirect(self.options.sign_out_redirect.clone())
+            None
         };
+
+        let response =
+            response.unwrap_or_else(|| Response::Redirect(self.options.sign_out_redirect.clone()));
 
         session.purge().await?;
 

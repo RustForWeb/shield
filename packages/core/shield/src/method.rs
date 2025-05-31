@@ -39,7 +39,7 @@ pub trait Method: Send + Sync {
         request: SignOutRequest,
         session: Session,
         options: &ShieldOptions,
-    ) -> Result<Response, ShieldError>;
+    ) -> Result<Option<Response>, ShieldError>;
 }
 
 #[cfg(test)]
@@ -111,8 +111,8 @@ pub(crate) mod tests {
             _request: SignOutRequest,
             _session: Session,
             _options: &ShieldOptions,
-        ) -> Result<Response, ShieldError> {
-            todo!("redirect back?")
+        ) -> Result<Option<Response>, ShieldError> {
+            Ok(None)
         }
     }
 }

@@ -4414,7 +4414,11 @@ dependencies = [
 name = "shield-credentials"
 version = "0.0.4"
 dependencies = [
+ "async-trait",
+ "serde",
+ "serde_json",
  "shield",
+ "tokio",
 ]
 
 [[package]]
