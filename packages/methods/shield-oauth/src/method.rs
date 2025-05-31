@@ -391,13 +391,15 @@ impl<U: User> Method for OauthMethod<U> {
         request: SignOutRequest,
         _session: Session,
         _options: &ShieldOptions,
-    ) -> Result<Response, ShieldError> {
+    ) -> Result<Option<Response>, ShieldError> {
         let _provider = match request.provider_id {
             Some(provider_id) => self.oauth_provider_by_id_or_slug(&provider_id).await?,
             None => return Err(ProviderError::ProviderMissing.into()),
         };
 
-        todo!("oauth sign out")
+        // TODO: OAuth token revocation.
+
+        Ok(None)
     }
 }
 

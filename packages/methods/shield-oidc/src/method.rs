@@ -423,8 +423,8 @@ impl<U: User> Method for OidcMethod<U> {
         &self,
         _request: SignOutRequest,
         _session: Session,
-        options: &ShieldOptions,
-    ) -> Result<Response, ShieldError> {
+        _options: &ShieldOptions,
+    ) -> Result<Option<Response>, ShieldError> {
         // TODO: See [`OidcProvider::oidc_client`].
 
         // let provider = match request.provider_id {
@@ -476,7 +476,7 @@ impl<U: User> Method for OidcMethod<U> {
         //     }
         // }
 
-        Ok(Response::Redirect(options.sign_out_redirect.clone()))
+        Ok(None)
     }
 }
 
