@@ -8,14 +8,14 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+native-tls = ["oauth2/native-tls"]
+rustls-tls = ["oauth2/rustls-tls"]
+
 [dependencies]
 async-trait.workspace = true
 chrono.workspace = true
 oauth2 = { version = "5.0.0", default-features = false, features = ["reqwest"] }
 serde.workspace = true
 shield.workspace = true
-
-[features]
-default = []
-native-tls = ["oauth2/native-tls"]
-rustls-tls = ["oauth2/rustls-tls"]

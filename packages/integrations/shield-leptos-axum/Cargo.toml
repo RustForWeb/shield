@@ -8,6 +8,10 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+utoipa = ["shield/utoipa", "shield-axum/utoipa"]
+
 [dependencies]
 async-trait.workspace = true
 leptos.workspace = true
@@ -15,7 +19,3 @@ leptos_axum.workspace = true
 shield.workspace = true
 shield-axum.workspace = true
 shield-leptos.workspace = true
-
-[features]
-default = []
-utoipa = ["shield/utoipa", "shield-axum/utoipa"]

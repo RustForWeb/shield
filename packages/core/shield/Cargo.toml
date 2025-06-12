@@ -8,6 +8,10 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+utoipa = ["dep:utoipa"]
+
 [dependencies]
 async-trait.workspace = true
 bon.workspace = true
@@ -17,7 +21,3 @@ serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true
 utoipa = { workspace = true, optional = true }
-
-[features]
-default = []
-utoipa = ["dep:utoipa"]

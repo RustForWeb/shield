@@ -8,21 +8,6 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
-[dependencies]
-async-trait.workspace = true
-chrono.workspace = true
-sea-orm.workspace = true
-sea-orm-migration.workspace = true
-serde = { workspace = true, features = ["derive"] }
-serde_json.workspace = true
-shield.workspace = true
-# shield-credentials = { workspace = true, optional = true }
-# shield-email = { workspace = true, optional = true }
-shield-oauth = { workspace = true, optional = true }
-shield-oidc = { workspace = true, optional = true }
-# shield-webauthn = { workspace = true, optional = true }
-utoipa = { workspace = true, optional = true }
-
 [features]
 default = []
 entity = []
@@ -41,3 +26,18 @@ method-oauth = ["dep:shield-oauth"]
 method-oidc = ["dep:shield-oidc"]
 # method-webauthn = ["dep:shield-webauthn"]
 utoipa = ["dep:utoipa", "shield/utoipa"]
+
+[dependencies]
+async-trait.workspace = true
+chrono.workspace = true
+sea-orm.workspace = true
+sea-orm-migration.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+shield.workspace = true
+# shield-credentials = { workspace = true, optional = true }
+# shield-email = { workspace = true, optional = true }
+shield-oauth = { workspace = true, optional = true }
+shield-oidc = { workspace = true, optional = true }
+# shield-webauthn = { workspace = true, optional = true }
+utoipa = { workspace = true, optional = true }

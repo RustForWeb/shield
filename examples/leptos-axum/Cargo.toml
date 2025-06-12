@@ -9,8 +9,32 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[package.metadata.leptos]
+bin-features = ["ssr"]
+bin-default-features = false
+
+lib-features = ["hydrate"]
+lib-default-features = false
+
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["ssr"]
+hydrate = ["leptos/hydrate"]
+ssr = [
+    "dep:axum",
+    "dep:leptos_axum",
+    "dep:shield-leptos-axum",
+    "dep:shield-memory",
+    "dep:shield-oidc",
+    "dep:tokio",
+    "dep:tower-sessions",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+    "shield-memory/method-oidc",
+]
 
 [dependencies]
 axum = { workspace = true, optional = true }
@@ -31,31 +55,7 @@ tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 tower-sessions = { workspace = true, optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
-wasm-bindgen.workspace = true
-wasm-tracing.workspace = true
 utoipa.workspace = true
 utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "vendored"] }
-
-[features]
-default = ["ssr"]
-hydrate = ["leptos/hydrate"]
-ssr = [
-    "dep:axum",
-    "dep:leptos_axum",
-    "dep:shield-leptos-axum",
-    "dep:shield-memory",
-    "dep:shield-oidc",
-    "dep:tokio",
-    "dep:tower-sessions",
-    "leptos/ssr",
-    "leptos_meta/ssr",
-    "leptos_router/ssr",
-    "shield-memory/method-oidc",
-]
-
-[package.metadata.leptos]
-bin-features = ["ssr"]
-bin-default-features = false
-
-lib-features = ["hydrate"]
-lib-default-features = false
+wasm-bindgen.workspace = true
+wasm-tracing.workspace = true

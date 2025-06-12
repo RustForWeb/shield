@@ -5,8 +5,33 @@ repos:
           - id: prettier
             additional_dependencies:
                 - prettier@^3.4.2
+
     - repo: https://github.com/doublify/pre-commit-rust
       rev: v1.0
       hooks:
           - id: fmt
           - id: clippy
+
+    - repo: https://github.com/EmbarkStudios/cargo-deny
+      rev: 0.18.3
+      hooks:
+          - id: cargo-deny
+
+    # - repo: https://github.com/bnjbvr/cargo-machete
+    #   rev: ba1bcd4
+    #   hooks:
+    #       - id: cargo-machete
+    - repo: local
+      hooks:
+          - id: cargo-machete
+            name: cargo-machete
+            language: rust
+            entry: cargo machete
+            types: [file, toml]
+            files: Cargo\.(toml|lock)
+            pass_filenames: false
+
+    - repo: https://github.com/DevinR528/cargo-sort
+      rev: v2.0.1
+      hooks:
+          - id: cargo-sort
