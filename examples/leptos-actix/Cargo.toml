@@ -9,8 +9,32 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[package.metadata.leptos]
+bin-features = ["ssr"]
+bin-default-features = false
+
+lib-features = ["hydrate"]
+lib-default-features = false
+
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["ssr"]
+hydrate = ["leptos/hydrate"]
+ssr = [
+    "dep:actix-files",
+    "dep:actix-session",
+    "dep:actix-web",
+    "dep:leptos_actix",
+    "dep:shield-leptos-actix",
+    "dep:shield-memory",
+    "dep:shield-oidc",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+    "shield-memory/method-oidc",
+]
 
 [dependencies]
 actix-files = { workspace = true, optional = true }
@@ -32,27 +56,3 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 wasm-bindgen.workspace = true
 wasm-tracing.workspace = true
-
-[features]
-default = ["ssr"]
-hydrate = ["leptos/hydrate"]
-ssr = [
-    "dep:actix-files",
-    "dep:actix-session",
-    "dep:actix-web",
-    "dep:leptos_actix",
-    "dep:shield-leptos-actix",
-    "dep:shield-memory",
-    "dep:shield-oidc",
-    "leptos/ssr",
-    "leptos_meta/ssr",
-    "leptos_router/ssr",
-    "shield-memory/method-oidc",
-]
-
-[package.metadata.leptos]
-bin-features = ["ssr"]
-bin-default-features = false
-
-lib-features = ["hydrate"]
-lib-default-features = false

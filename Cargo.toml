@@ -27,7 +27,6 @@ leptos_actix = "0.8.0-beta"
 leptos_axum = "0.8.0-beta"
 leptos_meta = "0.8.0-beta"
 leptos_router = "0.8.0-beta"
-thiserror = "2.0.7"
 sea-orm = "1.1.2"
 sea-orm-migration = "1.1.2"
 serde = "1.0.215"
@@ -48,6 +47,7 @@ shield-sea-orm = { path = "./packages/storage/shield-sea-orm", version = "0.0.4"
 shield-sqlx = { path = "./packages/storage/shield-sqlx", version = "0.0.4" }
 shield-tower = { path = "./packages/integrations/shield-tower", version = "0.0.4" }
 shield-webauthn = { path = "./packages/methods/shield-webauthn", version = "0.0.4" }
+thiserror = "2.0.7"
 tokio = "1.42.0"
 tower-layer = "0.3.3"
 tower-service = "0.3.3"

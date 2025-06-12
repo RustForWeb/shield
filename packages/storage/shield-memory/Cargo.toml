@@ -8,17 +8,6 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
-[dependencies]
-async-trait.workspace = true
-serde.workspace = true
-shield.workspace = true
-# shield-credentials = { workspace = true, optional = true }
-# shield-email = { workspace = true, optional = true }
-# shield-oauth = { workspace = true, optional = true }
-shield-oidc = { workspace = true, optional = true }
-# shield-webauthn = { workspace = true, optional = true }
-uuid = { workspace = true, features = ["v4"] }
-
 [features]
 default = []
 all-methods = [
@@ -32,4 +21,15 @@ all-methods = [
 # method-email = ["dep:shield-email"]
 # method-oauth = ["dep:shield-oauth"]
 method-oidc = ["dep:shield-oidc"]
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+shield.workspace = true
+# shield-credentials = { workspace = true, optional = true }
+# shield-email = { workspace = true, optional = true }
+# shield-oauth = { workspace = true, optional = true }
+shield-oidc = { workspace = true, optional = true }
+# shield-webauthn = { workspace = true, optional = true }
+uuid = { workspace = true, features = ["v4"] }
 # method-webauthn = ["dep:shield-webauthn"]

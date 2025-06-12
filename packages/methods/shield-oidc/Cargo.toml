@@ -8,6 +8,14 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[package.metadata.cargo-machete]
+ignored = ["oauth2"]
+
+[features]
+default = []
+native-tls = ["oauth2/native-tls", "openidconnect/native-tls"]
+rustls-tls = ["oauth2/rustls-tls", "openidconnect/native-tls"]
+
 [dependencies]
 async-trait.workspace = true
 bon.workspace = true
@@ -21,8 +29,3 @@ openidconnect = { version = "4.0.0", default-features = false, features = [
 serde.workspace = true
 shield.workspace = true
 tracing.workspace = true
-
-[features]
-default = []
-native-tls = ["oauth2/native-tls", "openidconnect/native-tls"]
-rustls-tls = ["oauth2/rustls-tls", "openidconnect/native-tls"]

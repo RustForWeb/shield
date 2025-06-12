@@ -8,6 +8,10 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+utoipa = ["dep:utoipa", "shield/utoipa"]
+
 [dependencies]
 axum.workspace = true
 serde.workspace = true
@@ -15,7 +19,3 @@ serde_json.workspace = true
 shield.workspace = true
 shield-tower.workspace = true
 utoipa = { workspace = true, features = ["axum_extras"], optional = true }
-
-[features]
-default = []
-utoipa = ["dep:utoipa", "shield/utoipa"]

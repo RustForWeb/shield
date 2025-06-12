@@ -17,15 +17,9 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: Set up Rust toolchain
-              run: |
-                  rustup toolchain install stable --no-self-update --profile minimal
-                  rustup target add wasm32-unknown-unknown
-
-            - name: Set up Rust cache
-              uses: swatinem/rust-cache@v2
+              uses: actions-rust-lang/setup-rust-toolchain@v1
               with:
-                  cache-on-failure: true
-                  save-if: ${{ github.ref == 'refs/heads/main' }}
+                  target: wasm32-unknown-unknown
 
             - name: Install Cargo Binary Install
               uses: cargo-bins/cargo-binstall@main
@@ -47,15 +41,9 @@ jobs:
                   fetch-depth: 0
 
             - name: Set up Rust toolchain
-              run: |
-                  rustup toolchain install stable --no-self-update --profile minimal
-                  rustup target add wasm32-unknown-unknown
-
-            - name: Set up Rust cache
-              uses: swatinem/rust-cache@v2
+              uses: actions-rust-lang/setup-rust-toolchain@v1
               with:
-                  cache-on-failure: true
-                  save-if: ${{ github.ref == 'refs/heads/main' }}
+                  target: wasm32-unknown-unknown
 
             - name: Install Cargo Binary Install
               uses: cargo-bins/cargo-binstall@main
