@@ -28,7 +28,7 @@ jobs:
               uses: cargo-bins/cargo-binstall@main
 
             - name: Install crates
-              run: cargo binstall -y cargo-deny cargo-machete cargo-sort
+              run: cargo binstall -y --force cargo-deny cargo-machete cargo-sort
 
             - name: Lint
               run: cargo clippy --all-features --locked
@@ -40,7 +40,7 @@ jobs:
               run: cargo machete
 
             - name: Check manifest formatting
-              run: cargo sort --check
+              run: cargo sort --workspace --check
 
             - name: Check formatting
               run: cargo fmt --all --check
