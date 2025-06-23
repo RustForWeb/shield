@@ -7,24 +7,15 @@ use shield::User;
 use crate::routes::*;
 
 #[cfg_attr(feature = "utoipa", derive(utoipa::OpenApi))]
-#[cfg_attr(
-    feature = "utoipa",
-    openapi(paths(providers, sign_in, sign_in_callback, sign_out, user))
-)]
+#[cfg_attr(feature = "utoipa", openapi(paths()))]
 pub struct AuthRoutes;
 
 impl AuthRoutes {
     pub fn router<U: User + Clone + 'static, S: Clone + Send + Sync + 'static>() -> Router<S> {
         Router::new()
-            .route("/providers", get(providers::<U>))
-            .route("/sign-in/{methodId}", post(sign_in::<U>))
-            .route("/sign-in/{methodId}/{providerId}", post(sign_in::<U>))
-            .route("/sign-in/callback/{methodId}", get(sign_in_callback::<U>))
-            .route(
-                "/sign-in/callback/{methodId}/{providerId}",
-                get(sign_in_callback::<U>),
-            )
-            .route("/sign-out", post(sign_out::<U>))
-            .route("/user", get(user::<U>))
+            .route("/{methodId}/{actionId}", get(action::<U>))
+            .route("/{methodId}/{actionId}", post(action::<U>))
+            .route("/{methodId}/{actionId}/{providerId}", get(action::<U>))
+            .route("/{methodId}/{actionId}/{providerId}", post(action::<U>))
     }
 }

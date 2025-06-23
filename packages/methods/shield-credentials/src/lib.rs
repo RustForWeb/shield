@@ -1,3 +1,4 @@
+mod actions;
 mod credentials;
 mod email_password;
 mod method;

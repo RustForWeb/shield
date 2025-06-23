@@ -13,13 +13,13 @@ default = []
 all-methods = [
     # "method-credentials",
     # "method-email",
-    # "method-oauth",
+    "method-oauth",
     "method-oidc",
     # "method-webauthn",
 ]
 # method-credentials = ["dep:shield-credentials"]
 # method-email = ["dep:shield-email"]
-# method-oauth = ["dep:shield-oauth"]
+method-oauth = ["dep:shield-oauth"]
 method-oidc = ["dep:shield-oidc"]
 
 [dependencies]
@@ -28,7 +28,7 @@ serde.workspace = true
 shield.workspace = true
 # shield-credentials = { workspace = true, optional = true }
 # shield-email = { workspace = true, optional = true }
-# shield-oauth = { workspace = true, optional = true }
+shield-oauth = { workspace = true, optional = true }
 shield-oidc = { workspace = true, optional = true }
 # shield-webauthn = { workspace = true, optional = true }
 uuid = { workspace = true, features = ["v4"] }

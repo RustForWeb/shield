@@ -1,7 +1,7 @@
 pub mod base;
 pub mod entities;
+mod methods;
 pub mod migrations;
-mod providers;
 mod storage;
 mod user;
 

@@ -1,45 +1,94 @@
+use std::any::Any;
+
 use async_trait::async_trait;
 
-use crate::{
-    error::ShieldError,
-    options::ShieldOptions,
-    provider::Provider,
-    request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
-    response::Response,
-    session::Session,
-};
+use crate::{ErasedAction, action::Action, error::ShieldError, provider::Provider};
 
 #[async_trait]
-pub trait Method: Send + Sync {
+pub trait Method<P: Provider>: Send + Sync {
     fn id(&self) -> String;
 
-    async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError>;
+    fn actions(&self) -> Vec<Box<dyn Action<P>>>;
 
-    async fn provider_by_id(
-        &self,
-        provider_id: &str,
-    ) -> Result<Option<Box<dyn Provider>>, ShieldError>;
+    fn action_by_id(&self, action_id: &str) -> Option<Box<dyn Action<P>>> {
+        self.actions()
+            .into_iter()
+            .find(|action| action.id() == action_id)
+    }
 
-    async fn sign_in(
-        &self,
-        request: SignInRequest,
-        session: Session,
-        options: &ShieldOptions,
-    ) -> Result<Response, ShieldError>;
+    async fn providers(&self) -> Result<Vec<P>, ShieldError>;
 
-    async fn sign_in_callback(
-        &self,
-        request: SignInCallbackRequest,
-        session: Session,
-        options: &ShieldOptions,
-    ) -> Result<Response, ShieldError>;
+    async fn provider_by_id(&self, provider_id: Option<&str>) -> Result<Option<P>, ShieldError> {
+        Ok(self
+            .providers()
+            .await?
+            .into_iter()
+            .find(|provider| provider.id().as_deref() == provider_id))
+    }
+}
 
-    async fn sign_out(
+#[async_trait]
+pub trait ErasedMethod: Send + Sync {
+    fn erased_id(&self) -> String;
+
+    fn erased_actions(&self) -> Vec<Box<dyn ErasedAction>>;
+
+    fn erased_action_by_id(&self, action_id: &str) -> Option<Box<dyn ErasedAction>>;
+
+    async fn erased_providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError>;
+
+    async fn erased_provider_by_id(
         &self,
-        request: SignOutRequest,
-        session: Session,
-        options: &ShieldOptions,
-    ) -> Result<Option<Response>, ShieldError>;
+        provider_id: Option<&str>,
+    ) -> Result<Option<Box<dyn Any + Send + Sync>>, ShieldError>;
+}
+
+#[macro_export]
+macro_rules! erased_method {
+    ($method:ident $(, < $( $generic_name:ident : $generic_type:ident ),+ > )*) => {
+        #[async_trait]
+        impl $( < $( $generic_name: $generic_type + 'static ),+ > )* $crate::ErasedMethod for $method $( < $( $generic_name ),+ > )* {
+            fn erased_id(&self) -> String {
+                self.id()
+            }
+
+            fn erased_actions(&self) -> Vec<Box<dyn $crate::ErasedAction>> {
+                self.actions()
+                    .into_iter()
+                    .map(|action| action as Box<dyn $crate::ErasedAction>)
+                    .collect()
+            }
+
+            fn erased_action_by_id(
+                &self,
+                action_id: &str,
+            ) -> Option<Box<dyn $crate::ErasedAction>> {
+                self.action_by_id(action_id)
+                    .map(|action| action as Box<dyn $crate::ErasedAction>)
+            }
+
+            async fn erased_providers(
+                &self,
+            ) -> Result<Vec<Box<dyn std::any::Any + Send + Sync>>, ShieldError> {
+                self.providers().await.map(|providers| {
+                    providers
+                        .into_iter()
+                        .map(|provider| Box::new(provider) as Box<dyn std::any::Any + Send + Sync>)
+                        .collect()
+                })
+            }
+
+            async fn erased_provider_by_id(
+                &self,
+                provider_id: Option<&str>,
+            ) -> Result<Option<Box<dyn std::any::Any + Send + Sync>>, ShieldError> {
+                self.provider_by_id(provider_id).await.map(|provider| {
+                    provider
+                        .map(|provider| Box::new(provider) as Box<dyn std::any::Any + Send + Sync>)
+                })
+            }
+        }
+    };
 }
 
 #[cfg(test)]
@@ -47,12 +96,9 @@ pub(crate) mod tests {
     use async_trait::async_trait;
 
     use crate::{
-        ShieldOptions,
+        action::{Action, tests::TestAction},
         error::ShieldError,
-        provider::Provider,
-        request::{SignInCallbackRequest, SignInRequest, SignOutRequest},
-        response::Response,
-        session::Session,
+        provider::tests::TestProvider,
     };
 
     use super::Method;
@@ -65,54 +111,27 @@ pub(crate) mod tests {
     }
 
     impl TestMethod {
-        pub fn with_id(mut self, id: &'static str) -> Self {
+        // TODO
+        pub fn _with_id(mut self, id: &'static str) -> Self {
             self.id = Some(id);
             self
         }
     }
 
     #[async_trait]
-    impl Method for TestMethod {
+    impl Method<TestProvider> for TestMethod {
         fn id(&self) -> String {
             self.id.unwrap_or(TEST_METHOD_ID).to_owned()
         }
 
-        async fn providers(&self) -> Result<Vec<Box<dyn Provider>>, ShieldError> {
-            Ok(vec![])
+        fn actions(&self) -> Vec<Box<dyn Action<TestProvider>>> {
+            vec![Box::new(TestAction::default())]
         }
 
-        async fn provider_by_id(
-            &self,
-            _provider_id: &str,
-        ) -> Result<Option<Box<dyn Provider>>, ShieldError> {
-            Ok(None)
-        }
-
-        async fn sign_in(
-            &self,
-            _request: SignInRequest,
-            _session: Session,
-            _options: &ShieldOptions,
-        ) -> Result<Response, ShieldError> {
-            todo!("redirect back?")
-        }
-
-        async fn sign_in_callback(
-            &self,
-            _request: SignInCallbackRequest,
-            _session: Session,
-            _options: &ShieldOptions,
-        ) -> Result<Response, ShieldError> {
-            todo!("redirect back?")
-        }
-
-        async fn sign_out(
-            &self,
-            _request: SignOutRequest,
-            _session: Session,
-            _options: &ShieldOptions,
-        ) -> Result<Option<Response>, ShieldError> {
-            Ok(None)
+        async fn providers(&self) -> Result<Vec<TestProvider>, ShieldError> {
+            Ok(vec![TestProvider::default()])
         }
     }
+
+    erased_method!(TestMethod);
 }

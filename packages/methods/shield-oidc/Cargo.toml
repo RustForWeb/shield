@@ -26,6 +26,7 @@ oauth2 = { version = "5.0.0", default-features = false, features = [
 openidconnect = { version = "4.0.0", default-features = false, features = [
     "reqwest",
 ] }
+secrecy.workspace = true
 serde.workspace = true
 shield.workspace = true
 tracing.workspace = true
