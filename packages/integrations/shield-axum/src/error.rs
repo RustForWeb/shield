@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
-use shield::{MethodError, ProviderError, ShieldError, StorageError};
+use shield::{ActionError, MethodError, ProviderError, ShieldError, StorageError};
 
 #[derive(Serialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
@@ -45,11 +45,14 @@ impl IntoResponse for RouteError {
     fn into_response(self) -> Response {
         let status_code = match &self.0 {
             ShieldError::Method(method_error) => match method_error {
-                MethodError::MethodNotFound(_) => StatusCode::NOT_FOUND,
+                MethodError::NotFound(_) => StatusCode::NOT_FOUND,
+            },
+            ShieldError::Action(action_error) => match action_error {
+                ActionError::NotFound(_) => StatusCode::NOT_FOUND,
             },
             ShieldError::Provider(provider_error) => match provider_error {
-                ProviderError::ProviderMissing => StatusCode::BAD_REQUEST,
-                ProviderError::ProviderNotFound(_) => StatusCode::NOT_FOUND,
+                ProviderError::Missing => StatusCode::BAD_REQUEST,
+                ProviderError::NotFound(_) => StatusCode::NOT_FOUND,
             },
             ShieldError::Configuration(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ShieldError::Session(_) => StatusCode::INTERNAL_SERVER_ERROR,

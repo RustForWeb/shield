@@ -4,7 +4,6 @@ use leptos_router::{
     components::{Route, Router, Routes},
     path,
 };
-use shield_leptos::routes::{SignIn, SignOut};
 
 use crate::home::HomePage;
 
@@ -37,9 +36,6 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routes fallback=|| "Not found.".into_view()>
                     <Route path=path!("") view=HomePage />
-
-                    <Route path=path!("/auth/sign-in") view=SignIn />
-                    <Route path=path!("/auth/sign-out") view=SignOut />
                 </Routes>
             </main>
         </Router>

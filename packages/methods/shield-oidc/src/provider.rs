@@ -10,6 +10,7 @@ use openidconnect::{
         CoreTokenResponse,
     },
 };
+use secrecy::{ExposeSecret, SecretString};
 use shield::{ConfigurationError, Provider};
 
 use crate::{
@@ -50,9 +51,13 @@ pub enum OidcProviderPkceCodeChallenge {
     Plain,
     S256,
 }
-
+#[expect(clippy::duplicated_attributes)]
 #[derive(Builder, Clone, Debug)]
-#[builder(on(String, into), state_mod(vis = "pub(crate)"))]
+#[builder(
+    on(String, into),
+    on(SecretString, into),
+    state_mod(vis = "pub(crate)")
+)]
 pub struct OidcProvider {
     pub id: String,
     pub name: String,
@@ -61,7 +66,7 @@ pub struct OidcProvider {
     #[builder(default = OidcProviderVisibility::Public)]
     pub visibility: OidcProviderVisibility,
     pub client_id: String,
-    pub client_secret: Option<String>,
+    pub client_secret: Option<SecretString>,
     pub scopes: Option<Vec<String>>,
     pub redirect_url: Option<String>,
     pub discovery_url: Option<String>,
@@ -177,7 +182,9 @@ impl OidcProvider {
         let mut client = CoreClient::from_provider_metadata(
             provider_metadata,
             ClientId::new(self.client_id.clone()),
-            self.client_secret.clone().map(ClientSecret::new),
+            self.client_secret
+                .clone()
+                .map(|client_secret| ClientSecret::new(client_secret.expose_secret().to_owned())),
         );
 
         // TODO: Upstream: _option version of these (and other) functions which set the type to EndpointMaybeSet.
@@ -216,13 +223,5 @@ impl Provider for OidcProvider {
 
     fn name(&self) -> String {
         self.name.clone()
-    }
-
-    fn icon_url(&self) -> Option<String> {
-        self.icon_url.clone()
-    }
-
-    fn form(&self) -> Option<shield::Form> {
-        None
     }
 }

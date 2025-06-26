@@ -6,7 +6,8 @@ use oauth2::{
         BasicTokenIntrospectionResponse, BasicTokenResponse,
     },
 };
-use shield::{ConfigurationError, Form, Provider};
+use secrecy::{ExposeSecret, SecretString};
+use shield::{ConfigurationError, Provider};
 
 use crate::method::OAUTH_METHOD_ID;
 
@@ -43,7 +44,7 @@ pub struct OauthProvider {
     pub slug: Option<String>,
     pub visibility: OauthProviderVisibility,
     pub client_id: String,
-    pub client_secret: Option<String>,
+    pub client_secret: Option<SecretString>,
     pub scopes: Option<Vec<String>>,
     pub redirect_url: Option<String>,
     pub authorization_url: Option<String>,
@@ -63,7 +64,8 @@ impl OauthProvider {
         let mut client = BasicClient::new(ClientId::new(self.client_id.clone()));
 
         if let Some(client_secret) = &self.client_secret {
-            client = client.set_client_secret(ClientSecret::new(client_secret.clone()));
+            client = client
+                .set_client_secret(ClientSecret::new(client_secret.expose_secret().to_owned()));
         }
 
         if let Some(redirect_url) = &self.redirect_url {
@@ -128,13 +130,5 @@ impl Provider for OauthProvider {
 
     fn name(&self) -> String {
         self.name.clone()
-    }
-
-    fn icon_url(&self) -> Option<String> {
-        self.icon_url.clone()
-    }
-
-    fn form(&self) -> Option<Form> {
-        None
     }
 }

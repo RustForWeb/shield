@@ -74,14 +74,14 @@ where
                 };
             let shield_session = Session::new(session_storage);
 
-            let user = match shield.user(&shield_session).await {
-                Ok(user) => user,
-                Err(_err) => return Ok(Self::internal_server_error()),
-            };
+            // let user = match shield.user(&shield_session).await {
+            //     Ok(user) => user,
+            //     Err(_err) => return Ok(Self::internal_server_error()),
+            // };
 
             req.extensions_mut().insert(shield);
             req.extensions_mut().insert(shield_session);
-            req.extensions_mut().insert(user);
+            // req.extensions_mut().insert(user);
 
             inner.call(req).await
         })

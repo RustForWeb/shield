@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
+use secrecy::ExposeSecret;
 use shield::StorageError;
 use shield_oidc::{
     CreateOidcConnection, OidcConnection, OidcProvider, OidcProviderPkceCodeChallenge,
@@ -74,9 +75,17 @@ impl OidcStorage<User> for SeaOrmStorage {
         let active_model = oidc_provider_connection::ActiveModel {
             identifier: ActiveValue::Set(connection.identifier),
             token_type: ActiveValue::Set(connection.token_type),
-            access_token: ActiveValue::Set(connection.access_token),
-            refresh_token: ActiveValue::Set(connection.refresh_token),
-            id_token: ActiveValue::Set(connection.id_token),
+            access_token: ActiveValue::Set(connection.access_token.expose_secret().to_owned()),
+            refresh_token: ActiveValue::Set(
+                connection
+                    .refresh_token
+                    .map(|refresh_token| refresh_token.expose_secret().to_owned()),
+            ),
+            id_token: ActiveValue::Set(
+                connection
+                    .id_token
+                    .map(|id_token| id_token.expose_secret().to_owned()),
+            ),
             expired_at: ActiveValue::Set(connection.expired_at),
             scopes: ActiveValue::Set(connection.scopes.map(|scopes| scopes.join(","))),
             provider_id: ActiveValue::Set(Self::parse_uuid(&connection.provider_id)?),
@@ -108,13 +117,16 @@ impl OidcStorage<User> for SeaOrmStorage {
             active_model.token_type = ActiveValue::Set(token_type);
         }
         if let Some(access_token) = connection.access_token {
-            active_model.access_token = ActiveValue::Set(access_token);
+            active_model.access_token = ActiveValue::Set(access_token.expose_secret().to_owned());
         }
         if let Some(refresh_token) = connection.refresh_token {
-            active_model.refresh_token = ActiveValue::Set(refresh_token);
+            active_model.refresh_token = ActiveValue::Set(
+                refresh_token.map(|refresh_token| refresh_token.expose_secret().to_owned()),
+            );
         }
         if let Some(id_token) = connection.id_token {
-            active_model.id_token = ActiveValue::Set(id_token);
+            active_model.id_token =
+                ActiveValue::Set(id_token.map(|id_token| id_token.expose_secret().to_owned()));
         }
         if let Some(expired_at) = connection.expired_at {
             active_model.expired_at = ActiveValue::Set(expired_at);
@@ -175,7 +187,7 @@ impl TryFrom<oidc_provider::Model> for OidcProvider {
             icon_url: value.icon_url,
             visibility: value.visibility.into(),
             client_id: value.client_id,
-            client_secret: value.client_secret,
+            client_secret: value.client_secret.map(Into::into),
             scopes: value
                 .scopes
                 .map(|scopes| scopes.split(',').map(|s| s.to_string()).collect()),
@@ -208,9 +220,9 @@ impl From<oidc_provider_connection::Model> for OidcConnection {
             id: value.id.to_string(),
             identifier: value.identifier,
             token_type: value.token_type,
-            access_token: value.access_token,
-            refresh_token: value.refresh_token,
-            id_token: value.id_token,
+            access_token: value.access_token.into(),
+            refresh_token: value.refresh_token.map(Into::into),
+            id_token: value.id_token.map(Into::into),
             expired_at: value.expired_at,
             scopes: value
                 .scopes
