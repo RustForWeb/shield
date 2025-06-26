@@ -20,6 +20,7 @@ axum = "0.8.1"
 bon = "3.3.2"
 chrono = "0.4.39"
 console_error_panic_hook = "0.1.2"
+dioxus = "0.7.0-alpha.1"
 futures = "0.3.31"
 http = "1.2.0"
 leptos = "0.8.0-beta"
@@ -37,6 +38,8 @@ shield-actix = { path = "./packages/integrations/shield-actix", version = "0.0.4
 shield-axum = { path = "./packages/integrations/shield-axum", version = "0.0.4" }
 shield-credentials = { path = "./packages/methods/shield-credentials", version = "0.0.4" }
 shield-diesel = { path = "./packages/storage/shield-diesel", version = "0.0.4" }
+shield-dioxus = { path = "./packages/integrations/shield-dioxus", version = "0.0.4" }
+shield-dioxus-axum = { path = "./packages/integrations/shield-dioxus-axum", version = "0.0.4" }
 shield-email = { path = "./packages/methods/shield-email", version = "0.0.4" }
 shield-leptos = { path = "./packages/integrations/shield-leptos", version = "0.0.4" }
 shield-leptos-actix = { path = "./packages/integrations/shield-leptos-actix", version = "0.0.4" }
@@ -59,3 +62,15 @@ utoipa = { version = "5.3.1", features = ["chrono", "uuid"] }
 uuid = "1.11.0"
 wasm-bindgen = "0.2.100"
 wasm-tracing = "2.0.0"
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
