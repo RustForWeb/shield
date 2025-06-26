@@ -1,0 +1,16 @@
+[package]
+name = "shield-dioxus-axum"
+description = "Dioxus Axum integration for Shield."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[features]
+default = []
+utoipa = ["shield-axum/utoipa"]
+
+[dependencies]
+shield-axum.workspace = true

@@ -1,0 +1,38 @@
+[package]
+name = "shield-examples-diouxs-axum"
+description = "Example with Dioxus and Axum."
+publish = false
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[features]
+default = ["server"]
+# TODO: Enabling these triggers multiple RustSec advisories.
+# desktop = ["dioxus/desktop"]
+# mobile = ["dioxus/mobile"]
+server = [
+    "dep:axum",
+    "dep:shield-dioxus-axum",
+    "dep:shield-memory",
+    "dep:shield-oidc",
+    "dep:tokio",
+    "dep:tower-sessions",
+    "dioxus/server",
+    "shield-memory/method-oidc",
+]
+web = ["dioxus/web"]
+
+[dependencies]
+axum = { workspace = true, optional = true }
+dioxus = { workspace = true, features = ["router", "fullstack"] }
+shield.workspace = true
+shield-dioxus-axum = { workspace = true, optional = true }
+shield-memory = { workspace = true, optional = true }
+shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
+tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
+tower-sessions = { workspace = true, optional = true }
+tracing.workspace = true
