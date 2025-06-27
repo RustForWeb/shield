@@ -30,7 +30,7 @@ pub fn migrations() {
                 .arg("-d")
                 .arg(example_path())
                 .status()
-                .unwrap_or_else(|_| panic!("{} up migrations should succeed.", backend))
+                .unwrap_or_else(|_| panic!("{backend} up migrations should succeed."))
                 .success()
         );
 
@@ -44,7 +44,7 @@ pub fn migrations() {
                 .arg("-d")
                 .arg(example_path())
                 .status()
-                .unwrap_or_else(|_| panic!("{} down migrations should succeed.", backend))
+                .unwrap_or_else(|_| panic!("{backend} down migrations should succeed."))
                 .success()
         );
 
@@ -58,7 +58,7 @@ pub fn migrations() {
                 .arg("-d")
                 .arg(example_path())
                 .status()
-                .unwrap_or_else(|_| panic!("{} cleanup should succeed.", backend))
+                .unwrap_or_else(|_| panic!("{backend} cleanup should succeed."))
                 .success()
         );
     }
