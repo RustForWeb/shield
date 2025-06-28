@@ -22,16 +22,14 @@ impl Action<OidcProvider> for OidcSignInAction {
         SIGN_IN_ACTION_ID.to_owned()
     }
 
-    fn render(&self, provider: OidcProvider) -> Form {
+    fn form(&self, provider: OidcProvider) -> Form {
         Form {
             inputs: vec![Input {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit::default()),
                 value: Some(format!("Sign in with {}", provider.name())),
-                attributes: None,
             }],
-            attributes: None,
         }
     }
 

@@ -5320,6 +5320,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shield-bootstrap"
+version = "0.0.4"
+dependencies = [
+ "dioxus",
+ "shield",
+ "shield-dioxus",
+]
+
+[[package]]
 name = "shield-credentials"
 version = "0.0.4"
 dependencies = [
@@ -5383,6 +5392,7 @@ dependencies = [
  "axum",
  "dioxus",
  "shield",
+ "shield-bootstrap",
  "shield-dioxus",
  "shield-dioxus-axum",
  "shield-memory",

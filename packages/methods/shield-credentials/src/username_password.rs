@@ -51,7 +51,6 @@ impl<U: User> Credentials<U, UsernamePasswordData> for UsernamePasswordCredentia
                         ..Default::default()
                     }),
                     value: None,
-                    attributes: None,
                 },
                 Input {
                     name: "password".to_owned(),
@@ -63,10 +62,8 @@ impl<U: User> Credentials<U, UsernamePasswordData> for UsernamePasswordCredentia
                         ..Default::default()
                     }),
                     value: None,
-                    attributes: None,
                 },
             ],
-            attributes: None,
         }
     }
 

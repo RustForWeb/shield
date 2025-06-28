@@ -18,19 +18,19 @@ impl ToRsx for Form {
 impl ToRsx for Input {
     fn to_rsx(&self) -> Element {
         let input = match &self.r#type {
-            InputType::Button(button) => rsx! {
+            InputType::Button(_button) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "button",
-                    popovertarget: button.popovertarget.clone(),
-                    popovertargetaction: button.popovertargetaction.clone(),
                 }
             },
             InputType::Checkbox(checkbox) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "checkbox",
                     checked: checkbox.checked,
                     required: checkbox.required,
@@ -40,6 +40,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "color",
                     "alpha": color.alpha,
                     autocomplete: color.autocomplete.clone(),
@@ -51,6 +52,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "date",
                     autocomplete: date.autocomplete.clone(),
                     list: date.list.clone(),
@@ -65,6 +67,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "datetime-local",
                     autocomplete: datetime_local.autocomplete.clone(),
                     list: datetime_local.list.clone(),
@@ -79,9 +82,9 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "email",
                     autocomplete: email.autocomplete.clone(),
-                    "dirname": email.dirname.clone(),
                     list: email.list.clone(),
                     maxlength: email.maxlength.clone(),
                     minlength: email.minlength.clone(),
@@ -97,6 +100,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "file",
                     accept: file.accept.clone(),
                     multiple: file.multiple,
@@ -107,9 +111,9 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "hidden",
                     autocomplete: hidden.autocomplete.clone(),
-                    "dirname": hidden.dirname.clone(),
                     required: hidden.required,
                 }
             },
@@ -117,16 +121,10 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "image",
                     alt: image.alt.clone(),
-                    formaction: image.formaction.clone(),
-                    formenctype: image.formenctype.clone(),
-                    formmethod: image.formmethod.clone(),
-                    formnovalidate: image.formnovalidate,
-                    formtarget: image.formtarget.clone(),
                     height: image.height.clone(),
-                    popovertarget: image.popovertarget.clone(),
-                    popovertargetaction: image.popovertargetaction.clone(),
                     src: image.src.clone(),
                     width: image.width.clone(),
                 }
@@ -135,6 +133,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "month",
                     autocomplete: month.autocomplete.clone(),
                     list: month.list.clone(),
@@ -149,6 +148,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "number",
                     autocomplete: number.autocomplete.clone(),
                     list: number.list.clone(),
@@ -164,9 +164,9 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "password",
                     autocomplete: password.autocomplete.clone(),
-                    "dirname": password.dirname.clone(),
                     maxlength: password.maxlength.clone(),
                     minlength: password.minlength.clone(),
                     pattern: password.pattern.clone(),
@@ -180,6 +180,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "radio",
                     checked: radio.checked,
                     required: radio.required,
@@ -189,6 +190,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "range",
                     autocomplete: range.autocomplete.clone(),
                     list: range.list.clone(),
@@ -197,22 +199,21 @@ impl ToRsx for Input {
                     step: range.step.clone(),
                 }
             },
-            InputType::Reset(reset) => rsx! {
+            InputType::Reset(_reset) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "reset",
-                    popovertarget: reset.popovertarget.clone(),
-                    popovertargetaction: reset.popovertargetaction.clone(),
                 }
             },
             InputType::Search(search) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "search",
                     autocomplete: search.autocomplete.clone(),
-                    "dirname": search.dirname.clone(),
                     list: search.list.clone(),
                     maxlength: search.maxlength.clone(),
                     minlength: search.minlength.clone(),
@@ -223,28 +224,21 @@ impl ToRsx for Input {
                     size: search.size.clone(),
                 }
             },
-            InputType::Submit(submit) => rsx! {
+            InputType::Submit(_submit) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "submit",
-                    "dirname": submit.dirname.clone(),
-                    formaction: submit.formaction.clone(),
-                    formenctype: submit.formenctype.clone(),
-                    formmethod: submit.formmethod.clone(),
-                    formnovalidate: submit.formnovalidate,
-                    formtarget: submit.formtarget.clone(),
-                    popovertarget: submit.popovertarget.clone(),
-                    popovertargetaction: submit.popovertargetaction.clone(),
                 }
             },
             InputType::Tel(tel) => rsx! {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "tel",
                     autocomplete: tel.autocomplete.clone(),
-                    "dirname": tel.dirname.clone(),
                     list: tel.list.clone(),
                     maxlength: tel.maxlength.clone(),
                     minlength: tel.minlength.clone(),
@@ -259,9 +253,9 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "text",
                     autocomplete: text.autocomplete.clone(),
-                    "dirname": text.dirname.clone(),
                     list: text.list.clone(),
                     maxlength: text.maxlength.clone(),
                     minlength: text.minlength.clone(),
@@ -276,6 +270,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "time",
                     autocomplete: time.autocomplete.clone(),
                     list: time.list.clone(),
@@ -290,9 +285,9 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "url",
                     autocomplete: url.autocomplete.clone(),
-                    "dirname": url.dirname.clone(),
                     list: url.list.clone(),
                     maxlength: url.maxlength.clone(),
                     minlength: url.minlength.clone(),
@@ -307,6 +302,7 @@ impl ToRsx for Input {
                 input {
                     name: self.name.clone(),
                     value: self.value.clone(),
+
                     r#type: "week",
                     autocomplete: week.autocomplete.clone(),
                     list: week.list.clone(),
@@ -321,8 +317,11 @@ impl ToRsx for Input {
 
         rsx! {
             div {
+                // TODO: Generate input ID and set for attribute.
                 if let Some(label) = &self.label {
-                    label { "{label}" }
+                    label {
+                        "{label}"
+                    }
                 }
 
                 {input}

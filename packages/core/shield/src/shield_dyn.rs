@@ -2,7 +2,7 @@ use std::{any::Any, sync::Arc};
 
 use async_trait::async_trait;
 
-use crate::{Form, error::ShieldError, shield::Shield, user::User};
+use crate::{error::ShieldError, form::Form, shield::Shield, user::User};
 
 #[async_trait]
 pub trait DynShield: Send + Sync {

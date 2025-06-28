@@ -15,7 +15,7 @@ pub const SIGN_OUT_ACTION_ID: &str = "sign-out";
 pub trait Action<P: Provider>: ErasedAction + Send + Sync {
     fn id(&self) -> String;
 
-    fn render(&self, provider: P) -> Form;
+    fn form(&self, provider: P) -> Form;
 
     async fn call(
         &self,
@@ -29,7 +29,7 @@ pub trait Action<P: Provider>: ErasedAction + Send + Sync {
 pub trait ErasedAction: Send + Sync {
     fn erased_id(&self) -> String;
 
-    fn erased_render(&self, provider: Box<dyn Any + Send + Sync>) -> Form;
+    fn erased_form(&self, provider: Box<dyn Any + Send + Sync>) -> Form;
 
     async fn erased_call(
         &self,
@@ -48,8 +48,8 @@ macro_rules! erased_action {
                 self.id()
             }
 
-            fn erased_render(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> $crate::Form {
-                self.render(*provider.downcast().expect("TODO"))
+            fn erased_form(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> $crate::Form {
+                self.form(*provider.downcast().expect("TODO"))
             }
 
             async fn erased_call(
@@ -87,11 +87,8 @@ pub(crate) mod tests {
             TEST_ACTION_ID.to_owned()
         }
 
-        fn render(&self, _provider: TestProvider) -> Form {
-            Form {
-                inputs: vec![],
-                attributes: None,
-            }
+        fn form(&self, _provider: TestProvider) -> Form {
+            Form { inputs: vec![] }
         }
 
         async fn call(

@@ -1,32 +1,18 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
-/// HTML [attribute](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub enum Attribute {
-    Boolean(bool),
-    String(String),
-}
-
-/// HTML [form](https://html.spec.whatwg.org/multipage/forms.html#the-form-element).
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Form {
     pub inputs: Vec<Input>,
-    pub attributes: Option<HashMap<String, Attribute>>,
 }
 
-/// HTML [input](https://html.spec.whatwg.org/multipage/input.html#the-input-element).
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Input {
     pub name: String,
     pub label: Option<String>,
     pub r#type: InputType,
     pub value: Option<String>,
-    pub attributes: Option<HashMap<String, Attribute>>,
 }
 
-/// HTML input [type](https://html.spec.whatwg.org/multipage/input.html#attr-input-type) and [attributes](https://html.spec.whatwg.org/multipage/input.html#input-type-attr-summary).
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum InputType {
     Button(InputTypeButton),
@@ -53,11 +39,37 @@ pub enum InputType {
     Week(InputTypeWeek),
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct InputTypeButton {
-    pub popovertarget: Option<String>,
-    pub popovertargetaction: Option<String>,
+impl InputType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            InputType::Button(_) => "button",
+            InputType::Checkbox(_) => "checkbox",
+            InputType::Color(_) => "color",
+            InputType::Date(_) => "date",
+            InputType::DatetimeLocal(_) => "datetime-local",
+            InputType::Email(_) => "email",
+            InputType::File(_) => "file",
+            InputType::Hidden(_) => "hidden",
+            InputType::Image(_) => "image",
+            InputType::Month(_) => "month",
+            InputType::Number(_) => "number",
+            InputType::Password(_) => "password",
+            InputType::Radio(_) => "radio",
+            InputType::Range(_) => "range",
+            InputType::Reset(_) => "reset",
+            InputType::Search(_) => "search",
+            InputType::Submit(_) => "submit",
+            InputType::Tel(_) => "tel",
+            InputType::Text(_) => "text",
+            InputType::Time(_) => "time",
+            InputType::Url(_) => "url",
+            InputType::Week(_) => "week",
+        }
+    }
 }
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct InputTypeButton {}
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeCheckbox {
@@ -98,7 +110,6 @@ pub struct InputTypeDatetimeLocal {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeEmail {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub list: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,
@@ -120,21 +131,13 @@ pub struct InputTypeFile {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeHidden {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub required: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeImage {
     pub alt: Option<String>,
-    pub formaction: Option<String>,
-    pub formenctype: Option<String>,
-    pub formmethod: Option<String>,
-    pub formnovalidate: Option<bool>,
-    pub formtarget: Option<String>,
     pub height: Option<String>,
-    pub popovertarget: Option<String>,
-    pub popovertargetaction: Option<String>,
     pub src: Option<String>,
     pub width: Option<String>,
 }
@@ -165,7 +168,6 @@ pub struct InputTypeNumber {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypePassword {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,
     pub pattern: Option<String>,
@@ -191,15 +193,11 @@ pub struct InputTypeRange {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct InputTypeReset {
-    pub popovertarget: Option<String>,
-    pub popovertargetaction: Option<String>,
-}
+pub struct InputTypeReset {}
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeSearch {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub list: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,
@@ -211,21 +209,11 @@ pub struct InputTypeSearch {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct InputTypeSubmit {
-    pub dirname: Option<String>,
-    pub formaction: Option<String>,
-    pub formenctype: Option<String>,
-    pub formmethod: Option<String>,
-    pub formnovalidate: Option<bool>,
-    pub formtarget: Option<String>,
-    pub popovertarget: Option<String>,
-    pub popovertargetaction: Option<String>,
-}
+pub struct InputTypeSubmit {}
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeTel {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub list: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,
@@ -239,7 +227,6 @@ pub struct InputTypeTel {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeText {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub list: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,
@@ -264,7 +251,6 @@ pub struct InputTypeTime {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct InputTypeUrl {
     pub autocomplete: Option<String>,
-    pub dirname: Option<String>,
     pub list: Option<String>,
     pub maxlength: Option<String>,
     pub minlength: Option<String>,

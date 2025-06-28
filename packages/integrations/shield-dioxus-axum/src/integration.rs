@@ -9,6 +9,12 @@ use shield_dioxus::{DioxusIntegration, DioxusIntegrationDyn};
 
 pub struct DioxusAxumIntegration<U: User>(PhantomData<U>);
 
+impl<U: User + Clone + 'static> DioxusAxumIntegration<U> {
+    pub fn context(self) -> DioxusIntegrationDyn {
+        DioxusIntegrationDyn::new(self)
+    }
+}
+
 impl<U: User> Default for DioxusAxumIntegration<U> {
     fn default() -> Self {
         Self(Default::default())
@@ -28,8 +34,4 @@ impl<U: User + Clone + 'static> DioxusIntegration for DioxusAxumIntegration<U> {
 
         session
     }
-}
-
-pub fn provide_axum_integration<U: User + Clone + 'static>() -> DioxusIntegrationDyn {
-    DioxusIntegrationDyn::new(DioxusAxumIntegration::<U>::default())
 }
