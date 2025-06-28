@@ -36,6 +36,7 @@ serde_json = "1.0.133"
 shield = { path = "./packages/core/shield", version = "0.0.4" }
 shield-actix = { path = "./packages/integrations/shield-actix", version = "0.0.4" }
 shield-axum = { path = "./packages/integrations/shield-axum", version = "0.0.4" }
+shield-bootstrap = { path = "./packages/styles/shield-bootstrap", version = "0.0.4" }
 shield-credentials = { path = "./packages/methods/shield-credentials", version = "0.0.4" }
 shield-diesel = { path = "./packages/storage/shield-diesel", version = "0.0.4" }
 shield-dioxus = { path = "./packages/integrations/shield-dioxus", version = "0.0.4" }

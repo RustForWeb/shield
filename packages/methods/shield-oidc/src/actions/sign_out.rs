@@ -13,11 +13,8 @@ impl Action<OidcProvider> for OidcSignOutAction {
         SIGN_OUT_ACTION_ID.to_owned()
     }
 
-    fn render(&self, _provider: OidcProvider) -> Form {
-        Form {
-            inputs: vec![],
-            attributes: None,
-        }
+    fn form(&self, _provider: OidcProvider) -> Form {
+        Form { inputs: vec![] }
     }
 
     async fn call(

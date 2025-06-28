@@ -135,11 +135,8 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
         SIGN_IN_CALLBACK_ACTION_ID.to_owned()
     }
 
-    fn render(&self, _provider: OauthProvider) -> Form {
-        Form {
-            inputs: vec![],
-            attributes: None,
-        }
+    fn form(&self, _provider: OauthProvider) -> Form {
+        Form { inputs: vec![] }
     }
 
     async fn call(

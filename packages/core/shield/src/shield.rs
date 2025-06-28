@@ -3,7 +3,7 @@ use std::{any::Any, collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
-    Form, error::ShieldError, method::ErasedMethod, options::ShieldOptions, storage::Storage,
+    error::ShieldError, form::Form, method::ErasedMethod, options::ShieldOptions, storage::Storage,
     user::User,
 };
 
@@ -73,7 +73,8 @@ impl<U: User> Shield<U> {
             };
 
             for provider in method.erased_providers().await? {
-                let form = action.erased_render(provider);
+                let form = action.erased_form(provider);
+
                 forms.push(form);
             }
         }
@@ -85,7 +86,7 @@ impl<U: User> Shield<U> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        ShieldOptions,
+        options::ShieldOptions,
         storage::tests::{TEST_STORAGE_ID, TestStorage},
     };
 

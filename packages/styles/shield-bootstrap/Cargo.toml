@@ -1,0 +1,17 @@
+[package]
+name = "shield-bootstrap"
+description = "Bootstrap style for Shield."
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[features]
+dioxus = ["dep:dioxus", "dep:shield-dioxus"]
+
+[dependencies]
+dioxus = { workspace = true, optional = true }
+shield.workspace = true
+shield-dioxus = { workspace = true, optional = true }

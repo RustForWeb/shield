@@ -27,7 +27,7 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
         SIGN_IN_ACTION_ID.to_owned()
     }
 
-    fn render(&self, _provider: CredentialsProvider) -> Form {
+    fn form(&self, _provider: CredentialsProvider) -> Form {
         self.credentials.form()
     }
 
