@@ -4,8 +4,8 @@ use openidconnect::{
     url::form_urlencoded::parse,
 };
 use shield::{
-    Action, Form, Request, Response, SIGN_IN_ACTION_ID, Session, SessionError, ShieldError,
-    erased_action,
+    Action, Form, Input, InputType, InputTypeSubmit, Provider, Request, Response,
+    SIGN_IN_ACTION_ID, Session, SessionError, ShieldError, erased_action,
 };
 
 use crate::{
@@ -22,9 +22,15 @@ impl Action<OidcProvider> for OidcSignInAction {
         SIGN_IN_ACTION_ID.to_owned()
     }
 
-    fn render(&self, _provider: OidcProvider) -> Form {
+    fn render(&self, provider: OidcProvider) -> Form {
         Form {
-            inputs: vec![],
+            inputs: vec![Input {
+                name: "submit".to_owned(),
+                label: None,
+                r#type: InputType::Submit(InputTypeSubmit::default()),
+                value: Some(format!("Sign in with {}", provider.name())),
+                attributes: None,
+            }],
             attributes: None,
         }
     }

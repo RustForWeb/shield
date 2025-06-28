@@ -19,8 +19,8 @@ async fn main() {
         prelude::{DioxusRouterExt, *},
     };
     use shield::{Shield, ShieldOptions};
-    use shield_dioxus_axum::ShieldLayer;
-    use shield_memory::MemoryStorage;
+    use shield_dioxus_axum::{ShieldLayer, provide_axum_integration};
+    use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcMethod};
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
@@ -59,7 +59,13 @@ async fn main() {
 
     // Initialize router
     let router = Router::new()
-        .serve_dioxus_application(ServeConfig::new().unwrap(), App)
+        .serve_dioxus_application(
+            ServeConfigBuilder::new()
+                .context_provider(provide_axum_integration::<User>)
+                .build()
+                .unwrap(),
+            App,
+        )
         .layer(shield_layer)
         .layer(session_layer);
 

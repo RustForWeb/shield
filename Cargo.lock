@@ -5337,12 +5337,21 @@ version = "0.0.4"
 [[package]]
 name = "shield-dioxus"
 version = "0.0.4"
+dependencies = [
+ "async-trait",
+ "dioxus",
+ "shield",
+]
 
 [[package]]
 name = "shield-dioxus-axum"
 version = "0.0.4"
 dependencies = [
+ "async-trait",
+ "dioxus",
+ "shield",
  "shield-axum",
+ "shield-dioxus",
 ]
 
 [[package]]
@@ -5374,6 +5383,7 @@ dependencies = [
  "axum",
  "dioxus",
  "shield",
+ "shield-dioxus",
  "shield-dioxus-axum",
  "shield-memory",
  "shield-oidc",
