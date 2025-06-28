@@ -2,7 +2,7 @@ use std::{pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
 use serde::Deserialize;
-use shield::{Form, Input, InputType, ShieldError, User};
+use shield::{Form, Input, InputType, InputTypeEmail, InputTypePassword, ShieldError, User};
 
 use crate::Credentials;
 
@@ -44,36 +44,24 @@ impl<U: User> Credentials<U, EmailPasswordData> for EmailPasswordCredentials<U> 
                 Input {
                     name: "email".to_owned(),
                     label: Some("Email address".to_owned()),
-                    r#type: InputType::Email {
+                    r#type: InputType::Email(InputTypeEmail {
                         autocomplete: Some("email".to_owned()),
-                        dirname: None,
-                        list: None,
-                        maxlength: None,
-                        minlength: None,
-                        multiple: None,
-                        pattern: None,
                         placeholder: Some("Email address".to_owned()),
-                        readonly: None,
                         required: Some(true),
-                        size: None,
-                    },
+                        ..Default::default()
+                    }),
                     value: None,
                     attributes: None,
                 },
                 Input {
                     name: "password".to_owned(),
                     label: Some("Password".to_owned()),
-                    r#type: InputType::Password {
+                    r#type: InputType::Password(InputTypePassword {
                         autocomplete: Some("current-password".to_owned()),
-                        dirname: None,
-                        maxlength: None,
-                        minlength: None,
-                        pattern: None,
                         placeholder: Some("Password".to_owned()),
-                        readonly: None,
                         required: Some(true),
-                        size: None,
-                    },
+                        ..Default::default()
+                    }),
                     value: None,
                     attributes: None,
                 },

@@ -2,7 +2,7 @@ use std::{pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
 use serde::Deserialize;
-use shield::{Form, Input, InputType, ShieldError, User};
+use shield::{Form, Input, InputType, InputTypePassword, InputTypeText, ShieldError, User};
 
 use crate::Credentials;
 
@@ -44,35 +44,24 @@ impl<U: User> Credentials<U, UsernamePasswordData> for UsernamePasswordCredentia
                 Input {
                     name: "username".to_owned(),
                     label: Some("Username".to_owned()),
-                    r#type: InputType::Text {
+                    r#type: InputType::Text(InputTypeText {
                         autocomplete: Some("username".to_owned()),
-                        dirname: None,
-                        list: None,
-                        maxlength: None,
-                        minlength: None,
-                        pattern: None,
                         placeholder: Some("Username".to_owned()),
-                        readonly: None,
                         required: Some(true),
-                        size: None,
-                    },
+                        ..Default::default()
+                    }),
                     value: None,
                     attributes: None,
                 },
                 Input {
                     name: "password".to_owned(),
                     label: Some("Password".to_owned()),
-                    r#type: InputType::Password {
+                    r#type: InputType::Password(InputTypePassword {
                         autocomplete: Some("current-password".to_owned()),
-                        dirname: None,
-                        maxlength: None,
-                        minlength: None,
-                        pattern: None,
                         placeholder: Some("Password".to_owned()),
-                        readonly: None,
                         required: Some(true),
-                        size: None,
-                    },
+                        ..Default::default()
+                    }),
                     value: None,
                     attributes: None,
                 },

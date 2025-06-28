@@ -30,6 +30,7 @@ web = ["dioxus/web"]
 axum = { workspace = true, optional = true }
 dioxus = { workspace = true, features = ["router", "fullstack"] }
 shield.workspace = true
+shield-dioxus.workspace = true
 shield-dioxus-axum = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
