@@ -4,8 +4,8 @@ use openidconnect::{
     url::form_urlencoded::parse,
 };
 use shield::{
-    Action, Form, Input, InputType, InputTypeSubmit, Provider, Request, Response,
-    SIGN_IN_ACTION_ID, Session, SessionError, ShieldError, erased_action,
+    Action, Form, Input, InputType, InputTypeSubmit, Provider, Request, Response, Session,
+    SessionError, ShieldError, SignInAction, erased_action,
 };
 
 use crate::{
@@ -19,7 +19,11 @@ pub struct OidcSignInAction;
 #[async_trait]
 impl Action<OidcProvider> for OidcSignInAction {
     fn id(&self) -> String {
-        SIGN_IN_ACTION_ID.to_owned()
+        SignInAction::id()
+    }
+
+    fn name(&self) -> String {
+        SignInAction::name()
     }
 
     fn form(&self, provider: OidcProvider) -> Form {

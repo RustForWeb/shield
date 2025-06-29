@@ -2,13 +2,17 @@ use std::{any::Any, sync::Arc};
 
 use async_trait::async_trait;
 
-use crate::{error::ShieldError, form::Form, shield::Shield, user::User};
+use crate::{Session, error::ShieldError, form::Form, shield::Shield, user::User};
 
 #[async_trait]
 pub trait DynShield: Send + Sync {
     async fn providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError>;
 
-    async fn action_forms(&self, action_id: &str) -> Result<Vec<Form>, ShieldError>;
+    async fn action_forms(
+        &self,
+        action_id: &str,
+        session: Session,
+    ) -> Result<Vec<Form>, ShieldError>;
 }
 
 #[async_trait]
@@ -17,8 +21,12 @@ impl<U: User> DynShield for Shield<U> {
         self.providers().await
     }
 
-    async fn action_forms(&self, action_id: &str) -> Result<Vec<Form>, ShieldError> {
-        self.action_forms(action_id).await
+    async fn action_forms(
+        &self,
+        action_id: &str,
+        session: Session,
+    ) -> Result<Vec<Form>, ShieldError> {
+        self.action_forms(action_id, session).await
     }
 }
 
@@ -33,7 +41,11 @@ impl ShieldDyn {
         self.0.providers().await
     }
 
-    pub async fn action_forms(&self, action_id: &str) -> Result<Vec<Form>, ShieldError> {
-        self.0.action_forms(action_id).await
+    pub async fn action_forms(
+        &self,
+        action_id: &str,
+        session: Session,
+    ) -> Result<Vec<Form>, ShieldError> {
+        self.0.action_forms(action_id, session).await
     }
 }

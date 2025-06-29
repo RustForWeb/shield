@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use shield::{
-    Action, ConfigurationError, Form, Request, Response, SIGN_IN_ACTION_ID, Session, SessionError,
-    ShieldError, erased_action,
+    Action, ConfigurationError, Form, Request, Response, Session, SessionError, ShieldError,
+    SignInAction, erased_action,
 };
 
 use crate::{
@@ -16,7 +16,11 @@ pub struct OauthSignInAction;
 #[async_trait]
 impl Action<OauthProvider> for OauthSignInAction {
     fn id(&self) -> String {
-        SIGN_IN_ACTION_ID.to_owned()
+        SignInAction::id()
+    }
+
+    fn name(&self) -> String {
+        SignInAction::name()
     }
 
     fn form(&self, _provider: OauthProvider) -> Form {

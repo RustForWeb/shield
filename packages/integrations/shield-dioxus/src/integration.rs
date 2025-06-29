@@ -21,4 +21,8 @@ impl DioxusIntegrationDyn {
     pub async fn extract_shield(&self) -> ShieldDyn {
         self.0.extract_shield().await
     }
+
+    pub async fn extract_session(&self) -> Session {
+        self.0.extract_session().await
+    }
 }
