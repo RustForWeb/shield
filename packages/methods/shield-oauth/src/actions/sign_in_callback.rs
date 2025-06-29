@@ -9,7 +9,7 @@ use oauth2::{
 use secrecy::SecretString;
 use shield::{
     Action, Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Form, Request,
-    Response, SIGN_IN_CALLBACK_ACTION_ID, Session, SessionError, ShieldError, UpdateUser, User,
+    Response, Session, SessionError, ShieldError, SignInCallbackAction, UpdateUser, User,
     erased_action,
 };
 
@@ -132,7 +132,15 @@ impl<U: User> OauthSignInCallbackAction<U> {
 #[async_trait]
 impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
     fn id(&self) -> String {
-        SIGN_IN_CALLBACK_ACTION_ID.to_owned()
+        SignInCallbackAction::id()
+    }
+
+    fn name(&self) -> String {
+        SignInCallbackAction::name()
+    }
+
+    fn condition(&self, provider: &OauthProvider, session: Session) -> Result<bool, ShieldError> {
+        SignInCallbackAction::condition(provider, session)
     }
 
     fn form(&self, _provider: OauthProvider) -> Form {

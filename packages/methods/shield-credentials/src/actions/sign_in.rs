@@ -3,8 +3,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use shield::{
-    Action, Authentication, Form, Request, Response, SIGN_IN_ACTION_ID, Session, SessionError,
-    ShieldError, User, erased_action,
+    Action, Authentication, Form, Request, Response, Session, SessionError, ShieldError,
+    SignInAction, User, erased_action,
 };
 
 use crate::{credentials::Credentials, provider::CredentialsProvider};
@@ -24,7 +24,11 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
     for CredentialsSignInAction<U, D>
 {
     fn id(&self) -> String {
-        SIGN_IN_ACTION_ID.to_owned()
+        SignInAction::id()
+    }
+
+    fn name(&self) -> String {
+        SignInAction::name()
     }
 
     fn form(&self, _provider: CredentialsProvider) -> Form {

@@ -7,13 +7,15 @@ use crate::{
     session::Session,
 };
 
-pub const SIGN_IN_ACTION_ID: &str = "sign-in";
-pub const SIGN_IN_CALLBACK_ACTION_ID: &str = "sign-in-callback";
-pub const SIGN_OUT_ACTION_ID: &str = "sign-out";
-
 #[async_trait]
 pub trait Action<P: Provider>: ErasedAction + Send + Sync {
     fn id(&self) -> String;
+
+    fn name(&self) -> String;
+
+    fn condition(&self, _provider: &P, _session: Session) -> Result<bool, ShieldError> {
+        Ok(true)
+    }
 
     fn form(&self, provider: P) -> Form;
 
@@ -28,6 +30,14 @@ pub trait Action<P: Provider>: ErasedAction + Send + Sync {
 #[async_trait]
 pub trait ErasedAction: Send + Sync {
     fn erased_id(&self) -> String;
+
+    fn erased_name(&self) -> String;
+
+    fn erased_condition(
+        &self,
+        provider: &(dyn Any + Send + Sync),
+        session: Session,
+    ) -> Result<bool, ShieldError>;
 
     fn erased_form(&self, provider: Box<dyn Any + Send + Sync>) -> Form;
 
@@ -48,6 +58,14 @@ macro_rules! erased_action {
                 self.id()
             }
 
+            fn erased_name(&self) -> String {
+                self.name()
+            }
+
+            fn erased_condition(&self, provider: &(dyn std::any::Any + Send + Sync), session: $crate::Session) -> Result<bool, $crate::ShieldError> {
+                self.condition(provider.downcast_ref().expect("TODO"), session)
+            }
+
             fn erased_form(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> $crate::Form {
                 self.form(*provider.downcast().expect("TODO"))
             }
@@ -57,7 +75,7 @@ macro_rules! erased_action {
                 provider: Box<dyn std::any::Any + Send + Sync>,
                 session: $crate::Session,
                 request: $crate::Request,
-            ) -> Result<$crate::Response, ShieldError> {
+            ) -> Result<$crate::Response, $crate::ShieldError> {
                 self.call(*provider.downcast().expect("TODO"), session, request)
                     .await
             }
@@ -76,7 +94,8 @@ pub(crate) mod tests {
 
     use super::Action;
 
-    pub const TEST_ACTION_ID: &str = "action";
+    pub const TEST_ACTION_ID: &str = "test";
+    pub const TEST_ACTION_NAME: &str = "Test";
 
     #[derive(Default)]
     pub struct TestAction {}
@@ -85,6 +104,10 @@ pub(crate) mod tests {
     impl Action<TestProvider> for TestAction {
         fn id(&self) -> String {
             TEST_ACTION_ID.to_owned()
+        }
+
+        fn name(&self) -> String {
+            TEST_ACTION_NAME.to_owned()
         }
 
         fn form(&self, _provider: TestProvider) -> Form {

@@ -1,7 +1,5 @@
 use async_trait::async_trait;
-use shield::{
-    Action, Form, Request, Response, SIGN_OUT_ACTION_ID, Session, ShieldError, erased_action,
-};
+use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
 
 use crate::provider::OidcProvider;
 
@@ -10,11 +8,19 @@ pub struct OidcSignOutAction;
 #[async_trait]
 impl Action<OidcProvider> for OidcSignOutAction {
     fn id(&self) -> String {
-        SIGN_OUT_ACTION_ID.to_owned()
+        SignOutAction::id()
     }
 
-    fn form(&self, _provider: OidcProvider) -> Form {
-        Form { inputs: vec![] }
+    fn name(&self) -> String {
+        SignOutAction::name()
+    }
+
+    fn condition(&self, provider: &OidcProvider, session: Session) -> Result<bool, ShieldError> {
+        SignOutAction::condition(provider, session)
+    }
+
+    fn form(&self, provider: OidcProvider) -> Form {
+        SignOutAction::form(provider)
     }
 
     async fn call(
@@ -73,6 +79,8 @@ impl Action<OidcProvider> for OidcSignOutAction {
         //         }
         //     }
         // }
+
+        // TODO: Sign out.
 
         Ok(Response::Default)
     }

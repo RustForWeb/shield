@@ -3,8 +3,8 @@ use std::{any::Any, collections::HashMap, sync::Arc};
 use futures::future::try_join_all;
 
 use crate::{
-    error::ShieldError, form::Form, method::ErasedMethod, options::ShieldOptions, storage::Storage,
-    user::User,
+    Session, error::ShieldError, form::Form, method::ErasedMethod, options::ShieldOptions,
+    storage::Storage, user::User,
 };
 
 #[derive(Clone)]
@@ -64,7 +64,11 @@ impl<U: User> Shield<U> {
         }
     }
 
-    pub async fn action_forms(&self, action_id: &str) -> Result<Vec<Form>, ShieldError> {
+    pub async fn action_forms(
+        &self,
+        action_id: &str,
+        session: Session,
+    ) -> Result<Vec<Form>, ShieldError> {
         let mut forms = vec![];
 
         for (_, method) in self.methods.iter() {
@@ -73,6 +77,10 @@ impl<U: User> Shield<U> {
             };
 
             for provider in method.erased_providers().await? {
+                if !action.erased_condition(&provider, session.clone())? {
+                    continue;
+                }
+
                 let form = action.erased_form(provider);
 
                 forms.push(form);

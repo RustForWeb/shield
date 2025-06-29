@@ -31,8 +31,9 @@ pub fn Action(props: ActionProps) -> Element {
 async fn forms(action_id: String) -> Result<Vec<Form>, ServerFnError> {
     let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
     let shield = integration.extract_shield().await;
+    let session = integration.extract_session().await;
 
-    let forms = shield.action_forms(&action_id).await?;
+    let forms = shield.action_forms(&action_id, session).await?;
 
     Ok(forms)
 }

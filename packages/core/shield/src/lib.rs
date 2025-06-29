@@ -1,4 +1,5 @@
 mod action;
+mod actions;
 mod error;
 mod form;
 mod method;
@@ -13,6 +14,7 @@ mod storage;
 mod user;
 
 pub use action::*;
+pub use actions::*;
 pub use error::*;
 pub use form::*;
 pub use method::*;
