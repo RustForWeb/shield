@@ -3,15 +3,15 @@ use shield::Form;
 use shield_dioxus::{DioxusStyle, ErasedDioxusStyle};
 
 #[derive(Default)]
-pub struct BootstrapStyle {}
+pub struct BootstrapDioxusStyle {}
 
-impl BootstrapStyle {
+impl BootstrapDioxusStyle {
     pub fn context(self) -> ErasedDioxusStyle {
         ErasedDioxusStyle::new(self)
     }
 }
 
-impl DioxusStyle for BootstrapStyle {
+impl DioxusStyle for BootstrapDioxusStyle {
     fn render(&self, forms: &[Form]) -> Element {
         rsx! {
             div {

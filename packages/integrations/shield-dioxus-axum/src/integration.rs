@@ -7,22 +7,22 @@ use shield::{Session, ShieldDyn, User};
 use shield_axum::{ExtractSession, ExtractShield};
 use shield_dioxus::{DioxusIntegration, DioxusIntegrationDyn};
 
-pub struct DioxusAxumIntegration<U: User>(PhantomData<U>);
+pub struct AxumDioxusIntegration<U: User>(PhantomData<U>);
 
-impl<U: User + Clone + 'static> DioxusAxumIntegration<U> {
+impl<U: User + Clone + 'static> AxumDioxusIntegration<U> {
     pub fn context(self) -> DioxusIntegrationDyn {
         DioxusIntegrationDyn::new(self)
     }
 }
 
-impl<U: User> Default for DioxusAxumIntegration<U> {
+impl<U: User> Default for AxumDioxusIntegration<U> {
     fn default() -> Self {
         Self(Default::default())
     }
 }
 
 #[async_trait]
-impl<U: User + Clone + 'static> DioxusIntegration for DioxusAxumIntegration<U> {
+impl<U: User + Clone + 'static> DioxusIntegration for AxumDioxusIntegration<U> {
     async fn extract_shield(&self) -> ShieldDyn {
         let ExtractShield(shield) = extract::<ExtractShield<U>, _>().await.expect("TODO");
 

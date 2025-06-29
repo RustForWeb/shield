@@ -77,7 +77,7 @@ impl<U: User> Shield<U> {
             };
 
             for provider in method.erased_providers().await? {
-                if !action.erased_condition(&provider, session.clone())? {
+                if !action.erased_condition(&*provider, session.clone())? {
                     continue;
                 }
 

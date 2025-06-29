@@ -5,10 +5,10 @@ use crate::app::App;
 
 #[cfg(not(feature = "server"))]
 fn main() {
-    use shield_bootstrap::dioxus::BootstrapStyle;
+    use shield_bootstrap::BootstrapDioxusStyle;
 
     dioxus::LaunchBuilder::new()
-        .with_context(BootstrapStyle::default().context())
+        .with_context(BootstrapDioxusStyle::default().context())
         .launch(App)
 }
 
@@ -23,8 +23,8 @@ async fn main() {
         prelude::{DioxusRouterExt, *},
     };
     use shield::{Shield, ShieldOptions};
-    use shield_bootstrap::dioxus::BootstrapStyle;
-    use shield_dioxus_axum::{DioxusAxumIntegration, ShieldLayer};
+    use shield_bootstrap::BootstrapDioxusStyle;
+    use shield_dioxus_axum::{AxumDioxusIntegration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcMethod};
     use tokio::net::TcpListener;
@@ -66,8 +66,8 @@ async fn main() {
     let router = Router::new()
         .serve_dioxus_application(
             ServeConfigBuilder::new()
-                .context(DioxusAxumIntegration::<User>::default().context())
-                .context(BootstrapStyle::default().context())
+                .context(AxumDioxusIntegration::<User>::default().context())
+                .context(BootstrapDioxusStyle::default().context())
                 .build()
                 .unwrap(),
             App,
