@@ -1,2 +1,5 @@
 #[cfg(feature = "dioxus")]
-pub mod dioxus;
+mod dioxus;
+
+#[cfg(feature = "dioxus")]
+pub use dioxus::*;
