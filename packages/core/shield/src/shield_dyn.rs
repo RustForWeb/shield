@@ -2,7 +2,9 @@ use std::{any::Any, sync::Arc};
 
 use async_trait::async_trait;
 
-use crate::{Session, error::ShieldError, form::Form, shield::Shield, user::User};
+use crate::{
+    action::ActionForms, error::ShieldError, session::Session, shield::Shield, user::User,
+};
 
 #[async_trait]
 pub trait DynShield: Send + Sync {
@@ -12,7 +14,7 @@ pub trait DynShield: Send + Sync {
         &self,
         action_id: &str,
         session: Session,
-    ) -> Result<Vec<Form>, ShieldError>;
+    ) -> Result<ActionForms, ShieldError>;
 }
 
 #[async_trait]
@@ -25,7 +27,7 @@ impl<U: User> DynShield for Shield<U> {
         &self,
         action_id: &str,
         session: Session,
-    ) -> Result<Vec<Form>, ShieldError> {
+    ) -> Result<ActionForms, ShieldError> {
         self.action_forms(action_id, session).await
     }
 }
@@ -45,7 +47,7 @@ impl ShieldDyn {
         &self,
         action_id: &str,
         session: Session,
-    ) -> Result<Vec<Form>, ShieldError> {
+    ) -> Result<ActionForms, ShieldError> {
         self.0.action_forms(action_id, session).await
     }
 }

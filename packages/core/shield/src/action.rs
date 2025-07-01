@@ -1,11 +1,20 @@
 use std::any::Any;
 
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     error::ShieldError, form::Form, provider::Provider, request::Request, response::Response,
     session::Session,
 };
+
+// TODO: Think of a better name.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ActionForms {
+    pub id: String,
+    pub name: String,
+    pub forms: Vec<Form>,
+}
 
 #[async_trait]
 pub trait Action<P: Provider>: ErasedAction + Send + Sync {

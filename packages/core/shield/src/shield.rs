@@ -1,10 +1,11 @@
 use std::{any::Any, collections::HashMap, sync::Arc};
 
 use futures::future::try_join_all;
+use tracing::warn;
 
 use crate::{
-    Session, error::ShieldError, form::Form, method::ErasedMethod, options::ShieldOptions,
-    storage::Storage, user::User,
+    action::ActionForms, error::ShieldError, method::ErasedMethod, options::ShieldOptions,
+    session::Session, storage::Storage, user::User,
 };
 
 #[derive(Clone)]
@@ -68,13 +69,22 @@ impl<U: User> Shield<U> {
         &self,
         action_id: &str,
         session: Session,
-    ) -> Result<Vec<Form>, ShieldError> {
+    ) -> Result<ActionForms, ShieldError> {
+        let mut action_name = None::<String>;
         let mut forms = vec![];
 
         for (_, method) in self.methods.iter() {
             let Some(action) = method.erased_action_by_id(action_id) else {
                 continue;
             };
+
+            let name = action.erased_name();
+            if let Some(action_name) = &action_name {
+                if *action_name != name {
+                    warn!("Action name mismatch `{}` != `{}`", action_name, name);
+                }
+            }
+            action_name = Some(name);
 
             for provider in method.erased_providers().await? {
                 if !action.erased_condition(&*provider, session.clone())? {
@@ -87,7 +97,11 @@ impl<U: User> Shield<U> {
             }
         }
 
-        Ok(forms)
+        Ok(ActionForms {
+            id: action_id.to_owned(),
+            name: action_name.unwrap_or(action_id.to_owned()),
+            forms,
+        })
     }
 }
 

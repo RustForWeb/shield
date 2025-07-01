@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use dioxus::prelude::Element;
-use shield::Form;
+use shield::ActionForms;
 
 pub trait DioxusStyle: Send + Sync {
-    fn render(&self, forms: &[Form]) -> Element;
+    fn render(&self, action: &ActionForms) -> Element;
 }
 
 #[derive(Clone)]
@@ -15,7 +15,7 @@ impl ErasedDioxusStyle {
         Self(Arc::new(integration))
     }
 
-    pub fn render(&self, forms: &[Form]) -> Element {
-        self.0.render(forms)
+    pub fn render(&self, action: &ActionForms) -> Element {
+        self.0.render(action)
     }
 }

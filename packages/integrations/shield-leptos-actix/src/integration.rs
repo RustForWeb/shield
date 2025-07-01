@@ -5,18 +5,18 @@ use leptos::prelude::provide_context;
 use leptos_actix::{extract, redirect};
 use shield::{Session, ShieldDyn, User};
 use shield_actix::{ExtractSession, ExtractShield, ExtractUser};
-use shield_leptos::integration::{LeptosIntegration, LeptosUser};
+use shield_leptos::{LeptosIntegration, LeptosUser};
 
-pub struct LeptosActixIntegration<U: User>(PhantomData<U>);
+pub struct ActixLeptosIntegration<U: User>(PhantomData<U>);
 
-impl<U: User> Default for LeptosActixIntegration<U> {
+impl<U: User> Default for ActixLeptosIntegration<U> {
     fn default() -> Self {
         Self(Default::default())
     }
 }
 
 #[async_trait]
-impl<U: User + Clone + 'static> LeptosIntegration for LeptosActixIntegration<U> {
+impl<U: User + Clone + 'static> LeptosIntegration for ActixLeptosIntegration<U> {
     async fn extract_shield(&self) -> ShieldDyn {
         let ExtractShield(shield) = extract::<ExtractShield<U>>().await.expect("TOD");
 
@@ -41,5 +41,5 @@ impl<U: User + Clone + 'static> LeptosIntegration for LeptosActixIntegration<U> 
 }
 
 pub fn provide_actix_integration<U: User + Clone + 'static>() {
-    provide_context::<Arc<dyn LeptosIntegration>>(Arc::new(LeptosActixIntegration::<U>::default()));
+    provide_context::<Arc<dyn LeptosIntegration>>(Arc::new(ActixLeptosIntegration::<U>::default()));
 }

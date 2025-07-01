@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
-use shield::Form;
+use shield::ActionForms;
 
-use crate::{DioxusIntegrationDyn, form::ToRsx};
+use crate::{DioxusIntegrationDyn, ErasedDioxusStyle};
 
 #[derive(Clone, PartialEq, Props)]
 pub struct ActionProps {
@@ -15,20 +15,19 @@ pub fn Action(props: ActionProps) -> Element {
 
         move || forms(action_id.clone())
     })?;
+    let style = use_context::<ErasedDioxusStyle>();
 
     let response_read = response.read();
     let response = response_read.as_ref().unwrap();
 
     match response {
-        Ok(forms) => rsx! {
-            {forms.iter().map(ToRsx::to_rsx)}
-        },
+        Ok(forms) => style.render(forms),
         Err(err) => rsx! { "{err}" },
     }
 }
 
 #[server]
-async fn forms(action_id: String) -> Result<Vec<Form>, ServerFnError> {
+async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
     let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
     let shield = integration.extract_shield().await;
     let session = integration.extract_session().await;

@@ -5295,6 +5295,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.12",
+ "tracing",
  "utoipa",
 ]
 
@@ -5324,8 +5325,10 @@ name = "shield-bootstrap"
 version = "0.0.4"
 dependencies = [
  "dioxus",
+ "leptos",
  "shield",
  "shield-dioxus",
+ "shield-leptos",
 ]
 
 [[package]]

@@ -48,6 +48,7 @@ leptos_actix = { workspace = true, optional = true }
 leptos_meta.workspace = true
 leptos_router.workspace = true
 shield.workspace = true
+# shield-bootstrap = { workspace = true, features = ["leptos"] }
 shield-leptos.workspace = true
 shield-leptos-actix = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }
