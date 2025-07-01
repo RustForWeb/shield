@@ -1,2 +1,7 @@
-pub mod context;
-pub mod integration;
+mod context;
+mod integration;
+mod style;
+
+pub use context::*;
+pub use integration::*;
+pub use style::*;

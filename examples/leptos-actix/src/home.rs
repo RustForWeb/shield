@@ -1,10 +1,10 @@
 use leptos::{either::Either, prelude::*};
 use leptos_router::components::A;
-use shield_leptos::integration::LeptosUser;
+use shield_leptos::LeptosUser;
 
 #[server]
 pub async fn user() -> Result<Option<LeptosUser>, ServerFnError> {
-    use shield_leptos::context::extract_user;
+    use shield_leptos::extract_user;
 
     Ok(extract_user().await)
 }

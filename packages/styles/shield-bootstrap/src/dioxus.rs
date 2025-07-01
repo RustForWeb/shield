@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use shield::Form;
+use shield::ActionForms;
 use shield_dioxus::{DioxusStyle, ErasedDioxusStyle};
 
 #[derive(Default)]
@@ -12,17 +12,16 @@ impl BootstrapDioxusStyle {
 }
 
 impl DioxusStyle for BootstrapDioxusStyle {
-    fn render(&self, forms: &[Form]) -> Element {
+    fn render(&self, action: &ActionForms) -> Element {
         rsx! {
             div {
                 class: "container",
 
                 h1 {
-                    // TODO: Get from action.
-                    "Sign in"
+                    "{action.name}"
                 }
 
-                for form in forms {
+                for form in &action.forms {
                     form {
                         for input in &form.inputs {
                             div {

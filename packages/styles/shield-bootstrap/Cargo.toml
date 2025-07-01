@@ -10,8 +10,11 @@ version.workspace = true
 
 [features]
 dioxus = ["dep:dioxus", "dep:shield-dioxus"]
+leptos = ["dep:leptos", "dep:shield-leptos"]
 
 [dependencies]
 dioxus = { workspace = true, optional = true }
+leptos = { workspace = true, optional = true }
 shield.workspace = true
 shield-dioxus = { workspace = true, optional = true }
+shield-leptos = { workspace = true, optional = true }
