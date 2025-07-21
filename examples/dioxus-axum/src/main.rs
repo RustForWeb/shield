@@ -65,7 +65,7 @@ async fn main() {
     // Initialize router
     let router = Router::new()
         .serve_dioxus_application(
-            ServeConfigBuilder::new()
+            ServeConfig::builder()
                 .context(AxumDioxusIntegration::<User>::default().context())
                 .context(BootstrapDioxusStyle::default().context())
                 .build()
