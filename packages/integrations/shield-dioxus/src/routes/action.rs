@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
-use shield::ActionForms;
+use dioxus_server::{FromContext, extract};
+use serde_json::Value;
+use shield::{ActionForms, Request};
 
 use crate::{DioxusIntegrationDyn, ErasedDioxusStyle};
 
@@ -35,4 +37,31 @@ async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
     let forms = shield.action_forms(&action_id, session).await?;
 
     Ok(forms)
+}
+
+#[server]
+pub async fn call(
+    action_id: String,
+    method_id: String,
+    provider_id: Option<String>,
+) -> Result<(), ServerFnError> {
+    let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
+    let shield = integration.extract_shield().await;
+    let session = integration.extract_session().await;
+
+    shield
+        .call(
+            &action_id,
+            &method_id,
+            provider_id.as_deref(),
+            session,
+            // TODO: Support request input.
+            Request {
+                query: Value::Null,
+                form_data: Value::Null,
+            },
+        )
+        .await?;
+
+    Ok(())
 }

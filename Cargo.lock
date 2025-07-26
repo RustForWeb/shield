@@ -5402,6 +5402,8 @@ version = "0.0.4"
 dependencies = [
  "async-trait",
  "dioxus",
+ "dioxus-server",
+ "serde_json",
  "shield",
 ]
 
@@ -5410,7 +5412,7 @@ name = "shield-dioxus-axum"
 version = "0.0.4"
 dependencies = [
  "async-trait",
- "dioxus",
+ "dioxus-server",
  "shield",
  "shield-axum",
  "shield-dioxus",
@@ -5489,6 +5491,7 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "shield",
+ "shield-bootstrap",
  "shield-leptos",
  "shield-leptos-axum",
  "shield-memory",
@@ -5520,7 +5523,9 @@ version = "0.0.4"
 dependencies = [
  "async-trait",
  "leptos",
+ "leptos_router",
  "serde",
+ "serde_json",
  "shield",
 ]
 

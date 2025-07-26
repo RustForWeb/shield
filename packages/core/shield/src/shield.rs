@@ -4,8 +4,9 @@ use futures::future::try_join_all;
 use tracing::warn;
 
 use crate::{
-    action::ActionForms, error::ShieldError, method::ErasedMethod, options::ShieldOptions,
-    session::Session, storage::Storage, user::User,
+    ActionError, ActionProviderForm, MethodError, ProviderError, Request, action::ActionForms,
+    error::ShieldError, method::ErasedMethod, options::ShieldOptions, session::Session,
+    storage::Storage, user::User,
 };
 
 #[derive(Clone)]
@@ -51,7 +52,12 @@ impl<U: User> Shield<U> {
                 .map(|provider| provider.erased_providers()),
         )
         .await
-        .map(|providers| providers.into_iter().flatten().collect::<Vec<_>>())
+        .map(|providers| {
+            providers
+                .into_iter()
+                .flat_map(|providers| providers.into_iter().map(|(_, provider)| provider))
+                .collect::<Vec<_>>()
+        })
     }
 
     pub async fn provider_by_id(
@@ -86,14 +92,18 @@ impl<U: User> Shield<U> {
             }
             action_name = Some(name);
 
-            for provider in method.erased_providers().await? {
+            for (provider_id, provider) in method.erased_providers().await? {
                 if !action.erased_condition(&*provider, session.clone())? {
                     continue;
                 }
 
                 let form = action.erased_form(provider);
 
-                forms.push(form);
+                forms.push(ActionProviderForm {
+                    method_id: method.erased_id(),
+                    provider_id,
+                    form,
+                });
             }
         }
 
@@ -102,6 +112,39 @@ impl<U: User> Shield<U> {
             name: action_name.unwrap_or(action_id.to_owned()),
             forms,
         })
+    }
+
+    pub async fn call(
+        &self,
+        action_id: &str,
+        method_id: &str,
+        provider_id: Option<&str>,
+        session: Session,
+        request: Request,
+    ) -> Result<(), ShieldError> {
+        let method =
+            self.method_by_id(method_id)
+                .ok_or(ShieldError::Method(MethodError::NotFound(
+                    method_id.to_owned(),
+                )))?;
+
+        let action = method
+            .erased_action_by_id(action_id)
+            .ok_or(ShieldError::Action(ActionError::NotFound(
+                action_id.to_owned(),
+            )))?;
+
+        let provider =
+            method
+                .erased_provider_by_id(provider_id)
+                .await?
+                .ok_or(ShieldError::Provider(ProviderError::NotFound(
+                    provider_id.map(ToOwned::to_owned),
+                )))?;
+
+        action.erased_call(provider, session, request).await?;
+
+        Ok(())
     }
 }
 

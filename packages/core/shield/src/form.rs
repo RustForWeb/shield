@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Form {
     pub inputs: Vec<Input>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Input {
     pub name: String,
     pub label: Option<String>,
@@ -13,7 +13,7 @@ pub struct Input {
     pub value: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum InputType {
     Button(InputTypeButton),
     Checkbox(InputTypeCheckbox),
@@ -68,16 +68,16 @@ impl InputType {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeButton {}
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeCheckbox {
     pub checked: Option<bool>,
     pub required: Option<bool>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeColor {
     pub alpha: Option<bool>,
     pub autocomplete: Option<String>,
@@ -85,7 +85,7 @@ pub struct InputTypeColor {
     pub list: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeDate {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -96,7 +96,7 @@ pub struct InputTypeDate {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeDatetimeLocal {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -107,7 +107,7 @@ pub struct InputTypeDatetimeLocal {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeEmail {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -121,20 +121,20 @@ pub struct InputTypeEmail {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeFile {
     pub accept: Option<String>,
     pub multiple: Option<bool>,
     pub required: Option<bool>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeHidden {
     pub autocomplete: Option<String>,
     pub required: Option<bool>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeImage {
     pub alt: Option<String>,
     pub height: Option<String>,
@@ -142,7 +142,7 @@ pub struct InputTypeImage {
     pub width: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeMonth {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -153,7 +153,7 @@ pub struct InputTypeMonth {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeNumber {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -165,7 +165,7 @@ pub struct InputTypeNumber {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypePassword {
     pub autocomplete: Option<String>,
     pub maxlength: Option<String>,
@@ -177,13 +177,13 @@ pub struct InputTypePassword {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeRadio {
     pub checked: Option<bool>,
     pub required: Option<bool>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeRange {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -192,10 +192,10 @@ pub struct InputTypeRange {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeReset {}
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeSearch {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -208,10 +208,10 @@ pub struct InputTypeSearch {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeSubmit {}
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeTel {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -224,7 +224,7 @@ pub struct InputTypeTel {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeText {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -237,7 +237,7 @@ pub struct InputTypeText {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeTime {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -248,7 +248,7 @@ pub struct InputTypeTime {
     pub step: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeUrl {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -261,7 +261,7 @@ pub struct InputTypeUrl {
     pub size: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct InputTypeWeek {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
