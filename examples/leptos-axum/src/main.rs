@@ -4,9 +4,13 @@ async fn main() {
     use std::sync::Arc;
 
     use axum::{Router, middleware::from_fn, routing::get};
-    use leptos::config::{LeptosOptions, get_configuration};
+    use leptos::{
+        config::{LeptosOptions, get_configuration},
+        context::provide_context,
+    };
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
+    use shield_bootstrap::BootstrapLeptosStyle;
     use shield_examples_leptos_axum::app::*;
     use shield_leptos_axum::{AuthRoutes, ShieldLayer, auth_required, provide_axum_integration};
     use shield_memory::{MemoryStorage, User};
@@ -74,6 +78,7 @@ async fn main() {
             routes,
             move || {
                 provide_axum_integration::<User>();
+                provide_context(BootstrapLeptosStyle::default().context());
             },
             {
                 let leptos_options = leptos_options.clone();

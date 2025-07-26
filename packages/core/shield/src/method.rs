@@ -35,7 +35,9 @@ pub trait ErasedMethod: Send + Sync {
 
     fn erased_action_by_id(&self, action_id: &str) -> Option<Box<dyn ErasedAction>>;
 
-    async fn erased_providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError>;
+    async fn erased_providers(
+        &self,
+    ) -> Result<Vec<(Option<String>, Box<dyn Any + Send + Sync>)>, ShieldError>;
 
     async fn erased_provider_by_id(
         &self,
@@ -69,11 +71,11 @@ macro_rules! erased_method {
 
             async fn erased_providers(
                 &self,
-            ) -> Result<Vec<Box<dyn std::any::Any + Send + Sync>>, ShieldError> {
+            ) -> Result<Vec<(Option<String>, Box<dyn std::any::Any + Send + Sync>)>, ShieldError> {
                 self.providers().await.map(|providers| {
                     providers
                         .into_iter()
-                        .map(|provider| Box::new(provider) as Box<dyn std::any::Any + Send + Sync>)
+                        .map(|provider| ($crate::Provider::id(&provider), Box::new(provider) as Box<dyn std::any::Any + Send + Sync>))
                         .collect()
                 })
             }

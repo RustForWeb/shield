@@ -13,7 +13,15 @@ use crate::{
 pub struct ActionForms {
     pub id: String,
     pub name: String,
-    pub forms: Vec<Form>,
+    pub forms: Vec<ActionProviderForm>,
+}
+
+// TODO: Think of a better name.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ActionProviderForm {
+    pub method_id: String,
+    pub provider_id: Option<String>,
+    pub form: Form,
 }
 
 #[async_trait]

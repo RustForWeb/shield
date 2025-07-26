@@ -3,7 +3,8 @@ use std::{any::Any, sync::Arc};
 use async_trait::async_trait;
 
 use crate::{
-    action::ActionForms, error::ShieldError, session::Session, shield::Shield, user::User,
+    action::ActionForms, error::ShieldError, request::Request, session::Session, shield::Shield,
+    user::User,
 };
 
 #[async_trait]
@@ -15,6 +16,15 @@ pub trait DynShield: Send + Sync {
         action_id: &str,
         session: Session,
     ) -> Result<ActionForms, ShieldError>;
+
+    async fn call(
+        &self,
+        action_id: &str,
+        method_id: &str,
+        provider_id: Option<&str>,
+        session: Session,
+        request: Request,
+    ) -> Result<(), ShieldError>;
 }
 
 #[async_trait]
@@ -29,6 +39,18 @@ impl<U: User> DynShield for Shield<U> {
         session: Session,
     ) -> Result<ActionForms, ShieldError> {
         self.action_forms(action_id, session).await
+    }
+
+    async fn call(
+        &self,
+        action_id: &str,
+        method_id: &str,
+        provider_id: Option<&str>,
+        session: Session,
+        request: Request,
+    ) -> Result<(), ShieldError> {
+        self.call(action_id, method_id, provider_id, session, request)
+            .await
     }
 }
 
@@ -49,5 +71,18 @@ impl ShieldDyn {
         session: Session,
     ) -> Result<ActionForms, ShieldError> {
         self.0.action_forms(action_id, session).await
+    }
+
+    pub async fn call(
+        &self,
+        action_id: &str,
+        method_id: &str,
+        provider_id: Option<&str>,
+        session: Session,
+        request: Request,
+    ) -> Result<(), ShieldError> {
+        self.0
+            .call(action_id, method_id, provider_id, session, request)
+            .await
     }
 }

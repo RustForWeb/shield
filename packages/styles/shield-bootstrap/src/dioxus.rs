@@ -1,6 +1,11 @@
+mod form;
+mod input;
+
 use dioxus::prelude::*;
 use shield::ActionForms;
 use shield_dioxus::{DioxusStyle, ErasedDioxusStyle};
+
+use crate::dioxus::form::Form;
 
 #[derive(Default)]
 pub struct BootstrapDioxusStyle {}
@@ -22,29 +27,9 @@ impl DioxusStyle for BootstrapDioxusStyle {
                 }
 
                 for form in &action.forms {
-                    form {
-                        for input in &form.inputs {
-                            div {
-                                class: "mb-3",
-
-                                if let Some(label) = &input.label {
-                                    label {
-                                        class: "form-label",
-
-                                        strong {
-                                            "{label}"
-                                        }
-                                    }
-                                }
-
-                                input {
-                                    class: "form-control",
-                                    name: input.name.clone(),
-                                    type: input.r#type.as_str(),
-                                    value: input.value.clone(),
-                                }
-                            }
-                        }
+                    Form {
+                        action_id: action.id.clone(),
+                        form: form.clone(),
                     }
                 }
             }
