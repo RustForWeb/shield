@@ -79,10 +79,10 @@ impl<U: User> Shield<U> {
             };
 
             let name = action.erased_name();
-            if let Some(action_name) = &action_name {
-                if *action_name != name {
-                    warn!("Action name mismatch `{}` != `{}`", action_name, name);
-                }
+            if let Some(action_name) = &action_name
+                && *action_name != name
+            {
+                warn!("Action name mismatch `{}` != `{}`", action_name, name);
             }
             action_name = Some(name);
 
