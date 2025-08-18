@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use async_trait::async_trait;
-use dioxus::prelude::extract;
+use dioxus_server::extract;
 
 use shield::{Session, ShieldDyn, User};
 use shield_axum::{ExtractSession, ExtractShield};

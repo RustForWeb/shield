@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use shield::ActionForms;
 
-use crate::{DioxusIntegrationDyn, ErasedDioxusStyle};
+use crate::ErasedDioxusStyle;
 
 #[derive(Clone, PartialEq, Props)]
 pub struct ActionProps {
@@ -26,13 +26,68 @@ pub fn Action(props: ActionProps) -> Element {
     }
 }
 
+// TODO: Figure out a way to access `FromContext` and `extract` without `dioxus/server` feature.
+
 #[server]
 async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
-    let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
-    let shield = integration.extract_shield().await;
-    let session = integration.extract_session().await;
+    #[cfg(feature = "server")]
+    {
+        use dioxus::prelude::{FromContext, extract};
 
-    let forms = shield.action_forms(&action_id, session).await?;
+        use crate::integration::DioxusIntegrationDyn;
 
-    Ok(forms)
+        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
+        let shield = integration.extract_shield().await;
+        let session = integration.extract_session().await;
+
+        let forms = shield.action_forms(&action_id, session).await?;
+
+        Ok(forms)
+    }
+
+    #[cfg(not(feature = "server"))]
+    {
+        Ok(ActionForms {
+            id: action_id.clone(),
+            name: action_id,
+            forms: vec![],
+        })
+    }
+}
+
+#[cfg_attr(not(feature = "server"), allow(unused_variables))]
+#[server]
+pub async fn call(
+    action_id: String,
+    method_id: String,
+    provider_id: Option<String>,
+) -> Result<(), ServerFnError> {
+    #[cfg(feature = "server")]
+    {
+        use dioxus::prelude::{FromContext, extract};
+        use serde_json::Value;
+        use shield::Request;
+
+        use crate::integration::DioxusIntegrationDyn;
+
+        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
+        let shield = integration.extract_shield().await;
+        let session = integration.extract_session().await;
+
+        shield
+            .call(
+                &action_id,
+                &method_id,
+                provider_id.as_deref(),
+                session,
+                // TODO: Support request input.
+                Request {
+                    query: Value::Null,
+                    form_data: Value::Null,
+                },
+            )
+            .await?;
+    }
+
+    Ok(())
 }

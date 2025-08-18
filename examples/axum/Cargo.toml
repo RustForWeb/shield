@@ -10,14 +10,14 @@ repository.workspace = true
 version.workspace = true
 
 [dependencies]
-axum = { workspace = true }
+axum.workspace = true
 shield.workspace = true
 shield-axum = { workspace = true, features = ["utoipa"] }
 shield-memory = { workspace = true, features = ["method-oidc"] }
 shield-oidc = { workspace = true, features = ["native-tls"] }
 time = "0.3.37"
 tokio = { workspace = true, features = ["rt-multi-thread"] }
-tower-sessions = { workspace = true }
+tower-sessions.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 utoipa.workspace = true

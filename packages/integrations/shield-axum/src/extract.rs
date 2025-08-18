@@ -33,7 +33,7 @@ impl<S: Send + Sync> FromRequestParts<S> for ExtractSession {
             .cloned()
             .map(ExtractSession)
             .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
-                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+                "Can't extract Shield session. Is `ShieldLayer` enabled?".to_owned(),
             )))
             .map_err(RouteError::from)
     }
@@ -51,7 +51,7 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for ExtractU
             .cloned()
             .map(ExtractUser)
             .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
-                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+                "Can't extract Shield user. Is `ShieldLayer` enabled?".to_owned(),
             )))
             .map_err(RouteError::from)
     }
@@ -68,7 +68,7 @@ impl<S: Send + Sync, U: User + Clone + 'static> FromRequestParts<S> for UserRequ
             .get::<Option<U>>()
             .cloned()
             .ok_or(ShieldError::Configuration(ConfigurationError::Invalid(
-                "Can't extract Shield. Is `ShieldLayer` enabled?".to_owned(),
+                "Can't extract Shield user. Is `ShieldLayer` enabled?".to_owned(),
             )))
             .and_then(|user| user.ok_or(ShieldError::Unauthorized))
             .map(UserRequired)

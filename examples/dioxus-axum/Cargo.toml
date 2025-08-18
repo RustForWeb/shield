@@ -10,7 +10,6 @@ repository.workspace = true
 version.workspace = true
 
 [features]
-default = ["server"]
 # TODO: Enabling these triggers multiple RustSec advisories.
 # desktop = ["dioxus/desktop"]
 # mobile = ["dioxus/mobile"]
@@ -22,13 +21,14 @@ server = [
     "dep:tokio",
     "dep:tower-sessions",
     "dioxus/server",
+    "shield-dioxus/server",
     "shield-memory/method-oidc",
 ]
 web = ["dioxus/web"]
 
 [dependencies]
 axum = { workspace = true, optional = true }
-dioxus = { workspace = true, features = ["router", "fullstack"] }
+dioxus = { workspace = true, features = ["fullstack", "router"] }
 shield.workspace = true
 shield-bootstrap = { workspace = true, features = ["dioxus"] }
 shield-dioxus.workspace = true
