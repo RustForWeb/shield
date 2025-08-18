@@ -14,6 +14,5 @@ server = ["dioxus/server"]
 [dependencies]
 async-trait.workspace = true
 dioxus = { workspace = true, features = ["fullstack", "router"] }
-dioxus-server = { workspace = true, default-features = true }
 serde_json.workspace = true
 shield.workspace = true
