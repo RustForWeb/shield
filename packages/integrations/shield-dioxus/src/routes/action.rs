@@ -28,6 +28,7 @@ pub fn Action(props: ActionProps) -> Element {
 
 // TODO: Figure out a way to access `FromContext` and `extract` without `dioxus/server` feature.
 
+#[cfg_attr(not(feature = "server"), allow(unused_variables))]
 #[server]
 async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
     #[cfg(feature = "server")]
@@ -46,13 +47,7 @@ async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
     }
 
     #[cfg(not(feature = "server"))]
-    {
-        Ok(ActionForms {
-            id: action_id.clone(),
-            name: action_id,
-            forms: vec![],
-        })
-    }
+    unreachable!()
 }
 
 #[cfg_attr(not(feature = "server"), allow(unused_variables))]
@@ -87,7 +82,10 @@ pub async fn call(
                 },
             )
             .await?;
+
+        Ok(())
     }
 
-    Ok(())
+    #[cfg(not(feature = "server"))]
+    unreachable!()
 }
