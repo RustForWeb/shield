@@ -20,8 +20,10 @@ axum = "0.8.1"
 bon = "3.3.2"
 chrono = "0.4.39"
 console_error_panic_hook = "0.1.2"
-dioxus = "0.7.0-rc.0"
-dioxus-server = { version = "0.7.0-rc.0" }
+# dioxus = "0.7.0-rc.0"
+# dioxus-server = { version = "0.7.0-rc.0", default-features = false }
+dioxus = { git = "https://github.com/DanielleHuisman/dioxus", rev = "e127a33f" }
+dioxus-server = { git = "https://github.com/DanielleHuisman/dioxus", rev = "e127a33f", default-features = false }
 futures = "0.3.31"
 http = "1.2.0"
 leptos = "0.8.3"

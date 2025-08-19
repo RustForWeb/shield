@@ -26,66 +26,50 @@ pub fn Action(props: ActionProps) -> Element {
     }
 }
 
-// TODO: Figure out a way to access `FromContext` and `extract` without `dioxus/server` feature.
-
-#[cfg_attr(not(feature = "server"), allow(unused_variables))]
 #[server]
 async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
-    #[cfg(feature = "server")]
-    {
-        use dioxus::prelude::{FromContext, extract};
+    use dioxus_server::{FromContext, extract};
 
-        use crate::integration::DioxusIntegrationDyn;
+    use crate::integration::DioxusIntegrationDyn;
 
-        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
-        let shield = integration.extract_shield().await;
-        let session = integration.extract_session().await;
+    let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
+    let shield = integration.extract_shield().await;
+    let session = integration.extract_session().await;
 
-        let forms = shield.action_forms(&action_id, session).await?;
+    let forms = shield.action_forms(&action_id, session).await?;
 
-        Ok(forms)
-    }
-
-    #[cfg(not(feature = "server"))]
-    unreachable!()
+    Ok(forms)
 }
 
-#[cfg_attr(not(feature = "server"), allow(unused_variables))]
 #[server]
 pub async fn call(
     action_id: String,
     method_id: String,
     provider_id: Option<String>,
 ) -> Result<(), ServerFnError> {
-    #[cfg(feature = "server")]
-    {
-        use dioxus::prelude::{FromContext, extract};
-        use serde_json::Value;
-        use shield::Request;
+    use dioxus_server::{FromContext, extract};
+    use serde_json::Value;
+    use shield::Request;
 
-        use crate::integration::DioxusIntegrationDyn;
+    use crate::integration::DioxusIntegrationDyn;
 
-        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
-        let shield = integration.extract_shield().await;
-        let session = integration.extract_session().await;
+    let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
+    let shield = integration.extract_shield().await;
+    let session = integration.extract_session().await;
 
-        shield
-            .call(
-                &action_id,
-                &method_id,
-                provider_id.as_deref(),
-                session,
-                // TODO: Support request input.
-                Request {
-                    query: Value::Null,
-                    form_data: Value::Null,
-                },
-            )
-            .await?;
+    shield
+        .call(
+            &action_id,
+            &method_id,
+            provider_id.as_deref(),
+            session,
+            // TODO: Support request input.
+            Request {
+                query: Value::Null,
+                form_data: Value::Null,
+            },
+        )
+        .await?;
 
-        Ok(())
-    }
-
-    #[cfg(not(feature = "server"))]
-    unreachable!()
+    Ok(())
 }

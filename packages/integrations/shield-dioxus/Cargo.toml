@@ -8,11 +8,12 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
-[features]
-server = ["dioxus/server"]
+# [features]
+# server = ["dioxus/server", "dioxus-server/full"]
 
 [dependencies]
 async-trait.workspace = true
 dioxus = { workspace = true, features = ["fullstack", "router"] }
+dioxus-server = { workspace = true, default-features = false }
 serde_json.workspace = true
 shield.workspace = true

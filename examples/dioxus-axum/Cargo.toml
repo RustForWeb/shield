@@ -21,7 +21,7 @@ server = [
     "dep:tokio",
     "dep:tower-sessions",
     "dioxus/server",
-    "shield-dioxus/server",
+    # "shield-dioxus/server",
     "shield-memory/method-oidc",
 ]
 web = ["dioxus/web"]
