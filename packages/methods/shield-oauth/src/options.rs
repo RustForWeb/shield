@@ -4,7 +4,7 @@ use bon::Builder;
 #[builder(on(String, into), state_mod(vis = "pub(crate)"))]
 pub struct OauthOptions {
     #[builder(default = "/")]
-    pub sign_in_redirect: String,
+    pub(crate) sign_in_redirect: String,
 }
 
 impl Default for OauthOptions {

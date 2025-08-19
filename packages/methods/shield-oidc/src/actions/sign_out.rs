@@ -19,8 +19,8 @@ impl Action<OidcProvider> for OidcSignOutAction {
         SignOutAction::condition(provider, session)
     }
 
-    fn forms(&self, provider: OidcProvider) -> Vec<Form> {
-        SignOutAction::forms(provider)
+    async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {
+        SignOutAction::forms(provider).await
     }
 
     async fn call(

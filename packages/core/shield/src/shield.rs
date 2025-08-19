@@ -107,7 +107,7 @@ impl<U: User> Shield<U> {
                     continue;
                 }
 
-                let forms = action.erased_forms(provider);
+                let forms = action.erased_forms(provider).await?;
                 for form in forms {
                     provider_forms.push(ActionProviderForm {
                         id: provider_id.clone(),

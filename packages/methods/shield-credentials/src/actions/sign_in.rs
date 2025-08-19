@@ -31,8 +31,8 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
         SignInAction::name()
     }
 
-    fn forms(&self, _provider: CredentialsProvider) -> Vec<Form> {
-        vec![self.credentials.form()]
+    async fn forms(&self, _provider: CredentialsProvider) -> Result<Vec<Form>, ShieldError> {
+        Ok(vec![self.credentials.form()])
     }
 
     async fn call(

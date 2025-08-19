@@ -31,11 +31,11 @@ impl Action<WorkosProvider> for WorkosSignUpAction {
         SignUpAction::name()
     }
 
-    fn forms(&self, _provider: WorkosProvider) -> Vec<Form> {
+    async fn forms(&self, _provider: WorkosProvider) -> Result<Vec<Form>, ShieldError> {
         // TODO: Magic auth and SSO buttons.
         // TODO: Prefill email address.
 
-        vec![
+        Ok(vec![
             Form {
                 inputs: vec![
                     Input {
@@ -87,7 +87,7 @@ impl Action<WorkosProvider> for WorkosSignUpAction {
                     },
                 ],
             },
-        ]
+        ])
     }
 
     async fn call(
