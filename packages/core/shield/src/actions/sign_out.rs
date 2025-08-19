@@ -31,14 +31,14 @@ impl SignOutAction {
             }))
     }
 
-    pub fn form<P: Provider>(_provider: P) -> Form {
-        Form {
+    pub fn forms<P: Provider>(_provider: P) -> Vec<Form> {
+        vec![Form {
             inputs: vec![Input {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit {}),
                 value: Some(Self::name()),
             }],
-        }
+        }]
     }
 }

@@ -26,10 +26,14 @@ impl DioxusStyle for BootstrapDioxusStyle {
                     "{action.name}"
                 }
 
-                for form in &action.forms {
-                    Form {
-                        action_id: action.id.clone(),
-                        form: form.clone(),
+                for method_form in &action.method_forms {
+                    for provider_form in &method_form.provider_forms {
+                        Form {
+                            action_id: action.id.clone(),
+                            method_id: method_form.id.clone(),
+                            provider_id: provider_form.id.clone(),
+                            form: provider_form.form.clone(),
+                        }
                     }
                 }
             }

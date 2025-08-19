@@ -143,8 +143,8 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
         SignInCallbackAction::condition(provider, session)
     }
 
-    fn form(&self, _provider: OauthProvider) -> Form {
-        Form { inputs: vec![] }
+    fn forms(&self, _provider: OauthProvider) -> Vec<Form> {
+        vec![Form { inputs: vec![] }]
     }
 
     async fn call(

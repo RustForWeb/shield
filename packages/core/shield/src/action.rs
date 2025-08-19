@@ -13,14 +13,20 @@ use crate::{
 pub struct ActionForms {
     pub id: String,
     pub name: String,
-    pub forms: Vec<ActionProviderForm>,
+    pub method_forms: Vec<ActionMethodForm>,
+}
+
+// TODO: Think of a better name.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ActionMethodForm {
+    pub id: String,
+    pub provider_forms: Vec<ActionProviderForm>,
 }
 
 // TODO: Think of a better name.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ActionProviderForm {
-    pub method_id: String,
-    pub provider_id: Option<String>,
+    pub id: Option<String>,
     pub form: Form,
 }
 
@@ -34,7 +40,7 @@ pub trait Action<P: Provider>: ErasedAction + Send + Sync {
         Ok(true)
     }
 
-    fn form(&self, provider: P) -> Form;
+    fn forms(&self, provider: P) -> Vec<Form>;
 
     async fn call(
         &self,
@@ -56,7 +62,7 @@ pub trait ErasedAction: Send + Sync {
         session: Session,
     ) -> Result<bool, ShieldError>;
 
-    fn erased_form(&self, provider: Box<dyn Any + Send + Sync>) -> Form;
+    fn erased_forms(&self, provider: Box<dyn Any + Send + Sync>) -> Vec<Form>;
 
     async fn erased_call(
         &self,
@@ -83,8 +89,8 @@ macro_rules! erased_action {
                 self.condition(provider.downcast_ref().expect("TODO"), session)
             }
 
-            fn erased_form(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> $crate::Form {
-                self.form(*provider.downcast().expect("TODO"))
+            fn erased_forms(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> Vec<$crate::Form> {
+                self.forms(*provider.downcast().expect("TODO"))
             }
 
             async fn erased_call(

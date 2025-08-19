@@ -1,5 +1,5 @@
 use dioxus::{logger::tracing::info, prelude::*};
-use shield::{ActionProviderForm, Response};
+use shield::Response;
 use shield_dioxus::call;
 
 use crate::dioxus::input::FormInput;
@@ -7,7 +7,9 @@ use crate::dioxus::input::FormInput;
 #[derive(Clone, PartialEq, Props)]
 pub struct FormProps {
     action_id: String,
-    form: ActionProviderForm,
+    method_id: String,
+    provider_id: Option<String>,
+    form: shield::Form,
 }
 
 #[component]
@@ -19,15 +21,17 @@ pub fn Form(props: FormProps) -> Element {
             onsubmit: {
                 move |event| {
                     let action_id = props.action_id.clone();
-                    let method_id = props.form.method_id.clone();
-                    let provider_id = props.form.provider_id.clone();
+                    let method_id = props.method_id.clone();
+                    let provider_id = props.provider_id.clone();
 
                     event.prevent_default();
 
                     async move {
                         info!("{:?}", event);
+                        // TODO: Replace `expect` with proper error handling.
+                        let data = serde_json::to_value(event.data().values()).expect("Valid JSON.");
 
-                        let result = call(action_id, method_id, provider_id).await;
+                        let result = call(action_id, method_id, provider_id, data).await;
                         info!("{:?}", result);
 
                         // TODO: Handle error.
@@ -43,7 +47,7 @@ pub fn Form(props: FormProps) -> Element {
                 }
             },
 
-            for input in props.form.form.inputs {
+            for input in props.form.inputs {
                 FormInput {
                     input: input
                 }
