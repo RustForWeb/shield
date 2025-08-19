@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_router::{hooks::use_params, params::Params};
-use shield::ActionForms;
+use shield::{ActionForms, Response};
 
 use crate::ErasedLeptosStyle;
 
@@ -62,7 +62,7 @@ pub async fn call(
     let shield = integration.extract_shield().await;
     let session = integration.extract_session().await;
 
-    shield
+    let response = shield
         .call(
             &action_id,
             &method_id,
@@ -75,6 +75,13 @@ pub async fn call(
             },
         )
         .await?;
+
+    match response {
+        Response::Default => todo!("default reponse"),
+        Response::Redirect(to) => {
+            integration.redirect(&to);
+        }
+    }
 
     Ok(())
 }

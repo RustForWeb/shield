@@ -23,8 +23,8 @@ pub async fn action<U: User>(
 
     shield
         .call(
-            &method_id,
             &action_id,
+            &method_id,
             provider_id.as_deref(),
             session,
             Request { query, form_data },

@@ -15,6 +15,6 @@ impl SignInCallbackAction {
     }
 
     pub fn condition<P: Provider>(_provider: &P, _session: Session) -> Result<bool, ShieldError> {
-        Ok(false)
+        Ok(true)
     }
 }

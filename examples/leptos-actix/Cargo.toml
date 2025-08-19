@@ -16,6 +16,8 @@ bin-default-features = false
 lib-features = ["hydrate"]
 lib-default-features = false
 
+site-addr = "127.0.0.1:8080"
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 

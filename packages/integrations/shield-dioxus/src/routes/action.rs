@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use shield::ActionForms;
+use shield::{ActionForms, Response};
 
 use crate::ErasedDioxusStyle;
 
@@ -56,12 +56,12 @@ pub async fn call(
     action_id: String,
     method_id: String,
     provider_id: Option<String>,
-) -> Result<(), ServerFnError> {
+) -> Result<Response, ServerFnError> {
     #[cfg(feature = "server")]
     {
         use dioxus::prelude::{FromContext, extract};
         use serde_json::Value;
-        use shield::Request;
+        use shield::{Request, Response};
 
         use crate::integration::DioxusIntegrationDyn;
 
@@ -69,7 +69,7 @@ pub async fn call(
         let shield = integration.extract_shield().await;
         let session = integration.extract_session().await;
 
-        shield
+        let response = shield
             .call(
                 &action_id,
                 &method_id,
@@ -83,7 +83,7 @@ pub async fn call(
             )
             .await?;
 
-        Ok(())
+        Ok(response)
     }
 
     #[cfg(not(feature = "server"))]
