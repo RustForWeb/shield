@@ -6,10 +6,6 @@ Web authentication for Rust.
 
 See [the Shield book](https://shield.rustforweb.org/) for documentation.
 
-## Credits
-
-Inspired by [Auth.js](https://authjs.dev/).
-
 ## License
 
 This project is available under the [MIT license](LICENSE.md).
