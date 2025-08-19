@@ -23,8 +23,8 @@ impl Action<CredentialsProvider> for CredentialsSignOutAction {
         SignOutAction::condition(provider, session)
     }
 
-    fn forms(&self, provider: CredentialsProvider) -> Vec<Form> {
-        SignOutAction::forms(provider)
+    async fn forms(&self, provider: CredentialsProvider) -> Result<Vec<Form>, ShieldError> {
+        SignOutAction::forms(provider).await
     }
 
     async fn call(

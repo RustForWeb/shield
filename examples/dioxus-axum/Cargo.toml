@@ -18,6 +18,7 @@ server = [
     "dep:shield-dioxus-axum",
     "dep:shield-memory",
     "dep:shield-oidc",
+    "dep:shield-workos",
     "dep:tokio",
     "dep:tower-sessions",
     "dioxus/server",
@@ -35,6 +36,7 @@ shield-dioxus.workspace = true
 shield-dioxus-axum = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
+shield-workos = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 tower-sessions = { workspace = true, optional = true }
 tracing.workspace = true

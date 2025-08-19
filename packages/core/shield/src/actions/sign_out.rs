@@ -31,14 +31,14 @@ impl SignOutAction {
             }))
     }
 
-    pub fn forms<P: Provider>(_provider: P) -> Vec<Form> {
-        vec![Form {
+    pub async fn forms<P: Provider>(_provider: P) -> Result<Vec<Form>, ShieldError> {
+        Ok(vec![Form {
             inputs: vec![Input {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit {}),
                 value: Some(Self::name()),
             }],
-        }]
+        }])
     }
 }

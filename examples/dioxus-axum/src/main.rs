@@ -15,18 +15,19 @@ fn main() {
 #[cfg(feature = "server")]
 #[tokio::main]
 async fn main() {
-    use std::sync::Arc;
+    use std::{env, sync::Arc};
 
     use axum::Router;
     use dioxus::{
         cli_config::fullstack_address_or_localhost,
         prelude::{DioxusRouterExt, *},
     };
-    use shield::{Shield, ShieldOptions};
+    use shield::{ErasedMethod, Method, Shield, ShieldOptions};
     use shield_bootstrap::BootstrapDioxusStyle;
     use shield_dioxus_axum::{AxumDioxusIntegration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcMethod};
+    use shield_workos::{WorkosMethod, WorkosOauthProvider, WorkosOptions};
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
     use tracing::{Level, info};
@@ -45,21 +46,39 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![Arc::new(
-            OidcMethod::new(storage).with_providers([Keycloak::builder(
-                "keycloak",
-                "http://localhost:18080/realms/Shield",
-                "client1",
-            )
-            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(format!(
-                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                dioxus::cli_config::devserver_raw_addr()
-                    .map(|addr| addr.port())
-                    .unwrap_or_else(|| addr.port())
-            ))
-            .build()]),
-        )],
+        [
+            Some(Arc::new(
+                OidcMethod::new(storage).with_providers([Keycloak::builder(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .redirect_url(format!(
+                    "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                    dioxus::cli_config::devserver_raw_addr()
+                        .map(|addr| addr.port())
+                        .unwrap_or_else(|| addr.port())
+                ))
+                .build()]),
+            ) as Arc<dyn ErasedMethod>),
+            env::var("WORKOS_API_KEY").ok().map(|api_key| {
+                Arc::new(
+                    WorkosMethod::from_api_key(&api_key).with_options(
+                        WorkosOptions::builder()
+                            .oauth_providers(vec![
+                                WorkosOauthProvider::AppleOAuth,
+                                WorkosOauthProvider::GoogleOAuth,
+                                WorkosOauthProvider::MicrosoftOAuth,
+                            ])
+                            .build(),
+                    ),
+                ) as Arc<dyn ErasedMethod>
+            }),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());

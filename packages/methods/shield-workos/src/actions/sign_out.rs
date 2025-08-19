@@ -32,8 +32,8 @@ impl Action<WorkosProvider> for WorkosSignOutAction {
         SignOutAction::condition(provider, session)
     }
 
-    fn forms(&self, provider: WorkosProvider) -> Vec<Form> {
-        SignOutAction::forms(provider)
+    async fn forms(&self, provider: WorkosProvider) -> Result<Vec<Form>, ShieldError> {
+        SignOutAction::forms(provider).await
     }
 
     async fn call(

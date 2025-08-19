@@ -19,8 +19,8 @@ impl Action<OauthProvider> for OauthSignOutAction {
         SignOutAction::condition(provider, session)
     }
 
-    fn forms(&self, provider: OauthProvider) -> Vec<Form> {
-        SignOutAction::forms(provider)
+    async fn forms(&self, provider: OauthProvider) -> Result<Vec<Form>, ShieldError> {
+        SignOutAction::forms(provider).await
     }
 
     async fn call(

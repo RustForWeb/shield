@@ -40,7 +40,7 @@ pub trait Action<P: Provider>: ErasedAction + Send + Sync {
         Ok(true)
     }
 
-    fn forms(&self, provider: P) -> Vec<Form>;
+    async fn forms(&self, provider: P) -> Result<Vec<Form>, ShieldError>;
 
     async fn call(
         &self,
@@ -62,7 +62,10 @@ pub trait ErasedAction: Send + Sync {
         session: Session,
     ) -> Result<bool, ShieldError>;
 
-    fn erased_forms(&self, provider: Box<dyn Any + Send + Sync>) -> Vec<Form>;
+    async fn erased_forms(
+        &self,
+        provider: Box<dyn Any + Send + Sync>,
+    ) -> Result<Vec<Form>, ShieldError>;
 
     async fn erased_call(
         &self,
@@ -89,8 +92,8 @@ macro_rules! erased_action {
                 self.condition(provider.downcast_ref().expect("TODO"), session)
             }
 
-            fn erased_forms(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> Vec<$crate::Form> {
-                self.forms(*provider.downcast().expect("TODO"))
+            async fn erased_forms(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> Result<Vec<$crate::Form>, $crate::ShieldError> {
+                self.forms(*provider.downcast().expect("TODO")).await
             }
 
             async fn erased_call(

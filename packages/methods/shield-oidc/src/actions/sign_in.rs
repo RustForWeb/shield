@@ -26,15 +26,15 @@ impl Action<OidcProvider> for OidcSignInAction {
         SignInAction::name()
     }
 
-    fn forms(&self, provider: OidcProvider) -> Vec<Form> {
-        vec![Form {
+    async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {
+        Ok(vec![Form {
             inputs: vec![Input {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit::default()),
                 value: Some(format!("Sign in with {}", provider.name())),
             }],
-        }]
+        }])
     }
 
     async fn call(
