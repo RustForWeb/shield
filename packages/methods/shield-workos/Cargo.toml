@@ -1,6 +1,6 @@
 [package]
-name = "shield-leptos"
-description = "Leptos integration for Shield."
+name = "shield-workos"
+description = "WorkOS method for Shield."
 
 authors.workspace = true
 edition.workspace = true
@@ -10,9 +10,9 @@ version.workspace = true
 
 [dependencies]
 async-trait.workspace = true
-leptos.workspace = true
-leptos_router.workspace = true
+bon.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 shield.workspace = true
 tracing.workspace = true
+workos-sdk = "0.3.0"

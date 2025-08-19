@@ -22,9 +22,14 @@ impl LeptosStyle for BootstrapLeptosStyle {
             <div class="container">
                 <h1>{action.name.clone()}</h1>
 
-                {action.forms.iter().map(|form| view! {
-                    <Form action_id=action.id.clone() form=form.clone() />
-                }).collect_view()}
+                {action.method_forms.iter().flat_map(|method_form| method_form.provider_forms.iter().map(|provider_form| view! {
+                    <Form
+                        action_id=action.id.clone()
+                        method_id=method_form.id.clone()
+                        provider_id=provider_form.id.clone()
+                        form=provider_form.form.clone()
+                    />
+                })).collect_view()}
             </div>
         }
         .into_any()

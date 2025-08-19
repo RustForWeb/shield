@@ -16,3 +16,4 @@ async-trait.workspace = true
 dioxus = { workspace = true, features = ["fullstack", "router"] }
 serde_json.workspace = true
 shield.workspace = true
+tracing.workspace = true

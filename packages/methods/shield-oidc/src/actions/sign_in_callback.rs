@@ -154,8 +154,8 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
         SignInCallbackAction::condition(provider, session)
     }
 
-    fn form(&self, _provider: OidcProvider) -> Form {
-        Form { inputs: vec![] }
+    fn forms(&self, _provider: OidcProvider) -> Vec<Form> {
+        vec![Form { inputs: vec![] }]
     }
 
     async fn call(

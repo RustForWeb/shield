@@ -8,13 +8,23 @@ license.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[package.metadata.cargo-machete]
+ignored = ["dioxus-html"]
+
 [features]
-dioxus = ["dep:dioxus", "dep:shield-dioxus"]
+dioxus = [
+    "dep:dioxus",
+    "dep:dioxus-html",
+    "dep:serde_json",
+    "dep:shield-dioxus",
+]
 leptos = ["dep:leptos", "dep:shield-leptos"]
 
 [dependencies]
 dioxus = { workspace = true, optional = true }
+dioxus-html = { workspace = true, features = ["serialize"], optional = true }
 leptos = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 shield.workspace = true
 shield-dioxus = { workspace = true, optional = true }
 shield-leptos = { workspace = true, optional = true }

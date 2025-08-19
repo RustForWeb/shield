@@ -4,6 +4,7 @@ use futures::future::try_join_all;
 use tracing::warn;
 
 use crate::{
+    ActionMethodForm,
     action::{ActionForms, ActionProviderForm},
     error::{ActionError, MethodError, ProviderError, ShieldError},
     method::ErasedMethod,
@@ -27,6 +28,8 @@ impl<U: User> Shield<U> {
     where
         S: Storage<U> + 'static,
     {
+        // TOOD: Check for duplicate method IDs.
+
         Self {
             storage: Arc::new(storage),
             methods: Arc::new(
@@ -83,9 +86,9 @@ impl<U: User> Shield<U> {
         session: Session,
     ) -> Result<ActionForms, ShieldError> {
         let mut action_name = None::<String>;
-        let mut forms = vec![];
+        let mut method_forms = vec![];
 
-        for (_, method) in self.methods.iter() {
+        for (method_id, method) in self.methods.iter() {
             let Some(action) = method.erased_action_by_id(action_id) else {
                 continue;
             };
@@ -98,25 +101,31 @@ impl<U: User> Shield<U> {
             }
             action_name = Some(name);
 
+            let mut provider_forms = vec![];
             for (provider_id, provider) in method.erased_providers().await? {
                 if !action.erased_condition(&*provider, session.clone())? {
                     continue;
                 }
 
-                let form = action.erased_form(provider);
-
-                forms.push(ActionProviderForm {
-                    method_id: method.erased_id(),
-                    provider_id,
-                    form,
-                });
+                let forms = action.erased_forms(provider);
+                for form in forms {
+                    provider_forms.push(ActionProviderForm {
+                        id: provider_id.clone(),
+                        form,
+                    });
+                }
             }
+
+            method_forms.push(ActionMethodForm {
+                id: method_id.clone(),
+                provider_forms,
+            });
         }
 
         Ok(ActionForms {
             id: action_id.to_owned(),
             name: action_name.unwrap_or(action_id.to_owned()),
-            forms,
+            method_forms,
         })
     }
 

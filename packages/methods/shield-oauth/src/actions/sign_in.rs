@@ -23,8 +23,8 @@ impl Action<OauthProvider> for OauthSignInAction {
         SignInAction::name()
     }
 
-    fn form(&self, _provider: OauthProvider) -> Form {
-        Form { inputs: vec![] }
+    fn forms(&self, _provider: OauthProvider) -> Vec<Form> {
+        vec![Form { inputs: vec![] }]
     }
 
     async fn call(

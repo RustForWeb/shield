@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 use leptos_router::{hooks::use_params, params::Params};
-use shield::{ActionForms, Response};
+use serde_json::Value;
+use shield::ActionForms;
 
 use crate::ErasedLeptosStyle;
 
@@ -52,9 +53,11 @@ pub async fn call(
     action_id: String,
     method_id: String,
     provider_id: Option<String>,
+    // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
+    data: Value,
 ) -> Result<(), ServerFnError> {
     use serde_json::Value;
-    use shield::Request;
+    use shield::{Request, Response};
 
     use crate::expect_server_integration;
 
@@ -62,16 +65,17 @@ pub async fn call(
     let shield = integration.extract_shield().await;
     let session = integration.extract_session().await;
 
+    tracing::info!("call data {data:#?}");
+
     let response = shield
         .call(
             &action_id,
             &method_id,
             provider_id.as_deref(),
             session,
-            // TODO: Support request input.
             Request {
                 query: Value::Null,
-                form_data: Value::Null,
+                form_data: data,
             },
         )
         .await?;

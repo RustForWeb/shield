@@ -25,7 +25,8 @@ fn Control(input: Input) -> impl IntoView {
     view! {
          <input
             class="form-control"
-            name=input.name.clone()
+            // TODO: Support nested data (`data[user[name]]` should instead be `data[user][name]`).
+            name=format!("data[{}]", input.name)
             r#type=input.r#type.as_str()
             value=input.value.clone()
         />

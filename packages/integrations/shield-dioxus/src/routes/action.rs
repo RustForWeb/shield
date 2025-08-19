@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use serde_json::Value;
 use shield::{ActionForms, Response};
 
 use crate::ErasedDioxusStyle;
@@ -56,6 +57,8 @@ pub async fn call(
     action_id: String,
     method_id: String,
     provider_id: Option<String>,
+    // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
+    data: Value,
 ) -> Result<Response, ServerFnError> {
     #[cfg(feature = "server")]
     {
@@ -64,6 +67,8 @@ pub async fn call(
         use shield::{Request, Response};
 
         use crate::integration::DioxusIntegrationDyn;
+
+        tracing::info!("call data {data:#?}");
 
         let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
         let shield = integration.extract_shield().await;
@@ -75,10 +80,9 @@ pub async fn call(
                 &method_id,
                 provider_id.as_deref(),
                 session,
-                // TODO: Support request input.
                 Request {
                     query: Value::Null,
-                    form_data: Value::Null,
+                    form_data: data,
                 },
             )
             .await?;

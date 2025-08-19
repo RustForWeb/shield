@@ -21,7 +21,8 @@ bon = "3.3.2"
 chrono = "0.4.39"
 console_error_panic_hook = "0.1.2"
 dioxus = "0.7.0-rc.0"
-dioxus-server = { version = "0.7.0-rc.0" }
+dioxus-html = "0.7.0-rc.0"
+dioxus-server = "0.7.0-rc.0"
 futures = "0.3.31"
 http = "1.2.0"
 leptos = "0.8.3"
@@ -53,6 +54,7 @@ shield-sea-orm = { path = "./packages/storage/shield-sea-orm", version = "0.0.4"
 shield-sqlx = { path = "./packages/storage/shield-sqlx", version = "0.0.4" }
 shield-tower = { path = "./packages/integrations/shield-tower", version = "0.0.4" }
 shield-webauthn = { path = "./packages/methods/shield-webauthn", version = "0.0.4" }
+shield-workos = { path = "./packages/methods/shield-workos", version = "0.0.4" }
 thiserror = "2.0.7"
 tokio = "1.42.0"
 tower-layer = "0.3.3"
