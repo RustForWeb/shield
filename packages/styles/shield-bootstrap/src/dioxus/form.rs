@@ -1,5 +1,5 @@
 use dioxus::{logger::tracing::info, prelude::*};
-use shield::ActionProviderForm;
+use shield::{ActionProviderForm, Response};
 use shield_dioxus::call;
 
 use crate::dioxus::input::FormInput;
@@ -12,6 +12,8 @@ pub struct FormProps {
 
 #[component]
 pub fn Form(props: FormProps) -> Element {
+    let navigator = navigator();
+
     rsx! {
         form {
             onsubmit: {
@@ -27,6 +29,16 @@ pub fn Form(props: FormProps) -> Element {
 
                         let result = call(action_id, method_id, provider_id).await;
                         info!("{:?}", result);
+
+                        // TODO: Handle error.
+                        if let Ok(response) = result {
+                            match response {
+                                Response::Default => todo!("default response"),
+                                Response::Redirect(to) => {
+                                    navigator.push(to);
+                                },
+                            }
+                        }
                     }
                 }
             },

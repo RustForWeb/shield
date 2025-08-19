@@ -4,9 +4,15 @@ use futures::future::try_join_all;
 use tracing::warn;
 
 use crate::{
-    ActionError, ActionProviderForm, MethodError, ProviderError, Request, action::ActionForms,
-    error::ShieldError, method::ErasedMethod, options::ShieldOptions, session::Session,
-    storage::Storage, user::User,
+    action::{ActionForms, ActionProviderForm},
+    error::{ActionError, MethodError, ProviderError, ShieldError},
+    method::ErasedMethod,
+    options::ShieldOptions,
+    request::Request,
+    response::Response,
+    session::Session,
+    storage::Storage,
+    user::User,
 };
 
 #[derive(Clone)]
@@ -121,7 +127,7 @@ impl<U: User> Shield<U> {
         provider_id: Option<&str>,
         session: Session,
         request: Request,
-    ) -> Result<(), ShieldError> {
+    ) -> Result<Response, ShieldError> {
         let method =
             self.method_by_id(method_id)
                 .ok_or(ShieldError::Method(MethodError::NotFound(
@@ -142,9 +148,12 @@ impl<U: User> Shield<U> {
                     provider_id.map(ToOwned::to_owned),
                 )))?;
 
-        action.erased_call(provider, session, request).await?;
+        let response = action.erased_call(provider, session.clone(), request).await;
 
-        Ok(())
+        // TODO: Should update always be called?
+        session.update().await?;
+
+        response
     }
 }
 

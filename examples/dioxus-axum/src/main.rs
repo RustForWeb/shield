@@ -32,8 +32,8 @@ async fn main() {
     use tracing::{Level, info};
 
     // Initialize Dioxus
-    let addr = fullstack_address_or_localhost();
     dioxus::logger::init(Level::DEBUG).unwrap();
+    let addr = fullstack_address_or_localhost();
 
     // Initialize sessions
     let session_store = MemoryStore::default();
@@ -53,8 +53,10 @@ async fn main() {
             )
             .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
             .redirect_url(format!(
-                "http://localhost:{}/api/auth/sign-in/callback/oidc/keycloak",
-                addr.port()
+                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                dioxus::cli_config::devserver_raw_addr()
+                    .map(|addr| addr.port())
+                    .unwrap_or_else(|| addr.port())
             ))
             .build()]),
         )],
