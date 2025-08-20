@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use dioxus::{logger::tracing::info, prelude::*};
 use shield::Response;
-use shield_dioxus::call;
+use shield_dioxus::{ShieldRouter, call};
 
 use crate::dioxus::input::FormInput;
 
@@ -28,8 +30,15 @@ pub fn Form(props: FormProps) -> Element {
 
                     async move {
                         info!("{:?}", event);
-                        // TODO: Replace `expect` with proper error handling.
-                        let data = serde_json::to_value(event.data().values()).expect("Valid JSON.");
+                        let data = serde_json::to_value(
+                            // TODO: Support inputs with `multiple` attribute.
+                            event
+                                .data()
+                                .values()
+                                .into_iter()
+                                .filter_map(|(key, values)| values.first().map(|value| (key, value.clone())))
+                                .collect::<HashMap<String, String>>()
+                        ).expect("TODO: handle error");
 
                         let result = call(action_id, method_id, provider_id, data).await;
                         info!("{:?}", result);
@@ -41,6 +50,9 @@ pub fn Form(props: FormProps) -> Element {
                                 Response::Redirect(to) => {
                                     navigator.push(to);
                                 },
+                                Response::RedirectToAction { action_id } => {
+                                    navigator.push(ShieldRouter::Action { action_id });
+                                }
                             }
                         }
                     }

@@ -1,4 +1,5 @@
 mod actions;
+mod client;
 mod method;
 mod options;
 mod provider;

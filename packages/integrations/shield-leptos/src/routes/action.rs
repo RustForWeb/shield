@@ -19,7 +19,7 @@ pub fn Action() -> impl IntoView {
             .as_ref()
             .ok()
             .and_then(|params| params.action_id.clone())
-            .expect("TODO: Properly handle missing param.")
+            .unwrap_or("index".to_owned())
     };
 
     let resource = Resource::new(action_id, forms);
@@ -84,6 +84,10 @@ pub async fn call(
         Response::Default => todo!("default reponse"),
         Response::Redirect(to) => {
             integration.redirect(&to);
+        }
+        Response::RedirectToAction { action_id } => {
+            // TODO: Use actual router prefix instead of hardcoded `/auth`.
+            integration.redirect(&format!("/auth/{action_id}"));
         }
     }
 

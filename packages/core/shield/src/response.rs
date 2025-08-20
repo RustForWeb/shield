@@ -5,4 +5,5 @@ pub enum Response {
     // TODO: Remove temporary default variant.
     Default,
     Redirect(String),
+    RedirectToAction { action_id: String },
 }

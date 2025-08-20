@@ -5,18 +5,17 @@ use shield::{
     Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypePassword,
     InputTypeSubmit, Request, Response, Session, ShieldError, SignInAction, erased_action,
 };
-use workos_sdk::WorkOs;
 
-use crate::provider::WorkosProvider;
+use crate::{client::WorkosClient, provider::WorkosProvider};
 
 pub struct WorkosSignInAction {
     // TODO: Remove expect.
     #[expect(unused)]
-    client: Arc<WorkOs>,
+    client: Arc<WorkosClient>,
 }
 
 impl WorkosSignInAction {
-    pub fn new(client: Arc<WorkOs>) -> Self {
+    pub fn new(client: Arc<WorkosClient>) -> Self {
         Self { client }
     }
 }

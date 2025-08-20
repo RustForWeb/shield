@@ -4,46 +4,37 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
     Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit, Request,
-    Response, Session, ShieldError, erased_action,
+    Response, Session, ShieldError, SignInAction, SignUpAction, erased_action,
 };
-use tracing::info;
 use workos_sdk::{
-    PaginationParams, WorkOs,
+    PaginationParams,
     sso::{ConnectionId, ListConnections, ListConnectionsParams},
-    user_management::{ListUsers, ListUsersParams, OauthProvider},
+    user_management::{
+        ConnectionSelector, GetAuthorizationUrl, GetAuthorizationUrlParams, ListUsers,
+        ListUsersParams, OauthProvider, Provider,
+    },
 };
 
-use crate::{WorkosOptions, provider::WorkosProvider};
-
-// TODO: Make a special case for an index action reachable at the `/auth` root URL.
+use crate::{client::WorkosClient, options::WorkosOptions, provider::WorkosProvider};
 
 const ACTION_ID: &str = "index";
-const ACTION_NAME: &str = "Index";
+const ACTION_NAME: &str = "Welcome";
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged, rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum IndexData {
-    Email {
-        // TODO: Dioxus records multiple values per field, but most of the time only a single value is expected.
-        email: Vec<String>,
-    },
-    Oauth {
-        // TODO: See above.
-        oauth_provider: Vec<OauthProvider>,
-    },
-    Sso {
-        // TODO: See above.
-        connection_id: Vec<ConnectionId>,
-    },
+    Email { email: String },
+    Oauth { oauth_provider: OauthProvider },
+    Sso { connection_id: ConnectionId },
 }
 
 pub struct WorkosIndexAction {
     options: WorkosOptions,
-    client: Arc<WorkOs>,
+    client: Arc<WorkosClient>,
 }
 
 impl WorkosIndexAction {
-    pub fn new(options: WorkosOptions, client: Arc<WorkOs>) -> Self {
+    pub fn new(options: WorkosOptions, client: Arc<WorkosClient>) -> Self {
         Self { options, client }
     }
 }
@@ -71,8 +62,6 @@ impl Action<WorkosProvider> for WorkosIndexAction {
             })
             .await
             .expect("TODO: handle error");
-
-        info!("{connections:#?}");
 
         Ok([Form {
             inputs: vec![
@@ -167,8 +156,6 @@ impl Action<WorkosProvider> for WorkosIndexAction {
 
         match data {
             IndexData::Email { email } => {
-                info!("email: {email:#?}");
-
                 let users = self
                     .client
                     .user_management()
@@ -177,43 +164,62 @@ impl Action<WorkosProvider> for WorkosIndexAction {
                             limit: Some(1),
                             ..Default::default()
                         },
-                        // TODO: Remove [0] once email is a single value.
-                        email: Some(&email[0]),
+                        email: Some(&email),
                         ..Default::default()
                     })
                     .await
                     .expect("TODO: handle error");
 
-                info!("{users:#?}");
-
+                // TODO: Include email address as state.
                 if users.data.is_empty() {
-                    // TODO: Redirect to sign up action.
+                    Ok(Response::RedirectToAction {
+                        action_id: SignUpAction::id(),
+                    })
                 } else {
-                    // TODO: Redirect to sign in action.
+                    Ok(Response::RedirectToAction {
+                        action_id: SignInAction::id(),
+                    })
                 }
             }
             IndexData::Oauth { oauth_provider } => {
-                info!("oauth {oauth_provider:#?}");
+                let authorization_url = self
+                    .client
+                    .user_management()
+                    .get_authorization_url(&GetAuthorizationUrlParams {
+                        client_id: &self.client.client_id(),
+                        redirect_uri: &self.options.redirect_url,
+                        connection_selector: ConnectionSelector::Provider(&Provider::Oauth(
+                            oauth_provider,
+                        )),
+                        // TODO: State and code challenge.
+                        state: None,
+                        code_challenge: None,
+                        login_hint: None,
+                        domain_hint: None,
+                    })
+                    .expect("TODO: handle error");
 
-                // TODO: Add client ID to method.
-                // self.client
-                //     .user_management()
-                //     .get_authorization_url(&GetAuthorizationUrlParams {
-                //         client_id: todo!(),
-                //         redirect_uri: todo!(),
-                //         connection_selector: todo!(),
-                //         state: todo!(),
-                //         code_challenge: todo!(),
-                //         login_hint: todo!(),
-                //         domain_hint: todo!(),
-                //     })
+                Ok(Response::Redirect(authorization_url.to_string()))
             }
             IndexData::Sso { connection_id } => {
-                info!("sso {connection_id:#?}");
+                let authorization_url = self
+                    .client
+                    .user_management()
+                    .get_authorization_url(&GetAuthorizationUrlParams {
+                        client_id: &self.client.client_id(),
+                        redirect_uri: &self.options.redirect_url,
+                        connection_selector: ConnectionSelector::Connection(&connection_id),
+                        // TODO: State and code challenge.
+                        state: None,
+                        code_challenge: None,
+                        login_hint: None,
+                        domain_hint: None,
+                    })
+                    .expect("TODO: handle error");
+
+                Ok(Response::Redirect(authorization_url.to_string()))
             }
         }
-
-        Ok(Response::Default)
     }
 }
 

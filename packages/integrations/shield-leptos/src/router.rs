@@ -6,7 +6,8 @@ use crate::routes::Action;
 #[component(transparent)]
 pub fn ShieldRouter() -> impl MatchNestedRoutes + Clone {
     view! {
-        <Route path=path!(":action_id") view=Action />
+        <Route path=path!("/") view=Action />
+        <Route path=path!("/:action_id") view=Action />
     }
     .into_inner()
 }
