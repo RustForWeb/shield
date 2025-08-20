@@ -26,7 +26,7 @@ async fn main() {
     use shield_bootstrap::BootstrapDioxusStyle;
     use shield_dioxus_axum::{AxumDioxusIntegration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
-    use shield_oidc::{Keycloak, OidcMethod};
+    use shield_workos::{WorkosMethod, WorkosOauthProvider, WorkosOptions};
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer, cookie::time::Duration};
     use tracing::{Level, info};
@@ -45,21 +45,21 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![
-            OidcMethod::new(storage).with_providers([Keycloak::builder(
-                "keycloak",
-                "http://localhost:18080/realms/Shield",
-                "client1",
-            )
-            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(format!(
-                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                dioxus::cli_config::devserver_raw_addr()
-                    .map(|addr| addr.port())
-                    .unwrap_or_else(|| addr.port())
-            ))
-            .build()]),
-        ],
+        vec![Arc::new(WorkosMethod::from_api_key(
+            &env::var("WORKOS_API_KEY").expect("Missing `WORKOS_API_KEY`."),
+            &env::var("WORKOS_CLIENT_ID").expect("Missing `WORKOS_CLIENT_ID`."),
+            WorkosOptions::builder()
+                .oauth_providers(vec![
+                    WorkosOauthProvider::AppleOAuth,
+                    WorkosOauthProvider::GoogleOAuth,
+                    WorkosOauthProvider::MicrosoftOAuth,
+                ])
+                .redirect_url(format!(
+                    "http://localhost:{}/api/auth/workos/sign-in-callback",
+                    addr.port()
+                ))
+                .build(),
+        ))],
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());

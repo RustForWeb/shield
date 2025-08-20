@@ -6,6 +6,7 @@ use crate::ErasedDioxusStyle;
 
 #[derive(Clone, PartialEq, Props)]
 pub struct ActionProps {
+    #[props(default = "index".to_owned())]
     action_id: String,
 }
 

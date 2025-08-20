@@ -23,7 +23,7 @@ async fn main() {
         .init();
 
     // Configuration
-    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000);
+    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
 
     // Initialize sessions
     let session_store = MemoryStore::default();

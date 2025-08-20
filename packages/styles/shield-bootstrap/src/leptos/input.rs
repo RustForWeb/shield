@@ -29,6 +29,7 @@ fn Control(input: Input) -> impl IntoView {
             name=format!("data[{}]", input.name)
             r#type=input.r#type.as_str()
             value=input.value.clone()
+            placeholder=input.label
         />
     }
 }

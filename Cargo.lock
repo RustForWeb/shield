@@ -5612,7 +5612,6 @@ dependencies = [
  "shield-dioxus-axum",
  "shield-memory",
  "shield-oidc",
- "shield-workos",
  "tokio",
  "tower-sessions",
  "tracing",
@@ -5676,6 +5675,23 @@ dependencies = [
  "sea-orm-migration",
  "shield-sea-orm",
  "tokio",
+]
+
+[[package]]
+name = "shield-examples-workos"
+version = "0.0.4"
+dependencies = [
+ "axum",
+ "dioxus",
+ "shield",
+ "shield-bootstrap",
+ "shield-dioxus",
+ "shield-dioxus-axum",
+ "shield-memory",
+ "shield-workos",
+ "tokio",
+ "tower-sessions",
+ "tracing",
 ]
 
 [[package]]
@@ -5801,7 +5817,6 @@ dependencies = [
  "serde",
  "serde_json",
  "shield",
- "tracing",
  "workos-sdk",
 ]
 

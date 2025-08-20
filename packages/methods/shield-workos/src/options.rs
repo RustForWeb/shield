@@ -6,10 +6,6 @@ use workos_sdk::user_management::OauthProvider;
 pub struct WorkosOptions {
     #[builder(default)]
     pub(crate) oauth_providers: Vec<OauthProvider>,
-}
-
-impl Default for WorkosOptions {
-    fn default() -> Self {
-        Self::builder().build()
-    }
+    // TODO: Generate automatically?
+    pub(crate) redirect_url: String,
 }

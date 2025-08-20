@@ -2,18 +2,17 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
-use workos_sdk::WorkOs;
 
-use crate::provider::WorkosProvider;
+use crate::{client::WorkosClient, provider::WorkosProvider};
 
 pub struct WorkosSignOutAction {
     // TODO: Remove expect.
     #[expect(unused)]
-    client: Arc<WorkOs>,
+    client: Arc<WorkosClient>,
 }
 
 impl WorkosSignOutAction {
-    pub fn new(client: Arc<WorkOs>) -> Self {
+    pub fn new(client: Arc<WorkosClient>) -> Self {
         Self { client }
     }
 }

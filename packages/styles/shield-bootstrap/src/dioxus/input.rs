@@ -27,6 +27,7 @@ pub fn FormInput(props: FormInputProps) -> Element {
                 name: props.input.name,
                 type: props.input.r#type.as_str(),
                 value: props.input.value.clone(),
+                placeholder: props.input.label,
             }
         }
     }

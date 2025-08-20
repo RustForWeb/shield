@@ -14,5 +14,4 @@ bon.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 shield.workspace = true
-tracing.workspace = true
 workos-sdk = "0.3.0"
