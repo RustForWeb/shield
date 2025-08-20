@@ -56,7 +56,9 @@ async fn main() {
                 ])
                 .redirect_url(format!(
                     "http://localhost:{}/api/auth/workos/sign-in-callback",
-                    addr.port()
+                    dioxus::cli_config::devserver_raw_addr()
+                        .map(|addr| addr.port())
+                        .unwrap_or_else(|| addr.port())
                 ))
                 .build(),
         ))],
