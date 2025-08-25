@@ -5817,7 +5817,7 @@ dependencies = [
  "serde",
  "serde_json",
  "shield",
- "workos-sdk",
+ "workos",
 ]
 
 [[package]]
@@ -7636,10 +7636,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "workos-sdk"
-version = "0.3.0"
+name = "workos"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecd0bf083e05d68ad10b7b85b8a9a21735c9d509bcb32b6d38687afb9014872d"
+checksum = "e28296ffec1ab62dd21a26eb8fb3bf877d1bbc7698160d593a634b4c5e45b277"
 dependencies = [
  "async-trait",
  "chrono",
