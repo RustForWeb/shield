@@ -9,13 +9,13 @@ on:
 permissions:
     contents: read
 
-env:
-    RUSTFLAGS: '-Dwarnings'
-
 jobs:
     lint:
         name: Lint
         runs-on: ubuntu-latest
+
+        env:
+            RUSTFLAGS: '-Dwarnings'
 
         steps:
             - name: Checkout
