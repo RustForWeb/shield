@@ -6,6 +6,9 @@ on:
         branches:
             - main
 
+permissions:
+    contents: read
+
 env:
     RUSTFLAGS: '-Dwarnings'
 
@@ -86,4 +89,4 @@ jobs:
               run: cargo binstall -y sea-orm-cli
 
             - name: Test
-              run: cargo test --locked
+              run: cargo test --locked --release
