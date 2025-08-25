@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use workos_sdk::{WorkOs, sso::ClientId};
+use workos::{WorkOs, sso::ClientId};
 
 pub struct WorkosClient {
     client: WorkOs,

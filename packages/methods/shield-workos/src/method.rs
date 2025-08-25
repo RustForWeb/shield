@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use shield::{Action, Method, ShieldError, erased_method};
-use workos_sdk::{ApiKey, WorkOs};
+use workos::{ApiKey, WorkOs};
 
 use crate::{
     actions::{WorkosIndexAction, WorkosSignInAction, WorkosSignOutAction, WorkosSignUpAction},

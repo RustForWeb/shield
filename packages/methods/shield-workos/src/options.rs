@@ -1,5 +1,5 @@
 use bon::Builder;
-use workos_sdk::user_management::OauthProvider;
+use workos::user_management::OauthProvider;
 
 #[derive(Builder, Clone, Debug)]
 #[builder(on(String, into), state_mod(vis = "pub(crate)"))]

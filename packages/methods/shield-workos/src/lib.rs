@@ -8,7 +8,7 @@ pub use method::*;
 pub use options::*;
 
 #[doc(no_inline)]
-pub use workos_sdk::{
+pub use workos::{
     ApiKey as WorkosApiKey, WorkOs as Workos, WorkOsBuilder as WorkosBuilder,
     user_management::OauthProvider as WorkosOauthProvider,
 };

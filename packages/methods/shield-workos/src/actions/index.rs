@@ -6,7 +6,7 @@ use shield::{
     Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit, Request,
     Response, Session, ShieldError, SignInAction, SignUpAction, erased_action,
 };
-use workos_sdk::{
+use workos::{
     PaginationParams,
     sso::{ConnectionId, ListConnections, ListConnectionsParams},
     user_management::{
