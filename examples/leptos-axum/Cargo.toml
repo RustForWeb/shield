@@ -54,7 +54,10 @@ shield-leptos-axum = { workspace = true, features = [
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
 time = "0.3.37"
-tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
+tokio = { workspace = true, features = [
+    "macros",
+    "rt-multi-thread",
+], optional = true }
 tower-sessions = { workspace = true, optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true

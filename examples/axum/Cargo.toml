@@ -16,7 +16,7 @@ shield-axum = { workspace = true, features = ["utoipa"] }
 shield-memory = { workspace = true, features = ["method-oidc"] }
 shield-oidc = { workspace = true, features = ["native-tls"] }
 time = "0.3.37"
-tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tower-sessions.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
