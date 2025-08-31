@@ -82,11 +82,5 @@ jobs:
                   components: clippy, rustfmt
                   target: wasm32-unknown-unknown
 
-            - name: Install Cargo Binary Install
-              uses: cargo-bins/cargo-binstall@main
-
-            - name: Install crates
-              run: cargo binstall -y sea-orm-cli
-
             - name: Test
               run: cargo test --locked --release

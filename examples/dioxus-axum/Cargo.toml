@@ -35,6 +35,9 @@ shield-dioxus.workspace = true
 shield-dioxus-axum = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
-tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
+tokio = { workspace = true, features = [
+    "macros",
+    "rt-multi-thread",
+], optional = true }
 tower-sessions = { workspace = true, optional = true }
 tracing.workspace = true

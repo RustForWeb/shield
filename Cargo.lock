@@ -5785,6 +5785,7 @@ dependencies = [
  "shield",
  "shield-oauth",
  "shield-oidc",
+ "tokio",
  "utoipa",
 ]
 

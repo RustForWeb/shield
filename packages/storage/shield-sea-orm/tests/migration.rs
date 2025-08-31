@@ -1,12 +1,6 @@
-use std::{
-    env,
-    path::{Path, PathBuf},
-    process::Command,
-};
-
-fn example_path() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../examples/sea-orm")
-}
+use sea_orm::Database;
+use sea_orm_migration::migrator::MigratorTrait;
+use shield_sea_orm::migrations::Migrator;
 
 const BACKENDS: &[(&str, &str)] = &[
     ("mysql", "mysql://shield:shield@localhost:13306/shield"),
@@ -17,49 +11,26 @@ const BACKENDS: &[(&str, &str)] = &[
     ("sqlite", "sqlite:///tmp/shield-seaorm.sqlite?mode=rwc"),
 ];
 
-#[test]
-pub fn migrations() {
+#[tokio::test]
+async fn migrations() {
     for (backend, url) in BACKENDS {
-        // Check up migrations
-        assert!(
-            Command::new("sea-orm-cli")
-                .arg("migrate")
-                .arg("fresh")
-                .arg("-u")
-                .arg(url)
-                .arg("-d")
-                .arg(example_path())
-                .status()
-                .unwrap_or_else(|_| panic!("{backend} up migrations should succeed."))
-                .success()
-        );
+        let database = Database::connect(url.to_owned())
+            .await
+            .unwrap_or_else(|err| panic!("Connect to backend `{backend}` failed: {err}"));
 
-        // Check down migrations
-        assert!(
-            Command::new("sea-orm-cli")
-                .arg("migrate")
-                .arg("refresh")
-                .arg("-u")
-                .arg(url)
-                .arg("-d")
-                .arg(example_path())
-                .status()
-                .unwrap_or_else(|_| panic!("{backend} down migrations should succeed."))
-                .success()
-        );
+        // Up migrations
+        Migrator::fresh(&database)
+            .await
+            .unwrap_or_else(|err| panic!("Up migrations for backend `{backend}` failed: {err}"));
+
+        // Down migrations
+        Migrator::refresh(&database)
+            .await
+            .unwrap_or_else(|err| panic!("Down migrations for backend `{backend}` failed: {err}"));
 
         // Cleanup
-        assert!(
-            Command::new("sea-orm-cli")
-                .arg("migrate")
-                .arg("reset")
-                .arg("-u")
-                .arg(url)
-                .arg("-d")
-                .arg(example_path())
-                .status()
-                .unwrap_or_else(|_| panic!("{backend} cleanup should succeed."))
-                .success()
-        );
+        Migrator::reset(&database)
+            .await
+            .unwrap_or_else(|err| panic!("Cleanup for backend `{backend}` failed: {err}"));
     }
 }
