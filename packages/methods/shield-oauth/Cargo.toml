@@ -20,7 +20,10 @@ rustls-tls = ["oauth2/rustls-tls"]
 async-trait.workspace = true
 bon.workspace = true
 chrono.workspace = true
-oauth2 = { version = "5.0.0", default-features = false, features = ["reqwest"] }
+oauth2 = { version = "5.0.0", default-features = false, features = [
+    "pkce-plain",
+    "reqwest",
+] }
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
