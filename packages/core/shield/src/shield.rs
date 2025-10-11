@@ -1,16 +1,15 @@
 use std::{any::Any, collections::HashMap, sync::Arc};
 
 use futures::future::try_join_all;
-use tracing::warn;
+use tracing::{debug, warn};
 
 use crate::{
-    ActionMethodForm,
-    action::{ActionForms, ActionProviderForm},
-    error::{ActionError, MethodError, ProviderError, ShieldError},
+    action::{ActionForms, ActionMethodForm, ActionProviderForm},
+    error::{ActionError, MethodError, ProviderError, SessionError, ShieldError},
     method::ErasedMethod,
     options::ShieldOptions,
     request::Request,
-    response::Response,
+    response::ResponseType,
     session::Session,
     storage::Storage,
     user::User,
@@ -93,6 +92,18 @@ impl<U: User> Shield<U> {
                 continue;
             };
 
+            let (base_session, method_session) = {
+                let session_data = session.data();
+                let session_data = session_data
+                    .lock()
+                    .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+                (
+                    session_data.base.clone(),
+                    method.erased_deserialize_session(session_data.method_str(method_id))?,
+                )
+            };
+
             let name = action.erased_name();
             if let Some(action_name) = &action_name
                 && *action_name != name
@@ -103,7 +114,7 @@ impl<U: User> Shield<U> {
 
             let mut provider_forms = vec![];
             for (provider_id, provider) in method.erased_providers().await? {
-                if !action.erased_condition(&*provider, session.clone())? {
+                if !action.erased_condition(&*provider, &base_session, &*method_session)? {
                     continue;
                 }
 
@@ -136,7 +147,7 @@ impl<U: User> Shield<U> {
         provider_id: Option<&str>,
         session: Session,
         request: Request,
-    ) -> Result<Response, ShieldError> {
+    ) -> Result<ResponseType, ShieldError> {
         let method =
             self.method_by_id(method_id)
                 .ok_or(ShieldError::Method(MethodError::NotFound(
@@ -157,12 +168,33 @@ impl<U: User> Shield<U> {
                     provider_id.map(ToOwned::to_owned),
                 )))?;
 
-        let response = action.erased_call(provider, session.clone(), request).await;
+        let (base_session, method_session) = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-        // TODO: Should update always be called?
-        session.update().await?;
+            (
+                session_data.base.clone(),
+                method.erased_deserialize_session(session_data.method_str(method_id))?,
+            )
+        };
 
-        response
+        let response = action
+            .erased_call(provider, &base_session, &*method_session, request)
+            .await?;
+
+        debug!("response {:#?}", response);
+
+        for session_action in &response.session_actions {
+            session_action
+                .call(method_id, provider_id, &session)
+                .await?;
+        }
+
+        debug!("session actions processed");
+
+        Ok(response.r#type)
     }
 }
 

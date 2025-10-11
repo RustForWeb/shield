@@ -3,8 +3,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
-    Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit, Request,
-    Response, Session, ShieldError, SignInAction, SignUpAction, erased_action,
+    Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit,
+    MethodSession, Request, Response, ResponseType, ShieldError, SignInAction, SignUpAction,
+    erased_action,
 };
 use workos::{
     PaginationParams,
@@ -40,7 +41,7 @@ impl WorkosIndexAction {
 }
 
 #[async_trait]
-impl Action<WorkosProvider> for WorkosIndexAction {
+impl Action<WorkosProvider, ()> for WorkosIndexAction {
     fn id(&self) -> String {
         ACTION_ID.to_owned()
     }
@@ -145,7 +146,7 @@ impl Action<WorkosProvider> for WorkosIndexAction {
     async fn call(
         &self,
         _provider: WorkosProvider,
-        _session: Session,
+        _session: &MethodSession<()>,
         request: Request,
     ) -> Result<Response, ShieldError> {
         // TODO: Check email address and redirect to sign-in/sign-up action with prefilled email address.
@@ -172,13 +173,13 @@ impl Action<WorkosProvider> for WorkosIndexAction {
 
                 // TODO: Include email address as state.
                 if users.data.is_empty() {
-                    Ok(Response::RedirectToAction {
+                    Ok(Response::new(ResponseType::RedirectToAction {
                         action_id: SignUpAction::id(),
-                    })
+                    }))
                 } else {
-                    Ok(Response::RedirectToAction {
+                    Ok(Response::new(ResponseType::RedirectToAction {
                         action_id: SignInAction::id(),
-                    })
+                    }))
                 }
             }
             IndexData::Oauth { oauth_provider } => {
@@ -199,7 +200,9 @@ impl Action<WorkosProvider> for WorkosIndexAction {
                     })
                     .expect("TODO: handle error");
 
-                Ok(Response::Redirect(authorization_url.to_string()))
+                Ok(Response::new(ResponseType::Redirect(
+                    authorization_url.to_string(),
+                )))
             }
             IndexData::Sso { connection_id } => {
                 let authorization_url = self
@@ -217,7 +220,9 @@ impl Action<WorkosProvider> for WorkosIndexAction {
                     })
                     .expect("TODO: handle error");
 
-                Ok(Response::Redirect(authorization_url.to_string()))
+                Ok(Response::new(ResponseType::Redirect(
+                    authorization_url.to_string(),
+                )))
             }
         }
     }

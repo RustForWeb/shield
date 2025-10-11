@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
+use shield::{
+    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignOutAction, erased_action,
+};
 
 use crate::{client::WorkosClient, provider::WorkosProvider};
 
@@ -18,7 +21,7 @@ impl WorkosSignOutAction {
 }
 
 #[async_trait]
-impl Action<WorkosProvider> for WorkosSignOutAction {
+impl Action<WorkosProvider, ()> for WorkosSignOutAction {
     fn id(&self) -> String {
         SignOutAction::id()
     }
@@ -27,7 +30,11 @@ impl Action<WorkosProvider> for WorkosSignOutAction {
         SignOutAction::name()
     }
 
-    fn condition(&self, provider: &WorkosProvider, session: Session) -> Result<bool, ShieldError> {
+    fn condition(
+        &self,
+        provider: &WorkosProvider,
+        session: &MethodSession<()>,
+    ) -> Result<bool, ShieldError> {
         SignOutAction::condition(provider, session)
     }
 
@@ -38,11 +45,12 @@ impl Action<WorkosProvider> for WorkosSignOutAction {
     async fn call(
         &self,
         _provider: WorkosProvider,
-        _session: Session,
+        _session: &MethodSession<()>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
-        // TODO: sign out
-        Ok(Response::Default)
+        // TODO: Handle WorkOS sign out.
+
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
     }
 }
 

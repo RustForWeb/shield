@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use serde_json::Value;
-use shield::{ActionForms, Response};
+use shield::{ActionForms, ResponseType};
 
 use crate::ErasedDioxusStyle;
 
@@ -60,12 +60,12 @@ pub async fn call(
     provider_id: Option<String>,
     // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
     data: Value,
-) -> Result<Response, ServerFnError> {
+) -> Result<ResponseType, ServerFnError> {
     #[cfg(feature = "server")]
     {
         use dioxus::prelude::{FromContext, extract};
         use serde_json::Value;
-        use shield::{Request, Response};
+        use shield::Request;
 
         use crate::integration::DioxusIntegrationDyn;
 

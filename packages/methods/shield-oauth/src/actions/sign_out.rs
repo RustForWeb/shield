@@ -1,12 +1,15 @@
 use async_trait::async_trait;
-use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
+use shield::{
+    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignOutAction, erased_action,
+};
 
-use crate::provider::OauthProvider;
+use crate::{provider::OauthProvider, session::OauthSession};
 
 pub struct OauthSignOutAction;
 
 #[async_trait]
-impl Action<OauthProvider> for OauthSignOutAction {
+impl Action<OauthProvider, OauthSession> for OauthSignOutAction {
     fn id(&self) -> String {
         SignOutAction::id()
     }
@@ -15,7 +18,11 @@ impl Action<OauthProvider> for OauthSignOutAction {
         SignOutAction::name()
     }
 
-    fn condition(&self, provider: &OauthProvider, session: Session) -> Result<bool, ShieldError> {
+    fn condition(
+        &self,
+        provider: &OauthProvider,
+        session: &MethodSession<OauthSession>,
+    ) -> Result<bool, ShieldError> {
         SignOutAction::condition(provider, session)
     }
 
@@ -26,13 +33,12 @@ impl Action<OauthProvider> for OauthSignOutAction {
     async fn call(
         &self,
         _provider: OauthProvider,
-        _session: Session,
+        _session: &MethodSession<OauthSession>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
         // TODO: OAuth token revocation.
-        // TODO: Sign out.
 
-        Ok(Response::Default)
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
     }
 }
 

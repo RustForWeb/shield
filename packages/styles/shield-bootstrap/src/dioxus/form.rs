@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dioxus::{logger::tracing::info, prelude::*};
-use shield::Response;
+use shield::ResponseType;
 use shield_dioxus::{ShieldRouter, call};
 
 use crate::dioxus::input::FormInput;
@@ -46,11 +46,11 @@ pub fn Form(props: FormProps) -> Element {
                         // TODO: Handle error.
                         if let Ok(response) = result {
                             match response {
-                                Response::Default => todo!("default response"),
-                                Response::Redirect(to) => {
+                                ResponseType::Default => todo!("default response"),
+                                ResponseType::Redirect(to) => {
                                     navigator.push(to);
                                 },
-                                Response::RedirectToAction { action_id } => {
+                                ResponseType::RedirectToAction { action_id } => {
                                     navigator.push(ShieldRouter::Action { action_id });
                                 }
                             }

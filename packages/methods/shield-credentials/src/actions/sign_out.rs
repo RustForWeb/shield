@@ -1,12 +1,15 @@
 use async_trait::async_trait;
-use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
+use shield::{
+    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignOutAction, erased_action,
+};
 
 use crate::provider::CredentialsProvider;
 
 pub struct CredentialsSignOutAction;
 
 #[async_trait]
-impl Action<CredentialsProvider> for CredentialsSignOutAction {
+impl Action<CredentialsProvider, ()> for CredentialsSignOutAction {
     fn id(&self) -> String {
         SignOutAction::id()
     }
@@ -18,7 +21,7 @@ impl Action<CredentialsProvider> for CredentialsSignOutAction {
     fn condition(
         &self,
         provider: &CredentialsProvider,
-        session: Session,
+        session: &MethodSession<()>,
     ) -> Result<bool, ShieldError> {
         SignOutAction::condition(provider, session)
     }
@@ -30,11 +33,10 @@ impl Action<CredentialsProvider> for CredentialsSignOutAction {
     async fn call(
         &self,
         _provider: CredentialsProvider,
-        _session: Session,
+        _session: &MethodSession<()>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
-        // TODO: sign out
-        Ok(Response::Default)
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
     }
 }
 

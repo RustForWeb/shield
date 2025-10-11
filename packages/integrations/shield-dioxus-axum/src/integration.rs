@@ -24,13 +24,15 @@ impl<U: User> Default for AxumDioxusIntegration<U> {
 #[async_trait]
 impl<U: User + Clone + 'static> DioxusIntegration for AxumDioxusIntegration<U> {
     async fn extract_shield(&self) -> ShieldDyn {
-        let ExtractShield(shield) = extract::<ExtractShield<U>, _>().await.expect("TODO");
+        let ExtractShield(shield) = extract::<ExtractShield<U>, _>()
+            .await
+            .expect("Shield should be extracted");
 
         ShieldDyn::new(shield)
     }
 
     async fn extract_session(&self) -> Session {
-        let ExtractSession(session) = extract().await.expect("TODO");
+        let ExtractSession(session) = extract().await.expect("Session should be extracted");
 
         session
     }

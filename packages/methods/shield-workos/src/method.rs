@@ -37,12 +37,15 @@ impl WorkosMethod {
 }
 
 #[async_trait]
-impl Method<WorkosProvider> for WorkosMethod {
+impl Method for WorkosMethod {
+    type Provider = WorkosProvider;
+    type Session = ();
+
     fn id(&self) -> String {
         WORKOS_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<WorkosProvider>>> {
+    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
             Box::new(WorkosIndexAction::new(
                 self.options.clone(),
@@ -54,7 +57,7 @@ impl Method<WorkosProvider> for WorkosMethod {
         ]
     }
 
-    async fn providers(&self) -> Result<Vec<WorkosProvider>, ShieldError> {
+    async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(vec![WorkosProvider])
     }
 }

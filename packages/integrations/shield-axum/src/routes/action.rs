@@ -1,9 +1,10 @@
 use axum::{
     Form,
     extract::{Path, Query},
+    response::{IntoResponse, Redirect, Response},
 };
 use serde_json::Value;
-use shield::{Request, User};
+use shield::{Request, ResponseType, User};
 
 use crate::{ExtractSession, ExtractShield, RouteError, path::ActionPathParams};
 
@@ -18,10 +19,10 @@ pub async fn action<U: User>(
     ExtractSession(session): ExtractSession,
     Query(query): Query<Value>,
     Form(form_data): Form<Value>,
-) -> Result<(), RouteError> {
+) -> Result<Response, RouteError> {
     // TODO: Check if this action supports the HTTP method (GET/POST)?
 
-    shield
+    let response = shield
         .call(
             &action_id,
             &method_id,
@@ -31,5 +32,12 @@ pub async fn action<U: User>(
         )
         .await?;
 
-    Ok(())
+    Ok(match response {
+        ResponseType::Default => todo!(),
+        ResponseType::Redirect(to) => Redirect::to(&to).into_response(),
+        ResponseType::RedirectToAction { action_id } => {
+            // TODO: Use actual frontend prefix instead of hardcoded `/auth`.
+            Redirect::to(&format!("/auth/{action_id}")).into_response()
+        }
+    })
 }

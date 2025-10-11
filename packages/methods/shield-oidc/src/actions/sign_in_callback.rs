@@ -10,8 +10,8 @@ use openidconnect::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Form, Request,
-    Response, Session, SessionError, ShieldError, SignInCallbackAction, UpdateUser, User,
+    Action, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession, Request,
+    Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser, User,
     erased_action,
 };
 use tracing::debug;
@@ -20,7 +20,6 @@ use crate::{
     claims::Claims,
     client::async_http_client,
     connection::{CreateOidcConnection, OidcConnection, UpdateOidcConnection},
-    method::OIDC_METHOD_ID,
     options::OidcOptions,
     provider::{OidcProvider, OidcProviderPkceCodeChallenge},
     session::OidcSession,
@@ -141,7 +140,7 @@ impl<U: User> OidcSignInCallbackAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
+impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallbackAction<U> {
     fn id(&self) -> String {
         SignInCallbackAction::id()
     }
@@ -150,7 +149,11 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
         SignInCallbackAction::name()
     }
 
-    fn condition(&self, provider: &OidcProvider, session: Session) -> Result<bool, ShieldError> {
+    fn condition(
+        &self,
+        provider: &OidcProvider,
+        session: &MethodSession<OidcSession>,
+    ) -> Result<bool, ShieldError> {
         SignInCallbackAction::condition(provider, session)
     }
 
@@ -161,7 +164,7 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
     async fn call(
         &self,
         provider: OidcProvider,
-        session: Session,
+        session: &MethodSession<OidcSession>,
         request: Request,
     ) -> Result<Response, ShieldError> {
         let OidcSession {
@@ -169,14 +172,7 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
             nonce,
             pkce_verifier,
             ..
-        } = {
-            let session_data = session.data();
-            let session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.method(OIDC_METHOD_ID)?
-        };
+        } = &session.method;
 
         let state = request
             .query
@@ -184,7 +180,7 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
             .and_then(|code| code.as_str())
             .ok_or_else(|| ShieldError::Validation("Missing state.".to_owned()))?;
 
-        if csrf.is_none_or(|csrf| csrf != state) {
+        if csrf.as_ref().is_none_or(|csrf| csrf != state) {
             return Err(ShieldError::Validation("Invalid state.".to_owned()));
         }
 
@@ -203,7 +199,8 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
             })?;
 
         if let Some(pkce_verifier) = pkce_verifier {
-            token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
+            token_request =
+                token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier.to_owned()));
         } else if provider.pkce_code_challenge != OidcProviderPkceCodeChallenge::None {
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
@@ -230,7 +227,9 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
                     &client.id_token_verifier(),
                     &Nonce::new(
                         nonce
-                            .ok_or_else(|| ShieldError::Validation("Missing nonce.".to_owned()))?,
+                            .as_ref()
+                            .ok_or_else(|| ShieldError::Validation("Missing nonce.".to_owned()))?
+                            .to_owned(),
                     ),
                 )
                 .map_err(|err| ShieldError::Validation(err.to_string()))?;
@@ -279,32 +278,16 @@ impl<U: User + 'static> Action<OidcProvider> for OidcSignInCallbackAction<U> {
             }
         };
 
-        session.renew().await?;
-
-        {
-            let session_data = session.data();
-            let mut session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.authentication = Some(Authentication {
-                method_id: self.id(),
-                provider_id: Some(provider.id),
-                user_id: user.id(),
-            });
-
-            session_data.set_method(
-                OIDC_METHOD_ID,
-                OidcSession {
-                    csrf: None,
-                    nonce: None,
-                    pkce_verifier: None,
-                    oidc_connection_id: Some(connection.id),
-                },
-            )?;
-        }
-
-        Ok(Response::Redirect(self.options.sign_in_redirect.clone()))
+        Ok(Response::new(ResponseType::Redirect(
+            self.options.sign_in_redirect.clone(),
+        ))
+        .session_action(SessionAction::authenticate(user))
+        .session_action(SessionAction::data(OidcSession {
+            csrf: None,
+            nonce: None,
+            pkce_verifier: None,
+            oidc_connection_id: Some(connection.id),
+        })?))
     }
 }
 

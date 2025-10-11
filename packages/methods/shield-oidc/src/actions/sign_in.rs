@@ -4,12 +4,11 @@ use openidconnect::{
     url::form_urlencoded::parse,
 };
 use shield::{
-    Action, Form, Input, InputType, InputTypeSubmit, Provider, Request, Response, Session,
-    SessionError, ShieldError, SignInAction, erased_action,
+    Action, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider, Request, Response,
+    ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
 };
 
 use crate::{
-    method::OIDC_METHOD_ID,
     provider::{OidcProvider, OidcProviderPkceCodeChallenge},
     session::OidcSession,
 };
@@ -17,7 +16,7 @@ use crate::{
 pub struct OidcSignInAction;
 
 #[async_trait]
-impl Action<OidcProvider> for OidcSignInAction {
+impl Action<OidcProvider, OidcSession> for OidcSignInAction {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -40,7 +39,7 @@ impl Action<OidcProvider> for OidcSignInAction {
     async fn call(
         &self,
         provider: OidcProvider,
-        session: Session,
+        _session: &MethodSession<OidcSession>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
         let client = provider.oidc_client().await?;
@@ -78,29 +77,15 @@ impl Action<OidcProvider> for OidcSignInAction {
 
         let (auth_url, csrf_token, nonce) = authorization_request.url();
 
-        {
-            // TODO: Add a generic type for session data to actions, so the action caller can be read/write the session.
-
-            let session_data = session.data();
-            let mut session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.authentication = None;
-
-            session_data.set_method(
-                OIDC_METHOD_ID,
-                OidcSession {
-                    csrf: Some(csrf_token.secret().clone()),
-                    nonce: Some(nonce.secret().clone()),
-                    pkce_verifier: pkce_code_challenge
-                        .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
-                    oidc_connection_id: None,
-                },
-            )?;
-        }
-
-        Ok(Response::Redirect(auth_url.to_string()))
+        Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
+            .session_action(SessionAction::unauthenticate())
+            .session_action(SessionAction::data(OidcSession {
+                csrf: Some(csrf_token.secret().clone()),
+                nonce: Some(nonce.secret().clone()),
+                pkce_verifier: pkce_code_challenge
+                    .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
+                oidc_connection_id: None,
+            })?))
     }
 }
 
