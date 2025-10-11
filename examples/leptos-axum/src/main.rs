@@ -19,8 +19,6 @@ async fn main() {
     use tokio::net::TcpListener;
     use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
     use tracing::{info, level_filters::LevelFilter};
-    use utoipa::OpenApi;
-    use utoipa_swagger_ui::SwaggerUi;
 
     // Initialize tracing
     tracing_subscriber::fmt()
@@ -60,19 +58,11 @@ async fn main() {
     );
     let shield_layer = ShieldLayer::new(shield.clone());
 
-    // Initialize OpenAPI specification (optional)
-    #[derive(OpenApi)]
-    #[openapi(nest(
-        (path = "/api/auth", api = AuthRoutes, tags = ["auth"]),
-    ))]
-    struct Docs;
-
     // Initialize router
     let router = Router::new()
         .route("/api/protected", get(async || "Protected"))
         .route_layer(from_fn(auth_required::<User>))
         .nest("/api/auth", AuthRoutes::router::<User, LeptosOptions>())
-        .merge(SwaggerUi::new("/api-docs").url("/api/openapi.json", Docs::openapi()))
         .leptos_routes_with_context(
             &leptos_options,
             routes,

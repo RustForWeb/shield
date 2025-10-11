@@ -1,22 +1,20 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::sync::Arc;
+
+use axum::{Json, middleware::from_fn, routing::get};
+use shield::{Shield, ShieldOptions};
+use shield_axum::{AuthRoutes, ShieldLayer, auth_required};
+use shield_memory::{MemoryStorage, User};
+use shield_oidc::{Keycloak, OidcMethod};
+use time::Duration;
+use tokio::net::TcpListener;
+use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
+use tracing::{info, level_filters::LevelFilter};
+use utoipa_axum::router::OpenApiRouter;
+use utoipa_scalar::{Scalar, Servable};
 
 #[tokio::main]
 async fn main() {
-    use std::sync::Arc;
-
-    use axum::{Router, middleware::from_fn, routing::get};
-
-    use shield::{Shield, ShieldOptions};
-    use shield_axum::{AuthRoutes, ShieldLayer, auth_required};
-    use shield_memory::{MemoryStorage, User};
-    use shield_oidc::{Keycloak, OidcMethod};
-    use time::Duration;
-    use tokio::net::TcpListener;
-    use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
-    use tracing::{info, level_filters::LevelFilter};
-    use utoipa::OpenApi;
-    use utoipa_swagger_ui::SwaggerUi;
-
     // Initialize tracing
     tracing_subscriber::fmt()
         .with_max_level(LevelFilter::DEBUG)
@@ -52,21 +50,23 @@ async fn main() {
     );
     let shield_layer = ShieldLayer::new(shield.clone());
 
-    // Initialize OpenAPI specification (optional)
-    #[derive(OpenApi)]
-    #[openapi(nest(
-        (path = "/api/auth", api = AuthRoutes, tags = ["auth"]),
-    ))]
-    struct Docs;
+    // Initialize API router
+    let api_router = OpenApiRouter::new()
+        .route("/protected", get(async || "Protected"))
+        .route_layer(from_fn(auth_required::<User>))
+        .nest("/auth", AuthRoutes::openapi_router::<User, ()>());
 
     // Initialize router
-    let router = Router::new()
-        .route("/api/protected", get(async || "Protected"))
-        .route_layer(from_fn(auth_required::<User>))
-        .nest("/api/auth", AuthRoutes::router::<User, ()>())
-        .merge(SwaggerUi::new("/api-docs").url("/api/openapi.json", Docs::openapi()))
+    let (router, openapi) = OpenApiRouter::new()
+        .nest("/api", api_router)
         .layer(shield_layer)
-        .layer(session_layer);
+        .layer(session_layer)
+        .split_for_parts();
+
+    // Add Scalar and OpenAPI specification
+    let router = router
+        .merge(Scalar::with_url("/api/reference", openapi.clone()))
+        .route("/api/openapi.json", get(|| async { Json(openapi) }));
 
     // Start app
     info!("listening on http://{}", &addr);

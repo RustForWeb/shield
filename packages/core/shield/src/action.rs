@@ -14,6 +14,8 @@ use crate::{
 
 // TODO: Think of a better name.
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ActionForms {
     pub id: String,
     pub name: String,
@@ -22,6 +24,8 @@ pub struct ActionForms {
 
 // TODO: Think of a better name.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ActionMethodForm {
     pub id: String,
     pub provider_forms: Vec<ActionProviderForm>,
@@ -29,6 +33,8 @@ pub struct ActionMethodForm {
 
 // TODO: Think of a better name.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ActionProviderForm {
     pub id: Option<String>,
     pub form: Form,
