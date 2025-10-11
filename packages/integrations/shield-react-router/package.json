@@ -1,0 +1,24 @@
+{
+    "name": "@rustforweb/shield-react-router",
+    "description": "React Router integration for Shield.",
+    "author": "Rust for Web <info@rustforweb.org>",
+    "repository": "github:RustForWeb/shield",
+    "license": "MIT",
+    "version": "0.1.0",
+    "type": "module",
+    "exports": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "@rustforweb/shield-react": "^0.1.0"
+    },
+    "peerDependencies": {
+        "@tanstack/react-query": "5.x",
+        "react-router": "7.x"
+    }
+}
