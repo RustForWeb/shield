@@ -19,7 +19,7 @@ pub struct Input {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[serde(rename_all = "kebab-case")]
+#[serde(tag = "type", rename_all = "kebab-case")]
 pub enum InputType {
     Button(InputTypeButton),
     Checkbox(InputTypeCheckbox),

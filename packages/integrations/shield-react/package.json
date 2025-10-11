@@ -1,0 +1,26 @@
+{
+    "name": "@rustforweb/shield-react",
+    "description": "React integration for Shield.",
+    "author": "Rust for Web <info@rustforweb.org>",
+    "repository": "github:RustForWeb/shield",
+    "license": "MIT",
+    "version": "0.1.0",
+    "type": "module",
+    "exports": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "generate:openapi": "openapi-ts"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@hey-api/openapi-ts": "^0.85.1"
+    },
+    "peerDependencies": {
+        "@tanstack/react-query": "5.x",
+        "react": "19.x"
+    }
+}

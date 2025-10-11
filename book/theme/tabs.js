@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(`mdbook-tabs-${global}`, name);
 
                 const globalContainers = document.querySelectorAll(
-                    `.mdbook-tabs-container[data-tabglobal="${global}"]`
+                    `.mdbook-tabs-container[data-tabglobal="${global}"]`,
                 );
                 for (const globalContainer of globalContainers) {
                     changeTab(globalContainer, name);

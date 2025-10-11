@@ -1,7 +1,11 @@
 {
-    "bracketSpacing": false,
+    "importOrder": ["^~", "^[.]"],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "jsonRecursiveSort": true,
+    "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-sort-json", "prettier-plugin-tailwindcss"],
     "printWidth": 120,
     "singleQuote": true,
     "tabWidth": 4,
-    "trailingComma": "none"
+    "tailwindStylesheet": "./examples/react-router/assets/css/index.css"
 }

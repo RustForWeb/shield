@@ -162,5 +162,12 @@ target/
 # mdBook
 book/book/
 
+# React Router
+.react-router/
+build/
+
 # SeaORM
 packages/storage/shield-sea-orm/src/entities_template/
+
+# Turborepo
+.turbo/

@@ -5,11 +5,25 @@
     "repository": "github:RustForWeb/shield",
     "license": "MIT",
     "private": true,
-    "scripts": {},
+    "workspaces": [
+        "examples/react-router",
+        "packages/integrations/shield-react",
+        "packages/integrations/shield-react-router",
+        "packages/styles/shield-react-shadcn-ui"
+    ],
+    "scripts": {
+        "build": "turbo build",
+        "dev": "turbo dev"
+    },
     "devDependencies": {
-        "prettier": "^3.4.2"
+        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "prettier": "^3.4.2",
+        "prettier-plugin-sort-json": "^4.1.1",
+        "prettier-plugin-tailwindcss": "^0.6.14",
+        "turbo": "^2.5.8"
     },
     "engines": {
         "node": ">=22"
-    }
+    },
+    "packageManager": "npm@11.6.1"
 }
