@@ -1,5 +1,24 @@
 [workspace]
-members = ["examples/*", "packages/*/*"]
+members = [
+    "examples/axum",
+    "examples/dioxus-axum",
+    "examples/leptos-actix",
+    "examples/leptos-axum",
+    "examples/sea-orm",
+    "examples/workos",
+    "packages/core/*",
+    "packages/integrations/shield-actix",
+    "packages/integrations/shield-axum",
+    "packages/integrations/shield-dioxus",
+    "packages/integrations/shield-dioxus-axum",
+    "packages/integrations/shield-leptos",
+    "packages/integrations/shield-leptos-actix",
+    "packages/integrations/shield-leptos-axum",
+    "packages/integrations/shield-tower",
+    "packages/methods/*",
+    "packages/storage/*",
+    "packages/styles/shield-bootstrap",
+]
 resolver = "2"
 
 [workspace.package]
@@ -63,6 +82,7 @@ tower-sessions = "0.14.0"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 utoipa = { version = "5.3.1", features = ["chrono", "uuid"] }
+utoipa-axum = "0.2.0"
 uuid = "1.11.0"
 wasm-bindgen = "0.2.100"
 wasm-tracing = "2.0.0"

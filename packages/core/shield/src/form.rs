@@ -1,11 +1,15 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct Form {
     pub inputs: Vec<Input>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct Input {
     pub name: String,
     pub label: Option<String>,
@@ -14,6 +18,8 @@ pub struct Input {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "kebab-case")]
 pub enum InputType {
     Button(InputTypeButton),
     Checkbox(InputTypeCheckbox),
@@ -69,15 +75,18 @@ impl InputType {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeButton {}
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeCheckbox {
     pub checked: Option<bool>,
     pub required: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeColor {
     pub alpha: Option<bool>,
     pub autocomplete: Option<String>,
@@ -86,6 +95,7 @@ pub struct InputTypeColor {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeDate {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -97,6 +107,7 @@ pub struct InputTypeDate {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeDatetimeLocal {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -108,6 +119,7 @@ pub struct InputTypeDatetimeLocal {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeEmail {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -122,6 +134,7 @@ pub struct InputTypeEmail {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeFile {
     pub accept: Option<String>,
     pub multiple: Option<bool>,
@@ -129,12 +142,14 @@ pub struct InputTypeFile {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeHidden {
     pub autocomplete: Option<String>,
     pub required: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeImage {
     pub alt: Option<String>,
     pub height: Option<String>,
@@ -143,6 +158,7 @@ pub struct InputTypeImage {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeMonth {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -154,6 +170,7 @@ pub struct InputTypeMonth {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeNumber {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -166,6 +183,7 @@ pub struct InputTypeNumber {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypePassword {
     pub autocomplete: Option<String>,
     pub maxlength: Option<String>,
@@ -178,12 +196,14 @@ pub struct InputTypePassword {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeRadio {
     pub checked: Option<bool>,
     pub required: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeRange {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -193,9 +213,11 @@ pub struct InputTypeRange {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeReset {}
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeSearch {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -209,9 +231,11 @@ pub struct InputTypeSearch {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeSubmit {}
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeTel {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -225,6 +249,7 @@ pub struct InputTypeTel {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeText {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -238,6 +263,7 @@ pub struct InputTypeText {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeTime {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -249,6 +275,7 @@ pub struct InputTypeTime {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeUrl {
     pub autocomplete: Option<String>,
     pub list: Option<String>,
@@ -262,6 +289,7 @@ pub struct InputTypeUrl {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 pub struct InputTypeWeek {
     pub autocomplete: Option<String>,
     pub list: Option<String>,

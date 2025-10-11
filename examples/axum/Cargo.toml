@@ -20,5 +20,5 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tower-sessions.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-utoipa.workspace = true
-utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "vendored"] }
+utoipa-axum.workspace = true
+utoipa-scalar = { version = "0.3.0", features = ["axum"] }

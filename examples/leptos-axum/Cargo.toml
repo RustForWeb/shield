@@ -48,9 +48,7 @@ leptos_router.workspace = true
 shield.workspace = true
 shield-bootstrap = { workspace = true, features = ["leptos"] }
 shield-leptos.workspace = true
-shield-leptos-axum = { workspace = true, features = [
-    "utoipa",
-], optional = true }
+shield-leptos-axum = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
 time = "0.3.37"
@@ -61,7 +59,5 @@ tokio = { workspace = true, features = [
 tower-sessions = { workspace = true, optional = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
-utoipa.workspace = true
-utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "vendored"] }
 wasm-bindgen.workspace = true
 wasm-tracing.workspace = true

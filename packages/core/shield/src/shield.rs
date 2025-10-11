@@ -196,6 +196,42 @@ impl<U: User> Shield<U> {
 
         Ok(response.r#type)
     }
+
+    pub async fn user(&self, session: &Session) -> Result<Option<U>, ShieldError> {
+        let authentication = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.base.authentication.clone()
+        };
+
+        match authentication {
+            Some(authentication) => {
+                if self
+                    .provider_by_id(
+                        &authentication.method_id,
+                        authentication.provider_id.as_deref(),
+                    )
+                    .await?
+                    .is_none()
+                {
+                    session.purge().await?;
+                    return Ok(None);
+                }
+
+                let user = self.storage().user_by_id(&authentication.user_id).await?;
+
+                if user.is_none() {
+                    session.purge().await?;
+                }
+
+                Ok(user)
+            }
+            None => Ok(None),
+        }
+    }
 }
 
 #[cfg(test)]

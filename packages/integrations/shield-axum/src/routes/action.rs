@@ -6,8 +6,27 @@ use axum::{
 use serde_json::Value;
 use shield::{Request, ResponseType, User};
 
-use crate::{ExtractSession, ExtractShield, RouteError, path::ActionPathParams};
+use crate::{ExtractSession, ExtractShield, RouteError, error::ErrorBody, path::ActionPathParams};
 
+#[cfg_attr(
+    feature = "utoipa",
+    utoipa::path(
+        get,
+        post,
+        path = "/{methodId}/{actionId}/{providerId}",
+        operation_id = "callAction",
+        summary = "Call action",
+        description = "Call an action.",
+        tags = ["auth"],
+        params(
+            ActionPathParams
+        ),
+        responses(
+            (status = 302, description = "Redirect."),
+            (status = 500, description = "Internal server error.", body = ErrorBody),
+        )
+    )
+)]
 pub async fn action<U: User>(
     Path(ActionPathParams {
         method_id,
