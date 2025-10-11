@@ -4,8 +4,12 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    error::ShieldError, form::Form, provider::Provider, request::Request, response::Response,
-    session::Session,
+    error::ShieldError,
+    form::Form,
+    provider::Provider,
+    request::Request,
+    response::Response,
+    session::{BaseSession, MethodSession},
 };
 
 // TODO: Think of a better name.
@@ -31,12 +35,12 @@ pub struct ActionProviderForm {
 }
 
 #[async_trait]
-pub trait Action<P: Provider>: ErasedAction + Send + Sync {
+pub trait Action<P: Provider, S>: ErasedAction + Send + Sync {
     fn id(&self) -> String;
 
     fn name(&self) -> String;
 
-    fn condition(&self, _provider: &P, _session: Session) -> Result<bool, ShieldError> {
+    fn condition(&self, _provider: &P, _session: &MethodSession<S>) -> Result<bool, ShieldError> {
         Ok(true)
     }
 
@@ -45,7 +49,7 @@ pub trait Action<P: Provider>: ErasedAction + Send + Sync {
     async fn call(
         &self,
         provider: P,
-        session: Session,
+        session: &MethodSession<S>,
         request: Request,
     ) -> Result<Response, ShieldError>;
 }
@@ -59,7 +63,8 @@ pub trait ErasedAction: Send + Sync {
     fn erased_condition(
         &self,
         provider: &(dyn Any + Send + Sync),
-        session: Session,
+        base_session: &BaseSession,
+        method_session: &(dyn Any + Send + Sync),
     ) -> Result<bool, ShieldError>;
 
     async fn erased_forms(
@@ -70,7 +75,8 @@ pub trait ErasedAction: Send + Sync {
     async fn erased_call(
         &self,
         provider: Box<dyn Any + Send + Sync>,
-        session: Session,
+        base_session: &BaseSession,
+        method_session: &(dyn Any + Send + Sync),
         request: Request,
     ) -> Result<Response, ShieldError>;
 }
@@ -88,21 +94,44 @@ macro_rules! erased_action {
                 self.name()
             }
 
-            fn erased_condition(&self, provider: &(dyn std::any::Any + Send + Sync), session: $crate::Session) -> Result<bool, $crate::ShieldError> {
-                self.condition(provider.downcast_ref().expect("TODO"), session)
+            fn erased_condition(
+                &self,
+                provider: &(dyn std::any::Any + Send + Sync),
+                base_session: &$crate::BaseSession,
+                method_session: &(dyn std::any::Any + Send + Sync)
+            ) -> Result<bool, $crate::ShieldError> {
+                self.condition(
+                    provider.downcast_ref().expect("Provider should be downcast"),
+                    &MethodSession {
+                        base: base_session,
+                        method: method_session.downcast_ref().expect("Session should be downcast"),
+                    },
+                )
             }
 
-            async fn erased_forms(&self, provider: Box<dyn std::any::Any + Send + Sync>) -> Result<Vec<$crate::Form>, $crate::ShieldError> {
-                self.forms(*provider.downcast().expect("TODO")).await
+            async fn erased_forms(
+                &self,
+                provider: Box<dyn std::any::Any + Send + Sync>
+            ) -> Result<Vec<$crate::Form>, $crate::ShieldError> {
+                self.forms(*provider.downcast().expect("Provider should be downcast")).await
             }
 
             async fn erased_call(
                 &self,
                 provider: Box<dyn std::any::Any + Send + Sync>,
-                session: $crate::Session,
+                base_session: &$crate::BaseSession,
+                method_session: &(dyn std::any::Any + Send + Sync),
                 request: $crate::Request,
             ) -> Result<$crate::Response, $crate::ShieldError> {
-                self.call(*provider.downcast().expect("TODO"), session, request)
+                self
+                    .call(
+                        *provider.downcast().expect("Provider should be downcast"),
+                        &$crate::MethodSession {
+                            base: base_session,
+                            method: method_session.downcast_ref().expect("Session should be downcast"),
+                        },
+                        request
+                    )
                     .await
             }
         }

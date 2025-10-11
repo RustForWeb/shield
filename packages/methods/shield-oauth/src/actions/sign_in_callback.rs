@@ -8,15 +8,14 @@ use oauth2::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, Authentication, ConfigurationError, CreateEmailAddress, CreateUser, Form, Request,
-    Response, Session, SessionError, ShieldError, SignInCallbackAction, UpdateUser, User,
+    Action, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession, Request,
+    Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser, User,
     erased_action,
 };
 
 use crate::{
     client::async_http_client,
     connection::{CreateOauthConnection, OauthConnection, UpdateOauthConnection},
-    method::OAUTH_METHOD_ID,
     options::OauthOptions,
     provider::{OauthProvider, OauthProviderPkceCodeChallenge},
     session::OauthSession,
@@ -130,7 +129,7 @@ impl<U: User> OauthSignInCallbackAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
+impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallbackAction<U> {
     fn id(&self) -> String {
         SignInCallbackAction::id()
     }
@@ -139,7 +138,11 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
         SignInCallbackAction::name()
     }
 
-    fn condition(&self, provider: &OauthProvider, session: Session) -> Result<bool, ShieldError> {
+    fn condition(
+        &self,
+        provider: &OauthProvider,
+        session: &MethodSession<OauthSession>,
+    ) -> Result<bool, ShieldError> {
         SignInCallbackAction::condition(provider, session)
     }
 
@@ -150,21 +153,14 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
     async fn call(
         &self,
         provider: OauthProvider,
-        session: Session,
+        session: &MethodSession<OauthSession>,
         request: Request,
     ) -> Result<Response, ShieldError> {
         let OauthSession {
             csrf,
             pkce_verifier,
             ..
-        } = {
-            let session_data = session.data();
-            let session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.method(OAUTH_METHOD_ID)?
-        };
+        } = &session.method;
 
         let state = request
             .query
@@ -172,7 +168,7 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
             .and_then(|code| code.as_str())
             .ok_or_else(|| ShieldError::Validation("Missing state.".to_owned()))?;
 
-        if csrf.is_none_or(|csrf| csrf != state) {
+        if csrf.as_ref().is_none_or(|csrf| csrf != state) {
             return Err(ShieldError::Validation("Invalid state.".to_owned()));
         }
 
@@ -191,7 +187,8 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
             })?;
 
         if let Some(pkce_verifier) = pkce_verifier {
-            token_request = token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier));
+            token_request =
+                token_request.set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier.to_owned()));
         } else if provider.pkce_code_challenge != OauthProviderPkceCodeChallenge::None {
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
@@ -247,31 +244,15 @@ impl<U: User + 'static> Action<OauthProvider> for OauthSignInCallbackAction<U> {
             }
         };
 
-        session.renew().await?;
-
-        {
-            let session_data = session.data();
-            let mut session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.authentication = Some(Authentication {
-                method_id: self.id(),
-                provider_id: Some(provider.id),
-                user_id: user.id(),
-            });
-
-            session_data.set_method(
-                OAUTH_METHOD_ID,
-                OauthSession {
-                    csrf: None,
-                    pkce_verifier: None,
-                    oauth_connection_id: Some(connection.id),
-                },
-            )?;
-        }
-
-        Ok(Response::Redirect(self.options.sign_in_redirect.clone()))
+        Ok(Response::new(ResponseType::Redirect(
+            self.options.sign_in_redirect.clone(),
+        ))
+        .session_action(SessionAction::authenticate(user))
+        .session_action(SessionAction::data(OauthSession {
+            csrf: None,
+            pkce_verifier: None,
+            oauth_connection_id: Some(connection.id),
+        })?))
     }
 }
 

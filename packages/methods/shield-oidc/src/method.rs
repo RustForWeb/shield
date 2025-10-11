@@ -7,6 +7,7 @@ use crate::{
     actions::{OidcSignInAction, OidcSignInCallbackAction, OidcSignOutAction},
     options::OidcOptions,
     provider::OidcProvider,
+    session::OidcSession,
     storage::OidcStorage,
 };
 
@@ -62,12 +63,15 @@ impl<U: User> OidcMethod<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Method<OidcProvider> for OidcMethod<U> {
+impl<U: User + 'static> Method for OidcMethod<U> {
+    type Provider = OidcProvider;
+    type Session = OidcSession;
+
     fn id(&self) -> String {
         OIDC_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<OidcProvider>>> {
+    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
             Box::new(OidcSignInAction),
             Box::new(OidcSignInCallbackAction::new(
@@ -78,7 +82,7 @@ impl<U: User + 'static> Method<OidcProvider> for OidcMethod<U> {
         ]
     }
 
-    async fn providers(&self) -> Result<Vec<OidcProvider>, ShieldError> {
+    async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(self
             .providers
             .iter()
@@ -90,7 +94,7 @@ impl<U: User + 'static> Method<OidcProvider> for OidcMethod<U> {
     async fn provider_by_id(
         &self,
         provider_id: Option<&str>,
-    ) -> Result<Option<OidcProvider>, ShieldError> {
+    ) -> Result<Option<Self::Provider>, ShieldError> {
         if let Some(provider_id) = provider_id {
             self.oidc_provider_by_id_or_slug(provider_id).await
         } else {

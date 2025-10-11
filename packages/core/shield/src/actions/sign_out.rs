@@ -1,6 +1,4 @@
-use crate::{
-    Form, Input, InputType, InputTypeSubmit, Provider, Session, SessionError, ShieldError,
-};
+use crate::{Form, Input, InputType, InputTypeSubmit, MethodSession, Provider, ShieldError};
 
 const ACTION_ID: &str = "sign-out";
 const ACTION_NAME: &str = "Sign out";
@@ -16,13 +14,12 @@ impl SignOutAction {
         ACTION_NAME.to_owned()
     }
 
-    pub fn condition<P: Provider>(provider: &P, session: Session) -> Result<bool, ShieldError> {
-        let session_data = session.data();
-        let session_data = session_data
-            .lock()
-            .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-        Ok(session_data
+    pub fn condition<P: Provider, S>(
+        provider: &P,
+        session: &MethodSession<S>,
+    ) -> Result<bool, ShieldError> {
+        Ok(session
+            .base
             .authentication
             .as_ref()
             .is_some_and(|authentication| {

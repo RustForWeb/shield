@@ -5696,6 +5696,7 @@ dependencies = [
  "oauth2",
  "secrecy",
  "serde",
+ "serde_json",
  "shield",
 ]
 
@@ -5710,6 +5711,7 @@ dependencies = [
  "openidconnect",
  "secrecy",
  "serde",
+ "serde_json",
  "shield",
  "tracing",
 ]

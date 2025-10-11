@@ -1,12 +1,12 @@
 use leptos::prelude::*;
 use leptos_meta::{MetaTags, Title, provide_meta_context};
 use leptos_router::{
-    components::{Outlet, ParentRoute, Router, Routes},
+    components::{Outlet, ParentRoute, Route, Router, Routes},
     path,
 };
 use shield_leptos::ShieldRouter;
 
-// use crate::home::HomePage;
+use crate::home::HomePage;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -44,7 +44,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 <Routes fallback=|| "Not found.".into_view()>
-                    // <Route path=path!("") view=HomePage />
+                    <Route path=path!("") view=HomePage />
 
                     <ParentRoute path=path!("auth") view=Outlet>
                         <ShieldRouter />

@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use shield::{
-    Action, ConfigurationError, Form, Input, InputType, InputTypeSubmit, Provider, Request,
-    Response, Session, SessionError, ShieldError, SignInAction, erased_action,
+    Action, ConfigurationError, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider,
+    Request, Response, ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
 };
 
 use crate::{
-    method::OAUTH_METHOD_ID,
     provider::{OauthProvider, OauthProviderPkceCodeChallenge},
     session::OauthSession,
 };
@@ -14,7 +13,7 @@ use crate::{
 pub struct OauthSignInAction;
 
 #[async_trait]
-impl Action<OauthProvider> for OauthSignInAction {
+impl Action<OauthProvider, OauthSession> for OauthSignInAction {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -37,7 +36,7 @@ impl Action<OauthProvider> for OauthSignInAction {
     async fn call(
         &self,
         provider: OauthProvider,
-        session: Session,
+        _session: &MethodSession<OauthSession>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
         let client = provider.oauth_client().await?;
@@ -73,26 +72,14 @@ impl Action<OauthProvider> for OauthSignInAction {
 
         let (auth_url, csrf_token) = authorization_request.url();
 
-        {
-            let session_data = session.data();
-            let mut session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.authentication = None;
-
-            session_data.set_method(
-                OAUTH_METHOD_ID,
-                OauthSession {
-                    csrf: Some(csrf_token.secret().clone()),
-                    pkce_verifier: pkce_code_challenge
-                        .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
-                    oauth_connection_id: None,
-                },
-            )?;
-        }
-
-        Ok(Response::Redirect(auth_url.to_string()))
+        Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
+            .session_action(SessionAction::Unauthenticate)
+            .session_action(SessionAction::data(OauthSession {
+                csrf: Some(csrf_token.secret().clone()),
+                pkce_verifier: pkce_code_challenge
+                    .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
+                oauth_connection_id: None,
+            })?))
     }
 }
 

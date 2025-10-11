@@ -57,7 +57,7 @@ pub async fn call(
     data: Value,
 ) -> Result<(), ServerFnError> {
     use serde_json::Value;
-    use shield::{Request, Response};
+    use shield::{Request, ResponseType};
 
     use crate::expect_server_integration;
 
@@ -81,11 +81,11 @@ pub async fn call(
         .await?;
 
     match response {
-        Response::Default => todo!("default reponse"),
-        Response::Redirect(to) => {
+        ResponseType::Default => todo!("default reponse"),
+        ResponseType::Redirect(to) => {
             integration.redirect(&to);
         }
-        Response::RedirectToAction { action_id } => {
+        ResponseType::RedirectToAction { action_id } => {
             // TODO: Use actual router prefix instead of hardcoded `/auth`.
             integration.redirect(&format!("/auth/{action_id}"));
         }

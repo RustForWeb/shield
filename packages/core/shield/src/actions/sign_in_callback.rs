@@ -1,4 +1,4 @@
-use crate::{Provider, Session, ShieldError};
+use crate::{MethodSession, Provider, ShieldError};
 
 const ACTION_ID: &str = "sign-in-callback";
 const ACTION_NAME: &str = "Sign in callback";
@@ -14,7 +14,10 @@ impl SignInCallbackAction {
         ACTION_NAME.to_owned()
     }
 
-    pub fn condition<P: Provider>(_provider: &P, _session: Session) -> Result<bool, ShieldError> {
+    pub fn condition<P: Provider, S>(
+        _provider: &P,
+        _session: &MethodSession<S>,
+    ) -> Result<bool, ShieldError> {
         Ok(true)
     }
 }

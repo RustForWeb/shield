@@ -24,7 +24,7 @@ async fn main() {
     };
     use shield::{ErasedMethod, Method, Shield, ShieldOptions};
     use shield_bootstrap::BootstrapDioxusStyle;
-    use shield_dioxus_axum::{AxumDioxusIntegration, ShieldLayer};
+    use shield_dioxus_axum::{AuthRoutes, AxumDioxusIntegration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcMethod};
     use tokio::net::TcpListener;
@@ -45,7 +45,7 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![
+        vec![Arc::new(
             OidcMethod::new(storage).with_providers([Keycloak::builder(
                 "keycloak",
                 "http://localhost:18080/realms/Shield",
@@ -59,13 +59,14 @@ async fn main() {
                     .unwrap_or_else(|| addr.port())
             ))
             .build()]),
-        ],
+        )],
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());
 
     // Initialize router
     let router = Router::new()
+        .nest("/api/auth", AuthRoutes::router::<User, ()>())
         .serve_dioxus_application(
             ServeConfig::builder()
                 .context(AxumDioxusIntegration::<User>::default().context())

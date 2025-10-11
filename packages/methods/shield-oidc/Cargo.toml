@@ -9,7 +9,7 @@ repository.workspace = true
 version.workspace = true
 
 [package.metadata.cargo-machete]
-ignored = ["oauth2"]
+ignored = ["oauth2", "serde_json"]
 
 [features]
 default = []
@@ -28,5 +28,6 @@ openidconnect = { version = "4.0.0", default-features = false, features = [
 ] }
 secrecy.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 shield.workspace = true
 tracing.workspace = true

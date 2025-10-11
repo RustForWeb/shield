@@ -25,21 +25,22 @@ impl<U: User, D: DeserializeOwned> CredentialsMethod<U, D> {
 }
 
 #[async_trait]
-impl<U: User + 'static, D: DeserializeOwned + 'static> Method<CredentialsProvider>
-    for CredentialsMethod<U, D>
-{
+impl<U: User + 'static, D: DeserializeOwned + 'static> Method for CredentialsMethod<U, D> {
+    type Provider = CredentialsProvider;
+    type Session = ();
+
     fn id(&self) -> String {
         CREDENTIALS_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<CredentialsProvider>>> {
+    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
             Box::new(CredentialsSignInAction::new(self.credentials.clone())),
             Box::new(CredentialsSignOutAction),
         ]
     }
 
-    async fn providers(&self) -> Result<Vec<CredentialsProvider>, ShieldError> {
+    async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(vec![CredentialsProvider])
     }
 }

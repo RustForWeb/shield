@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use shield::{
-    Action, Authentication, Form, Request, Response, Session, SessionError, ShieldError,
+    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
     SignInAction, User, erased_action,
 };
 
@@ -20,7 +20,7 @@ impl<U: User, D: DeserializeOwned> CredentialsSignInAction<U, D> {
 }
 
 #[async_trait]
-impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvider>
+impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvider, ()>
     for CredentialsSignInAction<U, D>
 {
     fn id(&self) -> String {
@@ -38,7 +38,7 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
     async fn call(
         &self,
         _provider: CredentialsProvider,
-        session: Session,
+        _session: &MethodSession<()>,
         request: Request,
     ) -> Result<Response, ShieldError> {
         let data = serde_json::from_value(request.form_data)
@@ -46,22 +46,7 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
 
         let user = self.credentials.sign_in(data).await?;
 
-        session.renew().await?;
-
-        {
-            let session_data = session.data();
-            let mut session_data = session_data
-                .lock()
-                .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-            session_data.authentication = Some(Authentication {
-                method_id: self.id(),
-                provider_id: None,
-                user_id: user.id(),
-            });
-        }
-
-        Ok(Response::Default)
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::authenticate(user)))
     }
 }
 

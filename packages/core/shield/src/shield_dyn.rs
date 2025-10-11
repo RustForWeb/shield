@@ -3,7 +3,7 @@ use std::{any::Any, sync::Arc};
 use async_trait::async_trait;
 
 use crate::{
-    action::ActionForms, error::ShieldError, request::Request, response::Response,
+    action::ActionForms, error::ShieldError, request::Request, response::ResponseType,
     session::Session, shield::Shield, user::User,
 };
 
@@ -24,7 +24,7 @@ pub trait DynShield: Send + Sync {
         provider_id: Option<&str>,
         session: Session,
         request: Request,
-    ) -> Result<Response, ShieldError>;
+    ) -> Result<ResponseType, ShieldError>;
 }
 
 #[async_trait]
@@ -48,7 +48,7 @@ impl<U: User> DynShield for Shield<U> {
         provider_id: Option<&str>,
         session: Session,
         request: Request,
-    ) -> Result<Response, ShieldError> {
+    ) -> Result<ResponseType, ShieldError> {
         self.call(action_id, method_id, provider_id, session, request)
             .await
     }
@@ -80,7 +80,7 @@ impl ShieldDyn {
         provider_id: Option<&str>,
         session: Session,
         request: Request,
-    ) -> Result<Response, ShieldError> {
+    ) -> Result<ResponseType, ShieldError> {
         self.0
             .call(action_id, method_id, provider_id, session, request)
             .await

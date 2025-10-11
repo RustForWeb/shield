@@ -7,6 +7,7 @@ use crate::{
     actions::{OauthSignInAction, OauthSignInCallbackAction, OauthSignOutAction},
     options::OauthOptions,
     provider::OauthProvider,
+    session::OauthSession,
     storage::OauthStorage,
 };
 
@@ -62,12 +63,15 @@ impl<U: User> OauthMethod<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Method<OauthProvider> for OauthMethod<U> {
+impl<U: User + 'static> Method for OauthMethod<U> {
+    type Provider = OauthProvider;
+    type Session = OauthSession;
+
     fn id(&self) -> String {
         OAUTH_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<OauthProvider>>> {
+    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
             Box::new(OauthSignInAction),
             Box::new(OauthSignInCallbackAction::new(
@@ -78,7 +82,7 @@ impl<U: User + 'static> Method<OauthProvider> for OauthMethod<U> {
         ]
     }
 
-    async fn providers(&self) -> Result<Vec<OauthProvider>, ShieldError> {
+    async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(self
             .providers
             .iter()
@@ -90,7 +94,7 @@ impl<U: User + 'static> Method<OauthProvider> for OauthMethod<U> {
     async fn provider_by_id(
         &self,
         provider_id: Option<&str>,
-    ) -> Result<Option<OauthProvider>, ShieldError> {
+    ) -> Result<Option<Self::Provider>, ShieldError> {
         if let Some(provider_id) = provider_id {
             self.oauth_provider_by_id_or_slug(provider_id).await
         } else {

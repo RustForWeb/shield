@@ -3,7 +3,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use shield::{
     Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypePassword,
-    InputTypeSubmit, Request, Response, Session, ShieldError, SignInAction, erased_action,
+    InputTypeSubmit, MethodSession, Request, Response, ResponseType, ShieldError, SignInAction,
+    erased_action,
 };
 
 use crate::{client::WorkosClient, provider::WorkosProvider};
@@ -21,7 +22,7 @@ impl WorkosSignInAction {
 }
 
 #[async_trait]
-impl Action<WorkosProvider> for WorkosSignInAction {
+impl Action<WorkosProvider, ()> for WorkosSignInAction {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -92,11 +93,11 @@ impl Action<WorkosProvider> for WorkosSignInAction {
     async fn call(
         &self,
         _provider: WorkosProvider,
-        _session: Session,
+        _session: &MethodSession<()>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
         // TODO: sign in
-        Ok(Response::Default)
+        Ok(Response::new(ResponseType::Default))
     }
 }
 

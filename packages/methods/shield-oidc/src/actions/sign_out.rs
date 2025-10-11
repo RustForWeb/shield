@@ -1,12 +1,15 @@
 use async_trait::async_trait;
-use shield::{Action, Form, Request, Response, Session, ShieldError, SignOutAction, erased_action};
+use shield::{
+    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignOutAction, erased_action,
+};
 
-use crate::provider::OidcProvider;
+use crate::{provider::OidcProvider, session::OidcSession};
 
 pub struct OidcSignOutAction;
 
 #[async_trait]
-impl Action<OidcProvider> for OidcSignOutAction {
+impl Action<OidcProvider, OidcSession> for OidcSignOutAction {
     fn id(&self) -> String {
         SignOutAction::id()
     }
@@ -15,7 +18,11 @@ impl Action<OidcProvider> for OidcSignOutAction {
         SignOutAction::name()
     }
 
-    fn condition(&self, provider: &OidcProvider, session: Session) -> Result<bool, ShieldError> {
+    fn condition(
+        &self,
+        provider: &OidcProvider,
+        session: &MethodSession<OidcSession>,
+    ) -> Result<bool, ShieldError> {
         SignOutAction::condition(provider, session)
     }
 
@@ -26,7 +33,7 @@ impl Action<OidcProvider> for OidcSignOutAction {
     async fn call(
         &self,
         _provider: OidcProvider,
-        _session: Session,
+        _session: &MethodSession<OidcSession>,
         _request: Request,
     ) -> Result<Response, ShieldError> {
         // TODO: See [`OidcProvider::oidc_client`].
@@ -80,9 +87,7 @@ impl Action<OidcProvider> for OidcSignOutAction {
         //     }
         // }
 
-        // TODO: Sign out.
-
-        Ok(Response::Default)
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
     }
 }
 
