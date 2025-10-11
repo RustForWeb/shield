@@ -7,7 +7,7 @@ authors = ["Rust for Web <info@rustforweb.org>"]
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/RustForWeb/shield"
-version = "0.0.4"
+version = "0.1.0"
 
 [workspace.dependencies]
 actix-files = "0.6.6"
@@ -35,26 +35,26 @@ sea-orm-migration = "1.1.2"
 secrecy = "0.10.3"
 serde = "1.0.215"
 serde_json = "1.0.133"
-shield = { path = "./packages/core/shield", version = "0.0.4" }
-shield-actix = { path = "./packages/integrations/shield-actix", version = "0.0.4" }
-shield-axum = { path = "./packages/integrations/shield-axum", version = "0.0.4" }
-shield-bootstrap = { path = "./packages/styles/shield-bootstrap", version = "0.0.4" }
-shield-credentials = { path = "./packages/methods/shield-credentials", version = "0.0.4" }
-shield-diesel = { path = "./packages/storage/shield-diesel", version = "0.0.4" }
-shield-dioxus = { path = "./packages/integrations/shield-dioxus", version = "0.0.4" }
-shield-dioxus-axum = { path = "./packages/integrations/shield-dioxus-axum", version = "0.0.4" }
-shield-email = { path = "./packages/methods/shield-email", version = "0.0.4" }
-shield-leptos = { path = "./packages/integrations/shield-leptos", version = "0.0.4" }
-shield-leptos-actix = { path = "./packages/integrations/shield-leptos-actix", version = "0.0.4" }
-shield-leptos-axum = { path = "./packages/integrations/shield-leptos-axum", version = "0.0.4" }
-shield-memory = { path = "./packages/storage/shield-memory", version = "0.0.4" }
-shield-oauth = { path = "./packages/methods/shield-oauth", version = "0.0.4" }
-shield-oidc = { path = "./packages/methods/shield-oidc", version = "0.0.4" }
-shield-sea-orm = { path = "./packages/storage/shield-sea-orm", version = "0.0.4" }
-shield-sqlx = { path = "./packages/storage/shield-sqlx", version = "0.0.4" }
-shield-tower = { path = "./packages/integrations/shield-tower", version = "0.0.4" }
-shield-webauthn = { path = "./packages/methods/shield-webauthn", version = "0.0.4" }
-shield-workos = { path = "./packages/methods/shield-workos", version = "0.0.4" }
+shield = { path = "./packages/core/shield", version = "0.1.0" }
+shield-actix = { path = "./packages/integrations/shield-actix", version = "0.1.0" }
+shield-axum = { path = "./packages/integrations/shield-axum", version = "0.1.0" }
+shield-bootstrap = { path = "./packages/styles/shield-bootstrap", version = "0.1.0" }
+shield-credentials = { path = "./packages/methods/shield-credentials", version = "0.1.0" }
+shield-diesel = { path = "./packages/storage/shield-diesel", version = "0.1.0" }
+shield-dioxus = { path = "./packages/integrations/shield-dioxus", version = "0.1.0" }
+shield-dioxus-axum = { path = "./packages/integrations/shield-dioxus-axum", version = "0.1.0" }
+shield-email = { path = "./packages/methods/shield-email", version = "0.1.0" }
+shield-leptos = { path = "./packages/integrations/shield-leptos", version = "0.1.0" }
+shield-leptos-actix = { path = "./packages/integrations/shield-leptos-actix", version = "0.1.0" }
+shield-leptos-axum = { path = "./packages/integrations/shield-leptos-axum", version = "0.1.0" }
+shield-memory = { path = "./packages/storage/shield-memory", version = "0.1.0" }
+shield-oauth = { path = "./packages/methods/shield-oauth", version = "0.1.0" }
+shield-oidc = { path = "./packages/methods/shield-oidc", version = "0.1.0" }
+shield-sea-orm = { path = "./packages/storage/shield-sea-orm", version = "0.1.0" }
+shield-sqlx = { path = "./packages/storage/shield-sqlx", version = "0.1.0" }
+shield-tower = { path = "./packages/integrations/shield-tower", version = "0.1.0" }
+shield-webauthn = { path = "./packages/methods/shield-webauthn", version = "0.1.0" }
+shield-workos = { path = "./packages/methods/shield-workos", version = "0.1.0" }
 thiserror = "2.0.7"
 tokio = "1.42.0"
 tower-layer = "0.3.3"
