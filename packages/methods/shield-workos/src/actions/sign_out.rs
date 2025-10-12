@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use shield::{
-    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
-    SignOutAction, erased_action,
+    Action, ActionMethod, Form, MethodSession, Request, Response, ResponseType, SessionAction,
+    ShieldError, SignOutAction, erased_action,
 };
 
 use crate::{client::WorkosClient, provider::WorkosProvider};
@@ -28,6 +28,18 @@ impl Action<WorkosProvider, ()> for WorkosSignOutAction {
 
     fn name(&self) -> String {
         SignOutAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign out with WorkOS"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign out with WorkOS."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     fn condition(

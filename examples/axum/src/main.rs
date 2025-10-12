@@ -54,7 +54,7 @@ async fn main() {
     let api_router = OpenApiRouter::new()
         .route("/protected", get(async || "Protected"))
         .route_layer(from_fn(auth_required::<User>))
-        .nest("/auth", AuthRoutes::openapi_router::<User, ()>());
+        .nest("/auth", AuthRoutes::new(shield).openapi_router());
 
     // Initialize router
     let (router, openapi) = OpenApiRouter::new()

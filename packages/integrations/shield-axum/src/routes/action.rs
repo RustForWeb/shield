@@ -4,9 +4,9 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use serde_json::Value;
-use shield::{Request, ResponseType, User};
+use shield::{ActionPathParams, Request, ResponseType, User};
 
-use crate::{ExtractSession, ExtractShield, RouteError, error::ErrorBody, path::ActionPathParams};
+use crate::{ExtractSession, ExtractShield, RouteError, error::ErrorBody};
 
 #[cfg_attr(
     feature = "utoipa",

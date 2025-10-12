@@ -5390,6 +5390,7 @@ dependencies = [
  "async-trait",
  "bon",
  "chrono",
+ "convert_case 0.8.0",
  "futures",
  "serde",
  "serde_json",

@@ -4,10 +4,7 @@ async fn main() {
     use std::sync::Arc;
 
     use axum::{Router, middleware::from_fn, routing::get};
-    use leptos::{
-        config::{LeptosOptions, get_configuration},
-        context::provide_context,
-    };
+    use leptos::{config::get_configuration, context::provide_context};
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
     use shield_bootstrap::BootstrapLeptosStyle;
@@ -62,7 +59,7 @@ async fn main() {
     let router = Router::new()
         .route("/api/protected", get(async || "Protected"))
         .route_layer(from_fn(auth_required::<User>))
-        .nest("/api/auth", AuthRoutes::router::<User, LeptosOptions>())
+        .nest("/api/auth", AuthRoutes::new(shield).router())
         .leptos_routes_with_context(
             &leptos_options,
             routes,

@@ -3,6 +3,9 @@ use crate::{Form, Input, InputType, InputTypeSubmit, MethodSession, Provider, Sh
 const ACTION_ID: &str = "sign-out";
 const ACTION_NAME: &str = "Sign out";
 
+// TODO: Sign out should be a global action that is independent of the method.
+// TODO: Add hooks, so the method can still perform custom sign out.
+
 pub struct SignOutAction;
 
 impl SignOutAction {

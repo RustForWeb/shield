@@ -8,9 +8,9 @@ use oauth2::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession, Request,
-    Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser, User,
-    erased_action,
+    Action, ActionMethod, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession,
+    Request, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser,
+    User, erased_action,
 };
 
 use crate::{
@@ -136,6 +136,18 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
 
     fn name(&self) -> String {
         SignInCallbackAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign in callback for OAuth"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign in callback for OAuth."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Get
     }
 
     fn condition(

@@ -1,8 +1,5 @@
 use std::any::Any;
 
-use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
-
 use crate::{
     error::ShieldError,
     form::Form,
@@ -11,6 +8,38 @@ use crate::{
     response::Response,
     session::{BaseSession, MethodSession},
 };
+use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "utoipa")]
+use utoipa::openapi::HttpMethod;
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum ActionMethod {
+    Get,
+    Post,
+    Put,
+    Delete,
+    Options,
+    Head,
+    Patch,
+    Trace,
+}
+
+#[cfg(feature = "utoipa")]
+impl From<ActionMethod> for HttpMethod {
+    fn from(value: ActionMethod) -> Self {
+        match value {
+            ActionMethod::Get => Self::Get,
+            ActionMethod::Post => Self::Post,
+            ActionMethod::Put => Self::Put,
+            ActionMethod::Delete => Self::Delete,
+            ActionMethod::Options => Self::Options,
+            ActionMethod::Head => Self::Head,
+            ActionMethod::Patch => Self::Patch,
+            ActionMethod::Trace => Self::Trace,
+        }
+    }
+}
 
 // TODO: Think of a better name.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -46,6 +75,12 @@ pub trait Action<P: Provider, S>: ErasedAction + Send + Sync {
 
     fn name(&self) -> String;
 
+    fn openapi_summary(&self) -> &'static str;
+
+    fn openapi_description(&self) -> &'static str;
+
+    fn method(&self) -> ActionMethod;
+
     fn condition(&self, _provider: &P, _session: &MethodSession<S>) -> Result<bool, ShieldError> {
         Ok(true)
     }
@@ -65,6 +100,12 @@ pub trait ErasedAction: Send + Sync {
     fn erased_id(&self) -> String;
 
     fn erased_name(&self) -> String;
+
+    fn erased_openapi_summary(&self) -> &'static str;
+
+    fn erased_openapi_description(&self) -> &'static str;
+
+    fn erased_method(&self) -> ActionMethod;
 
     fn erased_condition(
         &self,
@@ -98,6 +139,18 @@ macro_rules! erased_action {
 
             fn erased_name(&self) -> String {
                 self.name()
+            }
+
+            fn erased_openapi_summary(&self) -> &'static str {
+                self.openapi_summary()
+            }
+
+            fn erased_openapi_description(&self) -> &'static str {
+                self.openapi_description()
+            }
+
+            fn erased_method(&self) -> $crate::ActionMethod {
+                self.method()
             }
 
             fn erased_condition(

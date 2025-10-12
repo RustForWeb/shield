@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use shield::{
-    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
-    SignOutAction, erased_action,
+    Action, ActionMethod, Form, MethodSession, Request, Response, ResponseType, SessionAction,
+    ShieldError, SignOutAction, erased_action,
 };
 
 use crate::{provider::OauthProvider, session::OauthSession};
@@ -16,6 +16,18 @@ impl Action<OauthProvider, OauthSession> for OauthSignOutAction {
 
     fn name(&self) -> String {
         SignOutAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign out with OAuth"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign out with OAuth."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     fn condition(
