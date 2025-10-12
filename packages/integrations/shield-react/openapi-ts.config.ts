@@ -12,6 +12,9 @@ export default defineConfig({
             name: '@hey-api/client-fetch',
             baseUrl: '',
         },
-        '@tanstack/react-query',
+        {
+            name: '@tanstack/react-query',
+            exportFromIndex: true,
+        },
     ],
 });
