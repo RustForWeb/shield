@@ -1,13 +1,24 @@
 use std::{any::Any, collections::HashMap, sync::Arc};
 
+#[cfg(feature = "utoipa")]
+use convert_case::{Case, Casing};
 use futures::future::try_join_all;
-use tracing::{debug, warn};
+use tracing::warn;
+#[cfg(feature = "utoipa")]
+use utoipa::{
+    IntoParams,
+    openapi::{
+        OpenApi, PathItem, Paths,
+        path::{Operation, ParameterIn},
+    },
+};
 
 use crate::{
     action::{ActionForms, ActionMethodForm, ActionProviderForm},
     error::{ActionError, MethodError, ProviderError, SessionError, ShieldError},
     method::ErasedMethod,
     options::ShieldOptions,
+    path::ActionPathParams,
     request::Request,
     response::ResponseType,
     session::Session,
@@ -184,15 +195,11 @@ impl<U: User> Shield<U> {
             .erased_call(provider, &base_session, &*method_session, request)
             .await?;
 
-        debug!("response {:#?}", response);
-
         for session_action in &response.session_actions {
             session_action
                 .call(method_id, provider_id, &session)
                 .await?;
         }
-
-        debug!("session actions processed");
 
         Ok(response.r#type)
     }
@@ -231,6 +238,49 @@ impl<U: User> Shield<U> {
             }
             None => Ok(None),
         }
+    }
+
+    #[cfg(feature = "utoipa")]
+    pub fn openapi(&self) -> OpenApi {
+        let mut paths = Paths::builder();
+
+        for method in self.methods.values() {
+            for action in method.erased_actions() {
+                use utoipa::openapi::Response;
+
+                let method_id = method.erased_id();
+                let action_id = action.erased_id();
+
+                // TODO: Query, request body, responses.
+
+                paths = paths.path(
+                    format!("/{}/{}/{{providerId}}", method_id, action_id),
+                    PathItem::builder()
+                        .operation(
+                            action.erased_method().into(),
+                            Operation::builder()
+                                .operation_id(Some(format!(
+                                    "{}{}",
+                                    action_id.to_case(Case::Camel),
+                                    method_id.to_case(Case::UpperCamel)
+                                )))
+                                .summary(Some(action.erased_openapi_summary()))
+                                .description(Some(action.erased_openapi_description()))
+                                .tag("auth")
+                                .parameters(Some(ActionPathParams::into_params(|| {
+                                    Some(ParameterIn::Path)
+                                })))
+                                .response(
+                                    "500",
+                                    Response::builder().description("Internal server error."),
+                                ),
+                        )
+                        .build(),
+                );
+            }
+        }
+
+        OpenApi::builder().paths(paths.build()).build()
     }
 }
 

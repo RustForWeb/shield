@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
-    Action, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit,
+    Action, ActionMethod, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit,
     MethodSession, Request, Response, ResponseType, ShieldError, SignInAction, SignUpAction,
     erased_action,
 };
@@ -48,6 +48,18 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
 
     fn name(&self) -> String {
         ACTION_NAME.to_owned()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Index with WorkOS"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Index with WorkOS."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     async fn forms(&self, _provider: WorkosProvider) -> Result<Vec<Form>, ShieldError> {

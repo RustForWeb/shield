@@ -4,8 +4,8 @@ use openidconnect::{
     url::form_urlencoded::parse,
 };
 use shield::{
-    Action, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider, Request, Response,
-    ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
+    Action, ActionMethod, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider,
+    Request, Response, ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
 };
 
 use crate::{
@@ -23,6 +23,18 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
 
     fn name(&self) -> String {
         SignInAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign in with OpenID Connect"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign in with OpenID Connect."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {

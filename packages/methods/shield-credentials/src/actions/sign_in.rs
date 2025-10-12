@@ -3,8 +3,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use shield::{
-    Action, Form, MethodSession, Request, Response, ResponseType, SessionAction, ShieldError,
-    SignInAction, User, erased_action,
+    Action, ActionMethod, Form, MethodSession, Request, Response, ResponseType, SessionAction,
+    ShieldError, SignInAction, User, erased_action,
 };
 
 use crate::{credentials::Credentials, provider::CredentialsProvider};
@@ -29,6 +29,18 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
 
     fn name(&self) -> String {
         SignInAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign in with credentials"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign in with credentials."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     async fn forms(&self, _provider: CredentialsProvider) -> Result<Vec<Form>, ShieldError> {

@@ -1,8 +1,9 @@
 use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use shield::{
-    Action, ConfigurationError, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider,
-    Request, Response, ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
+    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeSubmit,
+    MethodSession, Provider, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignInAction, erased_action,
 };
 
 use crate::{
@@ -20,6 +21,18 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
 
     fn name(&self) -> String {
         SignInAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign in with OAuth"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign in with OAuth."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Post
     }
 
     async fn forms(&self, provider: OauthProvider) -> Result<Vec<Form>, ShieldError> {

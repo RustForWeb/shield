@@ -10,9 +10,9 @@ use openidconnect::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession, Request,
-    Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser, User,
-    erased_action,
+    Action, ActionMethod, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession,
+    Request, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser,
+    User, erased_action,
 };
 use tracing::debug;
 
@@ -147,6 +147,18 @@ impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallback
 
     fn name(&self) -> String {
         SignInCallbackAction::name()
+    }
+
+    fn openapi_summary(&self) -> &'static str {
+        "Sign in callback for OpenID Connect"
+    }
+
+    fn openapi_description(&self) -> &'static str {
+        "Sign in callback for OpenID Connect."
+    }
+
+    fn method(&self) -> ActionMethod {
+        ActionMethod::Get
     }
 
     fn condition(

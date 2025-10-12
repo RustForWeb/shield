@@ -1,7 +1,6 @@
 mod error;
 mod extract;
 mod middleware;
-mod path;
 mod router;
 mod routes;
 
