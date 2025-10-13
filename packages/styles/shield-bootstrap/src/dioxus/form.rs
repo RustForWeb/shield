@@ -36,7 +36,10 @@ pub fn Form(props: FormProps) -> Element {
                                 .data()
                                 .values()
                                 .into_iter()
-                                .filter_map(|(key, values)| values.first().map(|value| (key, value.clone())))
+                                .filter_map(|(key, value)| match value {
+                                    FormValue::Text(value) => Some((key, value)),
+                                    FormValue::File(_) => None,
+                                })
                                 .collect::<HashMap<String, String>>()
                         ).expect("TODO: handle error");
 

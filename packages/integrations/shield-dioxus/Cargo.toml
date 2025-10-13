@@ -12,7 +12,7 @@ version.workspace = true
 server = ["dioxus/server"]
 
 [dependencies]
-async-trait.workspace = true
+anyhow.workspace = true
 dioxus = { workspace = true, features = ["fullstack", "router"] }
 serde_json.workspace = true
 shield.workspace = true
