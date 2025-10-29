@@ -34,13 +34,13 @@ jobs:
               run: cargo binstall -y --force cargo-deny cargo-machete cargo-sort
 
             - name: Lint
-              run: cargo clippy --locked
+              run: cargo clippy --all-features --all-targets --locked
 
             - name: Check dependencies
               run: cargo deny check
 
             - name: Check unused dependencies
-              run: cargo machete
+              run: cargo machete --with-metadata
 
             - name: Check manifest formatting
               run: cargo sort --workspace --check

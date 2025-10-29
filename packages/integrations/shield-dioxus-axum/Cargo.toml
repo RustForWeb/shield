@@ -13,7 +13,7 @@ default = []
 utoipa = ["shield-axum/utoipa"]
 
 [dependencies]
-async-trait.workspace = true
+anyhow.workspace = true
 dioxus-server.workspace = true
 shield.workspace = true
 shield-axum.workspace = true

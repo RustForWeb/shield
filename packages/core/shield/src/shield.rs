@@ -13,12 +13,13 @@ use utoipa::{
     },
 };
 
+#[cfg(feature = "utoipa")]
+use crate::path::ActionPathParams;
 use crate::{
     action::{ActionForms, ActionMethodForm, ActionProviderForm},
     error::{ActionError, MethodError, ProviderError, SessionError, ShieldError},
     method::ErasedMethod,
     options::ShieldOptions,
-    path::ActionPathParams,
     request::Request,
     response::ResponseType,
     session::Session,

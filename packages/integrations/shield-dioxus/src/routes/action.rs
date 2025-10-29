@@ -28,69 +28,63 @@ pub fn Action(props: ActionProps) -> Element {
     }
 }
 
-// TODO: Figure out a way to access `FromContext` and `extract` without `dioxus/server` feature.
+#[get("/api/auth/forms", parts: dioxus::fullstack::http::request::Parts)]
+async fn forms(action_id: String) -> Result<ActionForms> {
+    use anyhow::anyhow;
 
-#[cfg_attr(not(feature = "server"), allow(unused_variables))]
-#[server]
-async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
-    #[cfg(feature = "server")]
-    {
-        use dioxus::prelude::{FromContext, extract};
+    use crate::integration::DioxusIntegrationDyn;
 
-        use crate::integration::DioxusIntegrationDyn;
+    let integration = parts
+        .extensions
+        .get::<DioxusIntegrationDyn>()
+        .ok_or_else(|| anyhow!("Dioxus Shield integration should be extracted."))?;
+    let shield = integration.extract_shield(&parts.extensions)?;
+    let session = integration.extract_session(&parts.extensions)?;
 
-        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
-        let shield = integration.extract_shield().await;
-        let session = integration.extract_session().await;
+    let forms = shield
+        .action_forms(&action_id, session)
+        .await
+        .context("Failed to get Shield action forms.")?;
 
-        let forms = shield.action_forms(&action_id, session).await?;
-
-        Ok(forms)
-    }
-
-    #[cfg(not(feature = "server"))]
-    unreachable!()
+    Ok(forms)
 }
 
-#[cfg_attr(not(feature = "server"), allow(unused_variables))]
-#[server]
+#[post("/api/auth/call", parts: dioxus::fullstack::http::request::Parts)]
 pub async fn call(
     action_id: String,
     method_id: String,
     provider_id: Option<String>,
     // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
     data: Value,
-) -> Result<ResponseType, ServerFnError> {
-    #[cfg(feature = "server")]
-    {
-        use dioxus::prelude::{FromContext, extract};
-        use serde_json::Value;
-        use shield::Request;
+) -> Result<ResponseType> {
+    use anyhow::anyhow;
+    use serde_json::Value;
+    use shield::Request;
 
-        use crate::integration::DioxusIntegrationDyn;
+    use crate::integration::DioxusIntegrationDyn;
 
-        tracing::info!("call data {data:#?}");
+    tracing::info!("call data {data:#?}");
 
-        let FromContext(integration): FromContext<DioxusIntegrationDyn> = extract().await?;
-        let shield = integration.extract_shield().await;
-        let session = integration.extract_session().await;
+    let integration = parts
+        .extensions
+        .get::<DioxusIntegrationDyn>()
+        .ok_or_else(|| anyhow!("Dioxus Shield integration should be extracted."))?;
+    let shield = integration.extract_shield(&parts.extensions)?;
+    let session = integration.extract_session(&parts.extensions)?;
 
-        let response = shield
-            .call(
-                &action_id,
-                &method_id,
-                provider_id.as_deref(),
-                session,
-                Request {
-                    query: Value::Null,
-                    form_data: data,
-                },
-            )
-            .await?;
+    let response = shield
+        .call(
+            &action_id,
+            &method_id,
+            provider_id.as_deref(),
+            session,
+            Request {
+                query: Value::Null,
+                form_data: data,
+            },
+        )
+        .await
+        .context("Failed to call Shield action.")?;
 
-        Ok(response)
-    }
-
-    #[cfg(not(feature = "server"))]
-    unreachable!()
+    Ok(response)
 }

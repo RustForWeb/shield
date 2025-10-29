@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
+use anyhow::Result;
+use dioxus::fullstack::http::Extensions;
 use shield::{Session, ShieldDyn};
 
-#[async_trait]
 pub trait DioxusIntegration: Send + Sync {
-    async fn extract_shield(&self) -> ShieldDyn;
+    fn extract_shield(&self, extensions: &Extensions) -> Result<ShieldDyn>;
 
-    async fn extract_session(&self) -> Session;
+    fn extract_session(&self, extensions: &Extensions) -> Result<Session>;
 }
 
 #[derive(Clone)]
@@ -18,11 +18,11 @@ impl DioxusIntegrationDyn {
         Self(Arc::new(integration))
     }
 
-    pub async fn extract_shield(&self) -> ShieldDyn {
-        self.0.extract_shield().await
+    pub fn extract_shield(&self, extensions: &Extensions) -> Result<ShieldDyn> {
+        self.0.extract_shield(extensions)
     }
 
-    pub async fn extract_session(&self) -> Session {
-        self.0.extract_session().await
+    pub fn extract_session(&self, extensions: &Extensions) -> Result<Session> {
+        self.0.extract_session(extensions)
     }
 }

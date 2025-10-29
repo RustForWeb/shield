@@ -15,14 +15,14 @@ fn main() {
 #[cfg(feature = "server")]
 #[tokio::main]
 async fn main() {
-    use std::{env, sync::Arc};
+    use std::sync::Arc;
 
-    use axum::Router;
+    use axum::{Extension, Router};
     use dioxus::{
         cli_config::fullstack_address_or_localhost,
         prelude::{DioxusRouterExt, *},
     };
-    use shield::{ErasedMethod, Method, Shield, ShieldOptions};
+    use shield::{Shield, ShieldOptions};
     use shield_bootstrap::BootstrapDioxusStyle;
     use shield_dioxus_axum::{AuthRoutes, AxumDioxusIntegration, ShieldLayer};
     use shield_memory::{MemoryStorage, User};
@@ -66,15 +66,14 @@ async fn main() {
 
     // Initialize router
     let router = Router::new()
-        .nest("/api/auth", AuthRoutes::router::<User, ()>())
+        .nest("/api/auth", AuthRoutes::new(shield).router())
         .serve_dioxus_application(
-            ServeConfig::builder()
-                .context(AxumDioxusIntegration::<User>::default().context())
-                .context(BootstrapDioxusStyle::default().context())
-                .build()
-                .unwrap(),
+            ServeConfig::new().context(BootstrapDioxusStyle::default().context()),
             App,
         )
+        .layer(Extension(
+            AxumDioxusIntegration::<User>::default().context(),
+        ))
         .layer(shield_layer)
         .layer(session_layer);
 

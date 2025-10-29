@@ -1,9 +1,8 @@
 use std::marker::PhantomData;
 
-use async_trait::async_trait;
-use dioxus_server::extract;
-
-use shield::{Session, ShieldDyn, User};
+use anyhow::{Result, anyhow};
+use dioxus_server::http::Extensions;
+use shield::{Session, Shield, ShieldDyn, User};
 use shield_axum::{ExtractSession, ExtractShield};
 use shield_dioxus::{DioxusIntegration, DioxusIntegrationDyn};
 
@@ -21,19 +20,24 @@ impl<U: User> Default for AxumDioxusIntegration<U> {
     }
 }
 
-#[async_trait]
 impl<U: User + Clone + 'static> DioxusIntegration for AxumDioxusIntegration<U> {
-    async fn extract_shield(&self) -> ShieldDyn {
-        let ExtractShield(shield) = extract::<ExtractShield<U>, _>()
-            .await
-            .expect("Shield should be extracted");
+    fn extract_shield(&self, extensions: &Extensions) -> Result<ShieldDyn> {
+        let ExtractShield(shield) = extensions
+            .get::<Shield<U>>()
+            .cloned()
+            .map(ExtractShield)
+            .ok_or_else(|| anyhow!("Shield should be extracted"))?;
 
-        ShieldDyn::new(shield)
+        Ok(ShieldDyn::new(shield))
     }
 
-    async fn extract_session(&self) -> Session {
-        let ExtractSession(session) = extract().await.expect("Session should be extracted");
+    fn extract_session(&self, extensions: &Extensions) -> Result<Session> {
+        let ExtractSession(session) = extensions
+            .get::<Session>()
+            .cloned()
+            .map(ExtractSession)
+            .ok_or_else(|| anyhow!("Session should be extracted"))?;
 
-        session
+        Ok(session)
     }
 }
