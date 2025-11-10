@@ -16,7 +16,7 @@
         "dev": "turbo dev"
     },
     "devDependencies": {
-        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "@trivago/prettier-plugin-sort-imports": "^6.0.0",
         "prettier": "^3.4.2",
         "prettier-plugin-sort-json": "^4.1.1",
         "prettier-plugin-tailwindcss": "^0.7.0",
