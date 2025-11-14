@@ -15,6 +15,12 @@ import type {
     GetCurrentUserData,
     GetCurrentUserErrors,
     GetCurrentUserResponses,
+    SignInCallbackOidcData,
+    SignInCallbackOidcErrors,
+    SignInOidcData,
+    SignInOidcErrors,
+    SignOutOidcData,
+    SignOutOidcErrors,
 } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<
@@ -36,6 +42,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 
 /**
  * Get action forms
+ *
  * Get action forms.
  */
 export const getActionForms = <ThrowOnError extends boolean = false>(
@@ -48,7 +55,46 @@ export const getActionForms = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Sign in callback for OpenID Connect
+ *
+ * Sign in callback for OpenID Connect.
+ */
+export const signInCallbackOidc = <ThrowOnError extends boolean = false>(
+    options: Options<SignInCallbackOidcData, ThrowOnError>,
+) => {
+    return (options.client ?? client).get<unknown, SignInCallbackOidcErrors, ThrowOnError>({
+        url: '/api/auth/oidc/sign-in-callback/{providerId}',
+        ...options,
+    });
+};
+
+/**
+ * Sign in with OpenID Connect
+ *
+ * Sign in with OpenID Connect.
+ */
+export const signInOidc = <ThrowOnError extends boolean = false>(options: Options<SignInOidcData, ThrowOnError>) => {
+    return (options.client ?? client).post<unknown, SignInOidcErrors, ThrowOnError>({
+        url: '/api/auth/oidc/sign-in/{providerId}',
+        ...options,
+    });
+};
+
+/**
+ * Sign out with OpenID Connect
+ *
+ * Sign out with OpenID Connect.
+ */
+export const signOutOidc = <ThrowOnError extends boolean = false>(options: Options<SignOutOidcData, ThrowOnError>) => {
+    return (options.client ?? client).post<unknown, SignOutOidcErrors, ThrowOnError>({
+        url: '/api/auth/oidc/sign-out/{providerId}',
+        ...options,
+    });
+};
+
+/**
  * Get current user
+ *
  * Get the current user account.
  */
 export const getCurrentUser = <ThrowOnError extends boolean = false>(
@@ -62,6 +108,7 @@ export const getCurrentUser = <ThrowOnError extends boolean = false>(
 
 /**
  * Call action
+ *
  * Call an action.
  */
 export const callAction = <ThrowOnError extends boolean = false>(options: Options<CallActionData, ThrowOnError>) => {

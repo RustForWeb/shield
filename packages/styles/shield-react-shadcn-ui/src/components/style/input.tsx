@@ -1,4 +1,4 @@
-import type { Input as ApiInput } from '@rustforweb/shield-react';
+import type { Input as ApiInput, InputValue as ApiInputValue } from '@rustforweb/shield-react';
 import { useId, useMemo } from 'react';
 
 // import { Controller } from 'react-hook-form';
@@ -6,6 +6,17 @@ import { useId, useMemo } from 'react';
 import { Button } from '../ui/button.js';
 import { Field, FieldLabel } from '../ui/field.js';
 import { Input } from '../ui/input.js';
+
+const inputValue = (value: ApiInputValue) => {
+    switch (value.type) {
+        case 'origin': {
+            return window.location.origin;
+        }
+        case 'string': {
+            return value.value;
+        }
+    }
+};
 
 export type StyleInputProps = {
     // control: Control;
@@ -19,7 +30,7 @@ export const StyleInput = ({ input }: StyleInputProps) => {
     if (input.type.type === 'button' || input.type.type === 'reset' || input.type.type === 'submit') {
         return (
             <Button name={input.name} type={input.type.type} variant="outline">
-                {input.value}
+                {input.value ? inputValue(input.value) : undefined}
             </Button>
         );
     }
@@ -52,7 +63,7 @@ export const StyleInput = ({ input }: StyleInputProps) => {
                 name={input.name}
                 type={input.type.type}
                 placeholder={input.label ?? undefined}
-                value={input.value ?? undefined}
+                value={input.value ? inputValue(input.value) : undefined}
             />
         </Field>
     );

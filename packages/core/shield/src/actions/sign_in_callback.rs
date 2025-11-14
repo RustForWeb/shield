@@ -1,4 +1,4 @@
-use crate::{MethodSession, Provider, ShieldError};
+use crate::{error::ShieldError, provider::Provider, session::MethodSession};
 
 const ACTION_ID: &str = "sign-in-callback";
 const ACTION_NAME: &str = "Sign in callback";

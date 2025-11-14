@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use shield::{
     Action, ActionMethod, Form, Input, InputType, InputTypeEmail, InputTypeHidden,
-    InputTypePassword, InputTypeSubmit, MethodSession, Request, Response, ResponseType,
+    InputTypePassword, InputTypeSubmit, InputValue, MethodSession, Request, Response, ResponseType,
     ShieldError, SignInAction, erased_action,
 };
 
@@ -76,7 +76,9 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                         name: "submit".to_owned(),
                         label: None,
                         r#type: InputType::Submit(InputTypeSubmit::default()),
-                        value: Some("Sign in".to_owned()),
+                        value: Some(InputValue::String {
+                            value: "Sign in".to_owned(),
+                        }),
                     },
                 ],
             },
@@ -95,7 +97,9 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                         name: "submit".to_owned(),
                         label: None,
                         r#type: InputType::Submit(InputTypeSubmit::default()),
-                        value: Some("Email sign-in code".to_owned()),
+                        value: Some(InputValue::String {
+                            value: "Email sign-in code".to_owned(),
+                        }),
                     },
                 ],
             },

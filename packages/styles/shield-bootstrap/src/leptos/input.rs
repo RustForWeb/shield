@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use shield::Input;
+use shield::{Input, InputValue};
 
 #[component]
 pub fn FormInput(input: Input) -> impl IntoView {
@@ -28,7 +28,10 @@ fn Control(input: Input) -> impl IntoView {
             // TODO: Support nested data (`data[user[name]]` should instead be `data[user][name]`).
             name=format!("data[{}]", input.name)
             r#type=input.r#type.as_str()
-            value=input.value.clone()
+            value=input.value.map(|value| match value {
+                InputValue::Origin => todo!(),
+                InputValue::String { value } => value.clone(),
+            })
             placeholder=input.label
         />
     }

@@ -1,4 +1,9 @@
-use crate::{Form, Input, InputType, InputTypeSubmit, MethodSession, Provider, ShieldError};
+use crate::{
+    error::ShieldError,
+    form::{Form, Input, InputType, InputTypeSubmit, InputValue},
+    provider::Provider,
+    session::MethodSession,
+};
 
 const ACTION_ID: &str = "sign-out";
 const ACTION_NAME: &str = "Sign out";
@@ -37,7 +42,9 @@ impl SignOutAction {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit {}),
-                value: Some(Self::name()),
+                value: Some(InputValue::String {
+                    value: Self::name(),
+                }),
             }],
         }])
     }

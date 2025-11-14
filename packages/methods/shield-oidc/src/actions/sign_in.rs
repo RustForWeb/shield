@@ -3,17 +3,35 @@ use openidconnect::{
     CsrfToken, Nonce, PkceCodeChallenge, Scope, core::CoreAuthenticationFlow,
     url::form_urlencoded::parse,
 };
+use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeSubmit, MethodSession, Provider,
-    Request, Response, ResponseType, SessionAction, ShieldError, SignInAction, erased_action,
+    Action, ActionMethod, Form, Input, InputType, InputTypeHidden, InputTypeSubmit, InputValue,
+    MethodSession, Provider, Request, Response, ResponseType, SessionAction, ShieldError,
+    SignInAction, erased_action,
 };
+use url::Url;
 
 use crate::{
+    options::OidcOptions,
     provider::{OidcProvider, OidcProviderPkceCodeChallenge},
     session::OidcSession,
 };
 
-pub struct OidcSignInAction;
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignInData {
+    pub redirect_origin: Option<Url>,
+}
+
+pub struct OidcSignInAction {
+    options: OidcOptions,
+}
+
+impl OidcSignInAction {
+    pub fn new(options: OidcOptions) -> Self {
+        Self { options }
+    }
+}
 
 #[async_trait]
 impl Action<OidcProvider, OidcSession> for OidcSignInAction {
@@ -39,12 +57,22 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
 
     async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {
         Ok(vec![Form {
-            inputs: vec![Input {
-                name: "submit".to_owned(),
-                label: None,
-                r#type: InputType::Submit(InputTypeSubmit::default()),
-                value: Some(format!("Sign in with {}", provider.name())),
-            }],
+            inputs: vec![
+                Input {
+                    name: "redirectOrigin".to_owned(),
+                    label: None,
+                    r#type: InputType::Hidden(InputTypeHidden::default()),
+                    value: Some(InputValue::Origin),
+                },
+                Input {
+                    name: "submit".to_owned(),
+                    label: None,
+                    r#type: InputType::Submit(InputTypeSubmit::default()),
+                    value: Some(InputValue::String {
+                        value: format!("Sign in with {}", provider.name()),
+                    }),
+                },
+            ],
         }])
     }
 
@@ -52,8 +80,21 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
         &self,
         provider: OidcProvider,
         _session: &MethodSession<OidcSession>,
-        _request: Request,
+        request: Request,
     ) -> Result<Response, ShieldError> {
+        let data = serde_json::from_value::<SignInData>(request.form_data)
+            .map_err(|err| ShieldError::Validation(err.to_string()))?;
+
+        let redirect_origin = if let Some(redirect_origins) = &self.options.redirect_origins
+            && let Some(redirect_origin) = data.redirect_origin
+            // TODO: Consider returning an error when redirect origin is not allowed.
+            && redirect_origins.contains(&redirect_origin)
+        {
+            Some(redirect_origin)
+        } else {
+            None
+        };
+
         let client = provider.oidc_client().await?;
 
         let mut authorization_request = client.authorize_url(
@@ -92,6 +133,7 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::unauthenticate())
             .session_action(SessionAction::data(OidcSession {
+                redirect_origin,
                 csrf: Some(csrf_token.secret().clone()),
                 nonce: Some(nonce.secret().clone()),
                 pkce_verifier: pkce_code_challenge

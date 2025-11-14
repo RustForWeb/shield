@@ -1,17 +1,34 @@
 use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
+use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeSubmit,
+    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeSubmit, InputValue,
     MethodSession, Provider, Request, Response, ResponseType, SessionAction, ShieldError,
     SignInAction, erased_action,
 };
+use url::Url;
 
 use crate::{
+    options::OauthOptions,
     provider::{OauthProvider, OauthProviderPkceCodeChallenge},
     session::OauthSession,
 };
 
-pub struct OauthSignInAction;
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignInData {
+    pub redirect_origin: Option<Url>,
+}
+
+pub struct OauthSignInAction {
+    options: OauthOptions,
+}
+
+impl OauthSignInAction {
+    pub fn new(options: OauthOptions) -> Self {
+        Self { options }
+    }
+}
 
 #[async_trait]
 impl Action<OauthProvider, OauthSession> for OauthSignInAction {
@@ -41,7 +58,9 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit::default()),
-                value: Some(format!("Sign in with {}", provider.name())),
+                value: Some(InputValue::String {
+                    value: format!("Sign in with {}", provider.name()),
+                }),
             }],
         }])
     }
@@ -50,8 +69,21 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
         &self,
         provider: OauthProvider,
         _session: &MethodSession<OauthSession>,
-        _request: Request,
+        request: Request,
     ) -> Result<Response, ShieldError> {
+        let data = serde_json::from_value::<SignInData>(request.form_data)
+            .map_err(|err| ShieldError::Validation(err.to_string()))?;
+
+        let redirect_origin = if let Some(redirect_origins) = &self.options.redirect_origins
+            && let Some(redirect_origin) = data.redirect_origin
+            // TODO: Consider returning an error when redirect origin is not allowed.
+            && redirect_origins.contains(&redirect_origin)
+        {
+            Some(redirect_origin)
+        } else {
+            None
+        };
+
         let client = provider.oauth_client().await?;
 
         let mut authorization_request = client
@@ -88,6 +120,7 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::Unauthenticate)
             .session_action(SessionAction::data(OauthSession {
+                redirect_origin,
                 csrf: Some(csrf_token.secret().clone()),
                 pkce_verifier: pkce_code_challenge
                     .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),

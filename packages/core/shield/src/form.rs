@@ -14,7 +14,15 @@ pub struct Input {
     pub name: String,
     pub label: Option<String>,
     pub r#type: InputType,
-    pub value: Option<String>,
+    pub value: Option<InputValue>,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(tag = "type", rename_all = "kebab-case")]
+pub enum InputValue {
+    Origin,
+    String { value: String },
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
