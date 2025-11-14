@@ -261,6 +261,7 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
         ))
         .session_action(SessionAction::authenticate(user))
         .session_action(SessionAction::data(OauthSession {
+            redirect_origin: None,
             csrf: None,
             pkce_verifier: None,
             oauth_connection_id: Some(connection.id),

@@ -73,7 +73,7 @@ impl<U: User + 'static> Method for OidcMethod<U> {
 
     fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
-            Box::new(OidcSignInAction),
+            Box::new(OidcSignInAction::new(self.options.clone())),
             Box::new(OidcSignInCallbackAction::new(
                 self.options.clone(),
                 self.storage.clone(),

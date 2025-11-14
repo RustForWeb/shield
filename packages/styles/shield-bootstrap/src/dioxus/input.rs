@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use shield::Input;
+use shield::{Input, InputValue};
 
 #[derive(Clone, PartialEq, Props)]
 pub struct FormInputProps {
@@ -26,7 +26,10 @@ pub fn FormInput(props: FormInputProps) -> Element {
                 class: "form-control",
                 name: props.input.name,
                 type: props.input.r#type.as_str(),
-                value: props.input.value.clone(),
+                value: props.input.value.map(|value| match value {
+                    InputValue::Origin => todo!(),
+                    InputValue::String { value } => value.clone(),
+                }),
                 placeholder: props.input.label,
             }
         }

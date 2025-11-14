@@ -5,11 +5,12 @@ use axum::{Json, middleware::from_fn, routing::get};
 use shield::{Shield, ShieldOptions};
 use shield_axum::{AuthRoutes, ShieldLayer, auth_required};
 use shield_memory::{MemoryStorage, User};
-use shield_oidc::{Keycloak, OidcMethod};
+use shield_oidc::{Keycloak, OidcMethod, OidcOptions};
 use time::Duration;
 use tokio::net::TcpListener;
 use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 use tracing::{info, level_filters::LevelFilter};
+use url::Url;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_scalar::{Scalar, Servable};
 
@@ -34,17 +35,26 @@ async fn main() {
     let shield = Shield::new(
         storage.clone(),
         vec![Arc::new(
-            OidcMethod::new(storage).with_providers([Keycloak::builder(
-                "keycloak",
-                "http://localhost:18080/realms/Shield",
-                "client1",
-            )
-            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(format!(
-                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                addr.port()
-            ))
-            .build()]),
+            OidcMethod::new(storage)
+                .with_providers([Keycloak::builder(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .redirect_url(format!(
+                    "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                    addr.port()
+                ))
+                .build()])
+                .with_options(
+                    OidcOptions::builder()
+                        .redirect_origins([
+                            Url::parse(&format!("http://localhost:{}", addr.port())).unwrap(),
+                            Url::parse("http://localhost:5173").unwrap(),
+                        ])
+                        .build(),
+                ),
         )],
         ShieldOptions::default(),
     );

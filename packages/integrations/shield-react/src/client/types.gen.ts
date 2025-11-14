@@ -41,7 +41,7 @@ export type Input = {
     label?: string | null;
     name: string;
     type: InputType;
-    value?: string | null;
+    value?: null | InputValue;
 };
 
 export type InputType =
@@ -300,6 +300,15 @@ export type InputTypeWeek = {
     step?: string | null;
 };
 
+export type InputValue =
+    | {
+          type: 'origin';
+      }
+    | {
+          type: 'string';
+          value: string;
+      };
+
 export type User = {
     additional: unknown;
     emailAddresses: Array<EmailAddress>;
@@ -336,6 +345,87 @@ export type GetActionFormsResponses = {
 };
 
 export type GetActionFormsResponse = GetActionFormsResponses[keyof GetActionFormsResponses];
+
+export type SignInCallbackOidcData = {
+    body?: never;
+    path: {
+        /**
+         * ID of the method.
+         */
+        methodId: string;
+        /**
+         * ID of the action.
+         */
+        actionId: string;
+        /**
+         * ID of provider (optional).
+         */
+        providerId: string | null;
+    };
+    query?: never;
+    url: '/api/auth/oidc/sign-in-callback/{providerId}';
+};
+
+export type SignInCallbackOidcErrors = {
+    /**
+     * Internal server error.
+     */
+    500: unknown;
+};
+
+export type SignInOidcData = {
+    body?: never;
+    path: {
+        /**
+         * ID of the method.
+         */
+        methodId: string;
+        /**
+         * ID of the action.
+         */
+        actionId: string;
+        /**
+         * ID of provider (optional).
+         */
+        providerId: string | null;
+    };
+    query?: never;
+    url: '/api/auth/oidc/sign-in/{providerId}';
+};
+
+export type SignInOidcErrors = {
+    /**
+     * Internal server error.
+     */
+    500: unknown;
+};
+
+export type SignOutOidcData = {
+    body?: never;
+    path: {
+        /**
+         * ID of the method.
+         */
+        methodId: string;
+        /**
+         * ID of the action.
+         */
+        actionId: string;
+        /**
+         * ID of provider (optional).
+         */
+        providerId: string | null;
+    };
+    query?: never;
+    url: '/api/auth/oidc/sign-out/{providerId}';
+};
+
+export type SignOutOidcErrors = {
+    /**
+     * Internal server error.
+     */
+    500: unknown;
+};
 
 export type GetCurrentUserData = {
     body?: never;

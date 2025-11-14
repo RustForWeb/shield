@@ -73,7 +73,7 @@ impl<U: User + 'static> Method for OauthMethod<U> {
 
     fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
         vec![
-            Box::new(OauthSignInAction),
+            Box::new(OauthSignInAction::new(self.options.clone())),
             Box::new(OauthSignInCallbackAction::new(
                 self.options.clone(),
                 self.storage.clone(),

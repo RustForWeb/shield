@@ -4,8 +4,8 @@ use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
     Action, ActionMethod, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit,
-    MethodSession, Request, Response, ResponseType, ShieldError, SignInAction, SignUpAction,
-    erased_action,
+    InputValue, MethodSession, Request, Response, ResponseType, ShieldError, SignInAction,
+    SignUpAction, erased_action,
 };
 use workos::{
     PaginationParams,
@@ -93,7 +93,9 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                     name: "submit".to_owned(),
                     label: None,
                     r#type: InputType::Submit(InputTypeSubmit::default()),
-                    value: Some("Continue".to_owned()),
+                    value: Some(InputValue::String {
+                        value: "Continue".to_owned(),
+                    }),
                 },
             ],
         }]
@@ -111,14 +113,16 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                                 required: Some(true),
                                 ..Default::default()
                             }),
-                            value: Some(oauth_provider.to_string()),
+                            value: Some(InputValue::String {
+                                value: oauth_provider.to_string(),
+                            }),
                         },
                         Input {
                             name: "submit".to_owned(),
                             label: None,
                             r#type: InputType::Submit(InputTypeSubmit::default()),
-                            value: Some(
-                                format!(
+                            value: Some(InputValue::String {
+                                value: format!(
                                     "Continue with {}",
                                     match oauth_provider {
                                         OauthProvider::AppleOAuth => "Apple",
@@ -128,7 +132,7 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                                     }
                                 )
                                 .to_owned(),
-                            ),
+                            }),
                         },
                     ],
                 }),
@@ -142,13 +146,17 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                         required: Some(true),
                         ..Default::default()
                     }),
-                    value: Some(connection.id.to_string()),
+                    value: Some(InputValue::String {
+                        value: connection.id.to_string(),
+                    }),
                 },
                 Input {
                     name: "submit".to_owned(),
                     label: None,
                     r#type: InputType::Submit(InputTypeSubmit::default()),
-                    value: Some(format!("Continue with {}", connection.name).to_owned()),
+                    value: Some(InputValue::String {
+                        value: format!("Continue with {}", connection.name).to_owned(),
+                    }),
                 },
             ],
         }))

@@ -291,10 +291,22 @@ impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallback
         };
 
         Ok(Response::new(ResponseType::Redirect(
-            self.options.sign_in_redirect.clone(),
+            session
+                .method
+                .redirect_origin
+                .as_ref()
+                .and_then(|redirect_origin| {
+                    redirect_origin
+                        .join(&self.options.sign_in_redirect)
+                        .as_ref()
+                        .map(ToString::to_string)
+                        .ok()
+                })
+                .unwrap_or_else(|| self.options.sign_in_redirect.clone()),
         ))
         .session_action(SessionAction::authenticate(user))
         .session_action(SessionAction::data(OidcSession {
+            redirect_origin: None,
             csrf: None,
             nonce: None,
             pkce_verifier: None,
