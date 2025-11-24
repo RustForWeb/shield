@@ -3240,16 +3240,24 @@ dependencies = [
 
 [[package]]
 name = "jsonwebtoken"
-version = "9.3.1"
+version = "10.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a87cc7a48537badeae96744432de36f4be2b4a34a05a5ef32e9dd8a1c169dde"
+checksum = "c76e1c7d7df3e34443b3621b459b066a7b79644f059fc8b2db7070c825fd417e"
 dependencies = [
  "base64 0.22.1",
+ "ed25519-dalek",
+ "getrandom 0.2.16",
+ "hmac",
  "js-sys",
+ "p256",
+ "p384",
  "pem",
- "ring",
+ "rand 0.8.5",
+ "rsa",
  "serde",
  "serde_json",
+ "sha2",
+ "signature",
  "simple_asn1",
 ]
 
@@ -7718,11 +7726,14 @@ dependencies = [
 
 [[package]]
 name = "workos"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "788e1fd0276d370133bfd964b9cdbfe7e9e7311c9c398d3448d076bc236651cf"
+checksum = "e8d65034dbf58137fcb8be2fb052514e901fa3f4bac715bbe4046c7e9fc87d7d"
 dependencies = [
+ "aead",
+ "aes-gcm",
  "async-trait",
+ "base64 0.22.1",
  "chrono",
  "derive_more",
  "jsonwebtoken",
