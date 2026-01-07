@@ -14,7 +14,7 @@ ignored = ["oauth2", "serde_json"]
 [features]
 default = []
 native-tls = ["oauth2/native-tls", "openidconnect/native-tls"]
-rustls-tls = ["oauth2/rustls-tls", "openidconnect/native-tls"]
+rustls-tls = ["oauth2/rustls-tls", "openidconnect/rustls-tls"]
 
 [dependencies]
 async-trait.workspace = true
