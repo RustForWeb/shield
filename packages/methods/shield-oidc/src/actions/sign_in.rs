@@ -20,8 +20,8 @@ use crate::{
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignInData {
-    pub redirect_origin: Option<Url>,
-    pub redirect_url: Option<Url>,
+    pub redirect_origin: Url,
+    pub redirect_url: Option<String>,
 }
 
 pub struct OidcSignInAction {
@@ -94,15 +94,13 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
         let data = serde_json::from_value::<SignInData>(request.form_data)
             .map_err(|err| ShieldError::Validation(err.to_string()))?;
 
-        let redirect_url = data.redirect_url.or_else(|| {
-            data.redirect_origin.and_then(|redirect_origin| {
-                redirect_origin.join(&self.options.sign_in_redirect).ok()
-            })
-        });
+        let redirect_url = data
+            .redirect_url
+            .map(|redirect_url| data.redirect_origin.join(&redirect_url))
+            .unwrap_or_else(|| data.redirect_origin.join(&self.options.sign_in_redirect))
+            .map_err(|err| ShieldError::Validation(format!("redirect URL parse error: {err}")))?;
 
-        if let Some(redirect_url) = &redirect_url
-            && let Some(redirect_origins) = &self.options.redirect_origins
-        {
+        if let Some(redirect_origins) = &self.options.redirect_origins {
             let redirect_origin = Url::parse(&redirect_url.origin().ascii_serialization())
                 .map_err(|err| {
                     ShieldError::Validation(format!("redirect origin parse error: {err}"))
@@ -153,7 +151,7 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::unauthenticate())
             .session_action(SessionAction::data(OidcSession {
-                redirect_url,
+                redirect_url: Some(redirect_url),
                 csrf: Some(csrf_token.secret().clone()),
                 nonce: Some(nonce.secret().clone()),
                 pkce_verifier: pkce_code_challenge
