@@ -24,6 +24,7 @@ oauth2 = { version = "5.0.0", default-features = false, features = [
     "pkce-plain",
     "reqwest",
 ] }
+regex.workspace = true
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
