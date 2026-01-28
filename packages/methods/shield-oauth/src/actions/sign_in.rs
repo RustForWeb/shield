@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeSubmit, InputValue,
-    MethodSession, Provider, Request, Response, ResponseType, SessionAction, ShieldError,
-    SignInAction, erased_action,
+    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeHidden,
+    InputTypeSubmit, InputValue, MethodSession, Provider, Request, Response, ResponseType,
+    SessionAction, ShieldError, SignInAction, erased_action,
 };
 use url::Url;
 
@@ -55,14 +55,30 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
 
     async fn forms(&self, provider: OauthProvider) -> Result<Vec<Form>, ShieldError> {
         Ok(vec![Form {
-            inputs: vec![Input {
-                name: "submit".to_owned(),
-                label: None,
-                r#type: InputType::Submit(InputTypeSubmit::default()),
-                value: Some(InputValue::String {
-                    value: format!("Sign in with {}", provider.name()),
-                }),
-            }],
+            inputs: vec![
+                Input {
+                    name: "redirectOrigin".to_owned(),
+                    label: None,
+                    r#type: InputType::Hidden(InputTypeHidden::default()),
+                    value: Some(InputValue::Origin),
+                },
+                Input {
+                    name: "redirectUrl".to_owned(),
+                    label: None,
+                    r#type: InputType::Hidden(InputTypeHidden::default()),
+                    value: Some(InputValue::Query {
+                        key: "redirectUrl".to_owned(),
+                    }),
+                },
+                Input {
+                    name: "submit".to_owned(),
+                    label: None,
+                    r#type: InputType::Submit(InputTypeSubmit::default()),
+                    value: Some(InputValue::String {
+                        value: format!("Sign in with {}", provider.name()),
+                    }),
+                },
+            ],
         }])
     }
 

@@ -22,6 +22,7 @@ pub struct Input {
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub enum InputValue {
     Origin,
+    Query { key: String },
     String { value: String },
 }
 
