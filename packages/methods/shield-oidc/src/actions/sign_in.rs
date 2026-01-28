@@ -113,6 +113,18 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
             }
         }
 
+        if let Some(redirect_patterns) = &self.options.redirect_patterns {
+            let redirect_url_str = redirect_url.to_string();
+            if !redirect_patterns
+                .iter()
+                .any(|pattern| pattern.is_match(&redirect_url_str))
+            {
+                return Err(ShieldError::Validation(format!(
+                    "redirect URL `{redirect_url}` not allowed"
+                )));
+            }
+        }
+
         let client = provider.oidc_client().await?;
 
         let mut authorization_request = client.authorize_url(

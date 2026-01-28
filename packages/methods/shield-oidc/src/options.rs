@@ -1,4 +1,5 @@
 use bon::Builder;
+use regex::Regex;
 use url::Url;
 
 #[derive(Builder, Clone, Debug)]
@@ -9,6 +10,9 @@ pub struct OidcOptions {
 
     #[builder(with = FromIterator::from_iter)]
     pub(crate) redirect_origins: Option<Vec<Url>>,
+
+    #[builder(with = FromIterator::from_iter)]
+    pub(crate) redirect_patterns: Option<Vec<Regex>>,
 }
 
 impl Default for OidcOptions {
