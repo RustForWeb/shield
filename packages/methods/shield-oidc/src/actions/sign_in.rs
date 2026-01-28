@@ -66,6 +66,14 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                     value: Some(InputValue::Origin),
                 },
                 Input {
+                    name: "redirectUrl".to_owned(),
+                    label: None,
+                    r#type: InputType::Hidden(InputTypeHidden::default()),
+                    value: Some(InputValue::Query {
+                        key: "redirectUrl".to_owned(),
+                    }),
+                },
+                Input {
                     name: "submit".to_owned(),
                     label: None,
                     r#type: InputType::Submit(InputTypeSubmit::default()),

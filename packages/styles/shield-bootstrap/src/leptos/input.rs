@@ -29,7 +29,8 @@ fn Control(input: Input) -> impl IntoView {
             name=format!("data[{}]", input.name)
             r#type=input.r#type.as_str()
             value=input.value.map(|value| match value {
-                InputValue::Origin => todo!(),
+                InputValue::Origin => todo!("origin"),
+                InputValue::Query {key} => todo!("query parameter `{key}`"),
                 InputValue::String { value } => value.clone(),
             })
             placeholder=input.label
