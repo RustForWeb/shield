@@ -18,6 +18,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct SignInData {
     pub redirect_origin: Option<Url>,
+    pub redirect_url: Option<Url>,
 }
 
 pub struct OauthSignInAction {
@@ -74,15 +75,26 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
         let data = serde_json::from_value::<SignInData>(request.form_data)
             .map_err(|err| ShieldError::Validation(err.to_string()))?;
 
-        let redirect_origin = if let Some(redirect_origins) = &self.options.redirect_origins
-            && let Some(redirect_origin) = data.redirect_origin
-            // TODO: Consider returning an error when redirect origin is not allowed.
-            && redirect_origins.contains(&redirect_origin)
+        let redirect_url = data.redirect_url.or_else(|| {
+            data.redirect_origin.and_then(|redirect_origin| {
+                redirect_origin.join(&self.options.sign_in_redirect).ok()
+            })
+        });
+
+        if let Some(redirect_url) = &redirect_url
+            && let Some(redirect_origins) = &self.options.redirect_origins
         {
-            Some(redirect_origin)
-        } else {
-            None
-        };
+            let redirect_origin = Url::parse(&redirect_url.origin().ascii_serialization())
+                .map_err(|err| {
+                    ShieldError::Validation(format!("redirect origin parse error: {err}"))
+                })?;
+
+            if !redirect_origins.contains(&redirect_origin) {
+                return Err(ShieldError::Validation(format!(
+                    "redirect origin `{redirect_origin}` not allowed"
+                )));
+            }
+        }
 
         let client = provider.oauth_client().await?;
 
@@ -120,7 +132,7 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::Unauthenticate)
             .session_action(SessionAction::data(OauthSession {
-                redirect_origin,
+                redirect_url,
                 csrf: Some(csrf_token.secret().clone()),
                 pkce_verifier: pkce_code_challenge
                     .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),

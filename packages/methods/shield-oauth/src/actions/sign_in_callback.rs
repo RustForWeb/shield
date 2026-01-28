@@ -257,11 +257,16 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
         };
 
         Ok(Response::new(ResponseType::Redirect(
-            self.options.sign_in_redirect.clone(),
+            session
+                .method
+                .redirect_url
+                .as_ref()
+                .map(ToString::to_string)
+                .unwrap_or_else(|| self.options.sign_in_redirect.clone()),
         ))
         .session_action(SessionAction::authenticate(user))
         .session_action(SessionAction::data(OauthSession {
-            redirect_origin: None,
+            redirect_url: None,
             csrf: None,
             pkce_verifier: None,
             oauth_connection_id: Some(connection.id),
