@@ -16,7 +16,7 @@ utoipa = ["dep:utoipa"]
 async-trait.workspace = true
 bon.workspace = true
 chrono = { workspace = true, features = ["serde"] }
-convert_case = "0.10.0"
+convert_case = "0.11.0"
 futures.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
