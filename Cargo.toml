@@ -29,7 +29,7 @@ repository = "https://github.com/RustForWeb/shield"
 version = "0.1.0"
 
 [workspace.dependencies]
-actix-files = "0.6.6"
+actix-files = "0.6.10"
 actix-session = "0.11.0"
 actix-utils = "3.0.1"
 actix-web = "4.9.0"
