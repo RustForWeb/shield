@@ -6,6 +6,7 @@ ignore = [
     { id = "RUSTSEC-2023-0071", reason = "No safe upgrade available for `rsa`." },
     { id = "RUSTSEC-2024-0436", reason = "No maintained version available for `paste`." },
 ]
+yanked = "deny"
 
 [bans]
 allow-wildcard-paths = true
