@@ -12,12 +12,7 @@ version.workspace = true
 ignored = ["dioxus-html"]
 
 [features]
-dioxus = [
-    "dep:dioxus",
-    "dep:dioxus-html",
-    "dep:serde_json",
-    "dep:shield-dioxus",
-]
+dioxus = ["dep:dioxus", "dep:dioxus-html", "dep:serde_json", "dep:shield-dioxus"]
 leptos = ["dep:leptos", "dep:shield-leptos"]
 
 [dependencies]
