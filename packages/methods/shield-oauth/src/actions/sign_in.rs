@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, ConfigurationError, Form, Input, InputType, InputTypeHidden,
+    Action, ActionMethod, ConfigurationError, Form, Input, InputAddon, InputType, InputTypeHidden,
     InputTypeSubmit, InputValue, MethodSession, Provider, Request, Response, ResponseType,
     SessionAction, ShieldError, SignInAction, erased_action,
 };
@@ -61,6 +61,8 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
                     label: None,
                     r#type: InputType::Hidden(InputTypeHidden::default()),
                     value: Some(InputValue::Origin),
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "redirectUrl".to_owned(),
@@ -69,6 +71,8 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
                     value: Some(InputValue::Query {
                         key: "redirectUrl".to_owned(),
                     }),
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "submit".to_owned(),
@@ -77,6 +81,10 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
                     value: Some(InputValue::String {
                         value: format!("Sign in with {}", provider.name()),
                     }),
+                    addon_start: provider
+                        .icon_url
+                        .map(|icon_url| InputAddon::Image { src: icon_url }),
+                    addon_end: None,
                 },
             ],
         }])

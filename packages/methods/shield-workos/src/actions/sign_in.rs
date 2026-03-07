@@ -60,6 +60,8 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                             ..Default::default()
                         }),
                         value: None,
+                        addon_start: None,
+                        addon_end: None,
                     },
                     Input {
                         name: "password".to_owned(),
@@ -71,6 +73,8 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                             ..Default::default()
                         }),
                         value: None,
+                        addon_start: None,
+                        addon_end: None,
                     },
                     Input {
                         name: "submit".to_owned(),
@@ -79,6 +83,8 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                         value: Some(InputValue::String {
                             value: "Sign in".to_owned(),
                         }),
+                        addon_start: None,
+                        addon_end: None,
                     },
                 ],
             },
@@ -92,6 +98,8 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                             required: Some(true),
                         }),
                         value: None,
+                        addon_start: None,
+                        addon_end: None,
                     },
                     Input {
                         name: "submit".to_owned(),
@@ -100,6 +108,8 @@ impl Action<WorkosProvider, ()> for WorkosSignInAction {
                         value: Some(InputValue::String {
                             value: "Email sign-in code".to_owned(),
                         }),
+                        addon_start: None,
+                        addon_end: None,
                     },
                 ],
             },

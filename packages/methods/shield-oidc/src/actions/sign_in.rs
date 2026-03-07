@@ -5,9 +5,9 @@ use openidconnect::{
 };
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeHidden, InputTypeSubmit, InputValue,
-    MethodSession, Provider, Request, Response, ResponseType, SessionAction, ShieldError,
-    SignInAction, erased_action,
+    Action, ActionMethod, Form, Input, InputAddon, InputType, InputTypeHidden, InputTypeSubmit,
+    InputValue, MethodSession, Provider, Request, Response, ResponseType, SessionAction,
+    ShieldError, SignInAction, erased_action,
 };
 use url::Url;
 
@@ -64,6 +64,8 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                     label: None,
                     r#type: InputType::Hidden(InputTypeHidden::default()),
                     value: Some(InputValue::Origin),
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "redirectUrl".to_owned(),
@@ -72,6 +74,8 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                     value: Some(InputValue::Query {
                         key: "redirectUrl".to_owned(),
                     }),
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "submit".to_owned(),
@@ -80,6 +84,10 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                     value: Some(InputValue::String {
                         value: format!("Sign in with {}", provider.name()),
                     }),
+                    addon_start: provider
+                        .icon_url
+                        .map(|icon_url| InputAddon::Image { src: icon_url }),
+                    addon_end: None,
                 },
             ],
         }])
