@@ -45,6 +45,8 @@ impl SignOutAction {
                 value: Some(InputValue::String {
                     value: Self::name(),
                 }),
+                addon_start: None,
+                addon_end: None,
             }],
         }])
     }

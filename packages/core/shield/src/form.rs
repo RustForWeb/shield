@@ -15,6 +15,8 @@ pub struct Input {
     pub label: Option<String>,
     pub r#type: InputType,
     pub value: Option<InputValue>,
+    pub addon_start: Option<InputAddon>,
+    pub addon_end: Option<InputAddon>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -24,6 +26,18 @@ pub enum InputValue {
     Origin,
     Query { key: String },
     String { value: String },
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(
+    tag = "type",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum InputAddon {
+    Image { src: String },
+    Text { text: String },
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

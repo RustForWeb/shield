@@ -88,6 +88,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                         ..Default::default()
                     }),
                     value: None,
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "submit".to_owned(),
@@ -96,6 +98,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                     value: Some(InputValue::String {
                         value: "Continue".to_owned(),
                     }),
+                    addon_start: None,
+                    addon_end: None,
                 },
             ],
         }]
@@ -116,6 +120,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                             value: Some(InputValue::String {
                                 value: oauth_provider.to_string(),
                             }),
+                            addon_start: None,
+                            addon_end: None,
                         },
                         Input {
                             name: "submit".to_owned(),
@@ -133,6 +139,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                                 )
                                 .to_owned(),
                             }),
+                            addon_start: None,
+                            addon_end: None,
                         },
                     ],
                 }),
@@ -149,6 +157,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                     value: Some(InputValue::String {
                         value: connection.id.to_string(),
                     }),
+                    addon_start: None,
+                    addon_end: None,
                 },
                 Input {
                     name: "submit".to_owned(),
@@ -157,6 +167,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
                     value: Some(InputValue::String {
                         value: format!("Continue with {}", connection.name).to_owned(),
                     }),
+                    addon_start: None,
+                    addon_end: None,
                 },
             ],
         }))
