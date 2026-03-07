@@ -86,7 +86,11 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                     }),
                     addon_start: provider
                         .icon_url
-                        .map(|icon_url| InputAddon::Image { src: icon_url }),
+                        .as_ref()
+                        .map(|icon_url| InputAddon::Image {
+                            alt: format!("{} logo", provider.name()),
+                            src: icon_url.clone(),
+                        }),
                     addon_end: None,
                 },
             ],
