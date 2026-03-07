@@ -36,7 +36,7 @@ pub enum InputValue {
     rename_all_fields = "camelCase"
 )]
 pub enum InputAddon {
-    Image { src: String },
+    Image { alt: String, src: String },
     Text { text: String },
 }
 
