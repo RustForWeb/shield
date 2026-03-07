@@ -14,8 +14,8 @@ all-methods = [
     # "method-credentials",
     # "method-email",
     "method-oauth",
-    "method-oidc",
     # "method-webauthn",
+    "method-oidc",
 ]
 # method-credentials = ["dep:shield-credentials"]
 # method-email = ["dep:shield-email"]
