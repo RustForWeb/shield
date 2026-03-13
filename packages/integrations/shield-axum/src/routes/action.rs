@@ -6,7 +6,9 @@ use axum::{
 use serde_json::Value;
 use shield::{ActionPathParams, Request, ResponseType, User};
 
-use crate::{ExtractSession, ExtractShield, RouteError, error::ErrorBody};
+#[cfg(feature = "utoipa")]
+use crate::error::ErrorBody;
+use crate::{ExtractSession, ExtractShield, RouteError};
 
 #[cfg_attr(
     feature = "utoipa",

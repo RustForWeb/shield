@@ -1,6 +1,8 @@
+#[cfg(feature = "utoipa")]
+use axum::routing::post;
 use axum::{
     Router,
-    routing::{any, get, post},
+    routing::{any, get},
 };
 use shield::{Shield, User};
 #[cfg(feature = "utoipa")]
@@ -16,6 +18,7 @@ use crate::routes::*;
 struct BaseOpenApi;
 
 pub struct AuthRoutes<U: User> {
+    #[cfg_attr(not(feature = "utoipa"), expect(dead_code))]
     shield: Shield<U>,
 }
 

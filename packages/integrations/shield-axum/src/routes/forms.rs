@@ -1,7 +1,9 @@
 use axum::{Json, extract::Path};
 use shield::{ActionForms, ActionFormsPathParams, User};
 
-use crate::{ExtractSession, ExtractShield, RouteError, error::ErrorBody};
+#[cfg(feature = "utoipa")]
+use crate::error::ErrorBody;
+use crate::{ExtractSession, ExtractShield, RouteError};
 
 #[cfg_attr(
     feature = "utoipa",

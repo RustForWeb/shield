@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use shield::{ConfigurationError, EmailAddress, ShieldError, User};
 
-use crate::{RouteError, error::ErrorBody, extract::UserRequired};
+#[cfg(feature = "utoipa")]
+use crate::error::ErrorBody;
+use crate::{RouteError, extract::UserRequired};
 
 #[derive(Deserialize, Serialize)]
 #[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
