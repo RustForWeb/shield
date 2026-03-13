@@ -3,8 +3,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeText, MethodSession, Request, Response,
-    ResponseType, SessionAction, ShieldError, SignInAction, Storage, User, erased_action,
+    Action, ActionMethod, Form, Input, InputType, InputTypeSubmit, InputTypeText, InputValue,
+    MethodSession, Request, Response, ResponseType, SessionAction, ShieldError, SignInAction,
+    Storage, User, erased_action,
 };
 
 use crate::provider::DummyProvider;
@@ -49,18 +50,30 @@ impl<U: User + 'static> Action<DummyProvider, ()> for DummySignInAction<U> {
 
     async fn forms(&self, _provider: DummyProvider) -> Result<Vec<Form>, ShieldError> {
         Ok(vec![Form {
-            inputs: vec![Input {
-                name: "userId".to_owned(),
-                label: Some("User ID".to_owned()),
-                r#type: InputType::Text(InputTypeText {
-                    placeholder: Some("User ID".to_owned()),
-                    required: Some(true),
-                    ..Default::default()
-                }),
-                value: None,
-                addon_start: None,
-                addon_end: None,
-            }],
+            inputs: vec![
+                Input {
+                    name: "userId".to_owned(),
+                    label: Some("User ID".to_owned()),
+                    r#type: InputType::Text(InputTypeText {
+                        placeholder: Some("User ID".to_owned()),
+                        required: Some(true),
+                        ..Default::default()
+                    }),
+                    value: None,
+                    addon_start: None,
+                    addon_end: None,
+                },
+                Input {
+                    name: "submit".to_owned(),
+                    label: None,
+                    r#type: InputType::Submit(InputTypeSubmit::default()),
+                    value: Some(InputValue::String {
+                        value: "Sign in with dummy".to_owned(),
+                    }),
+                    addon_start: None,
+                    addon_end: None,
+                },
+            ],
         }])
     }
 
