@@ -45,9 +45,9 @@ impl UserBody {
         description = "Get the current user account.",
         tags = ["auth"],
         responses(
-            (status = 200, description = "The current user account.", body = UserBody),
-            (status = 401, description = "No account signed in.", body = ErrorBody),
-            (status = 500, description = "Internal server error.", body = ErrorBody),
+            (status = OK, description = "The current user account.", body = UserBody),
+            (status = UNAUTHORIZED, description = "No account signed in.", body = ErrorBody),
+            (status = INTERNAL_SERVER_ERROR, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]
