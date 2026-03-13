@@ -18,8 +18,8 @@ use crate::{ExtractSession, ExtractShield, RouteError};
             ActionFormsPathParams
         ),
         responses(
-            (status = 200, description = "The action forms.", body = ActionForms),
-            (status = 500, description = "Internal server error.", body = ErrorBody),
+            (status = OK, description = "The action forms.", body = ActionForms),
+            (status = INTERNAL_SERVER_ERROR, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]

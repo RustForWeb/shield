@@ -1,6 +1,7 @@
 use axum::{
     Form,
     extract::{Path, Query},
+    http::StatusCode,
     response::{IntoResponse, Redirect, Response},
 };
 use serde_json::Value;
@@ -24,8 +25,9 @@ use crate::{ExtractSession, ExtractShield, RouteError};
             ActionPathParams
         ),
         responses(
-            (status = 302, description = "Redirect."),
-            (status = 500, description = "Internal server error.", body = ErrorBody),
+            (status = NO_CONTENT, description = "Success."),
+            (status = SEE_OTHER, description = "Redirect."),
+            (status = INTERNAL_SERVER_ERROR, description = "Internal server error.", body = ErrorBody),
         )
     )
 )]
@@ -54,7 +56,7 @@ pub async fn action<U: User>(
         .await?;
 
     Ok(match response {
-        ResponseType::Default => todo!(),
+        ResponseType::Default => StatusCode::NO_CONTENT.into_response(),
         ResponseType::Redirect(to) => Redirect::to(&to).into_response(),
         ResponseType::RedirectToAction { action_id } => {
             // TODO: Use actual frontend prefix instead of hardcoded `/auth`.
