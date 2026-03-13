@@ -1,6 +1,6 @@
 use shield::Provider;
 
-use crate::CREDENTIALS_METHOD_ID;
+use crate::method::CREDENTIALS_METHOD_ID;
 
 pub struct CredentialsProvider;
 
