@@ -16,7 +16,7 @@ impl EmailStorage<User> for SeaOrmStorage {
         email_auth_token::Entity::find()
             .filter(email_auth_token::Column::Email.eq(email))
             .filter(email_auth_token::Column::Token.eq(token))
-            .filter(email_auth_token::Column::ExpiredAt.lte(Utc::now()))
+            .filter(email_auth_token::Column::ExpiredAt.gt(Utc::now()))
             .one(&self.database)
             .await
             .map_err(|err| StorageError::Engine(err.to_string()))

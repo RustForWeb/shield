@@ -15,5 +15,6 @@ server = ["dioxus/server"]
 anyhow.workspace = true
 dioxus = { workspace = true, features = ["fullstack", "router"] }
 serde_json.workspace = true
+serde_qs = "1.0.0"
 shield.workspace = true
 tracing.workspace = true

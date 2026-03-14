@@ -7,7 +7,7 @@ use secrecy::SecretString;
 use crate::sender::Sender;
 
 #[derive(Builder, Clone)]
-#[builder(state_mod(vis = "pub(crate)"))]
+#[builder(on(String, into), state_mod(vis = "pub(crate)"))]
 pub struct EmailOptions {
     #[builder(into)]
     pub(crate) secret: SecretString,
@@ -17,4 +17,7 @@ pub struct EmailOptions {
 
     #[builder(default = TimeDelta::minutes(10))]
     pub(crate) expires_in: TimeDelta,
+
+    #[builder(default = "/")]
+    pub(crate) sign_in_redirect: String,
 }

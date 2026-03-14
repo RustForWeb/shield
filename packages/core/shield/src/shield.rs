@@ -139,11 +139,15 @@ impl<U: User> Shield<U> {
                 }
             }
 
+            provider_forms.sort_by(|a, b| a.id.cmp(&b.id));
+
             method_forms.push(ActionMethodForm {
                 id: method_id.clone(),
                 provider_forms,
             });
         }
+
+        method_forms.sort_by(|a, b| a.id.cmp(&b.id));
 
         Ok(ActionForms {
             id: action_id.to_owned(),
