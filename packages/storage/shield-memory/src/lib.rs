@@ -1,4 +1,4 @@
-mod providers;
+mod methods;
 mod storage;
 mod user;
 

@@ -49,7 +49,7 @@ pub fn Form(props: FormProps) -> Element {
                         // TODO: Handle error.
                         if let Ok(response) = result {
                             match response {
-                                ResponseType::Default => todo!("default response"),
+                                ResponseType::Default => {},
                                 ResponseType::Redirect(to) => {
                                     navigator.push(to);
                                 },

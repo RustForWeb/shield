@@ -56,7 +56,7 @@ impl MigrationTrait for Migration {
                                 .not_null()
                                 .default(false),
                         )
-                        .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
+                        .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(64))
                         .col(
                             ColumnDef::new(EmailAddress::VerificationTokenExpiredAt)
                                 .timestamp_with_time_zone(),
@@ -107,7 +107,7 @@ impl MigrationTrait for Migration {
                                 .not_null()
                                 .default(false),
                         )
-                        .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(32))
+                        .col(ColumnDef::new(EmailAddress::VerificationToken).string_len(64))
                         .col(
                             ColumnDef::new(EmailAddress::VerificationTokenExpiredAt)
                                 .timestamp_with_time_zone(),

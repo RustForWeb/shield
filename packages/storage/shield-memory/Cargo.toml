@@ -11,25 +11,23 @@ version.workspace = true
 [features]
 default = []
 all-methods = [
-    # "method-credentials",
-    # "method-email",
+    "method-email",
     "method-oauth",
     # "method-webauthn",
     "method-oidc",
 ]
-# method-credentials = ["dep:shield-credentials"]
-# method-email = ["dep:shield-email"]
+method-email = ["dep:chrono", "dep:shield-email"]
 method-oauth = ["dep:shield-oauth"]
 method-oidc = ["dep:shield-oidc"]
+# method-webauthn = ["dep:shield-webauthn"]
 
 [dependencies]
 async-trait.workspace = true
+chrono = { workspace = true, optional = true }
 serde.workspace = true
 shield.workspace = true
-# shield-credentials = { workspace = true, optional = true }
-# shield-email = { workspace = true, optional = true }
+shield-email = { workspace = true, optional = true }
 shield-oauth = { workspace = true, optional = true }
 shield-oidc = { workspace = true, optional = true }
 # shield-webauthn = { workspace = true, optional = true }
 uuid = { workspace = true, features = ["v4"] }
-# method-webauthn = ["dep:shield-webauthn"]

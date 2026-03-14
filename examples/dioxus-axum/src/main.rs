@@ -25,6 +25,7 @@ async fn main() {
     use shield::{Shield, ShieldOptions};
     use shield_bootstrap::BootstrapDioxusStyle;
     use shield_dioxus_axum::{AuthRoutes, AxumDioxusIntegration, ShieldLayer};
+    use shield_email::{EmailMethod, EmailOptions, TracingSender};
     use shield_memory::{MemoryStorage, User};
     use shield_oidc::{Keycloak, OidcMethod};
     use tokio::net::TcpListener;
@@ -45,21 +46,30 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![Arc::new(
-            OidcMethod::new(storage).with_providers([Keycloak::builder(
-                "keycloak",
-                "http://localhost:18080/realms/Shield",
-                "client1",
-            )
-            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(format!(
-                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                dioxus::cli_config::devserver_raw_addr()
-                    .map(|addr| addr.port())
-                    .unwrap_or_else(|| addr.port())
-            ))
-            .build()]),
-        )],
+        vec![
+            Arc::new(EmailMethod::new(
+                EmailOptions::builder()
+                    .secret("secret")
+                    .sender(TracingSender)
+                    .build(),
+                storage.clone(),
+            )),
+            Arc::new(
+                OidcMethod::new(storage).with_providers([Keycloak::builder(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .redirect_url(format!(
+                    "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                    dioxus::cli_config::devserver_raw_addr()
+                        .map(|addr| addr.port())
+                        .unwrap_or_else(|| addr.port())
+                ))
+                .build()]),
+            ),
+        ],
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());
