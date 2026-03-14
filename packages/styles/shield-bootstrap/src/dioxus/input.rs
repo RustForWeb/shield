@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 use shield::{Input, InputValue};
+use shield_dioxus::Query;
 
 #[derive(Clone, PartialEq, Props)]
 pub struct FormInputProps {
@@ -8,6 +9,8 @@ pub struct FormInputProps {
 
 #[component]
 pub fn FormInput(props: FormInputProps) -> Element {
+    let query = use_context::<Query>();
+
     rsx! {
         div {
             class: "mb-3",
@@ -28,7 +31,9 @@ pub fn FormInput(props: FormInputProps) -> Element {
                 type: props.input.r#type.as_str(),
                 value: props.input.value.map(|value| match value {
                     InputValue::Origin => "TODO: origin".to_owned(),
-                    InputValue::Query {key} => format!("TODO: query param {key}"),
+                    InputValue::Query { key } => {
+                        query.get(&key).cloned().unwrap_or_default()
+                    },
                     InputValue::String { value } => value.clone(),
                 }),
                 placeholder: props.input.label,

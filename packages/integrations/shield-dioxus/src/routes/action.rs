@@ -2,12 +2,13 @@ use dioxus::prelude::*;
 use serde_json::Value;
 use shield::{ActionForms, ResponseType};
 
-use crate::ErasedDioxusStyle;
+use crate::{query::Query, style::ErasedDioxusStyle};
 
 #[derive(Clone, PartialEq, Props)]
 pub struct ActionProps {
     #[props(default = "index".to_owned())]
     action_id: String,
+    query: String,
 }
 
 #[component]
@@ -21,6 +22,8 @@ pub fn Action(props: ActionProps) -> Element {
 
     let response_read = response.read();
     let response = response_read.as_ref().unwrap();
+
+    use_context_provider(|| Query::parse(&props.query));
 
     match response {
         Ok(forms) => style.render(forms),

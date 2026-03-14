@@ -29,7 +29,7 @@ impl EmailStorage<User> for MemoryStorage {
             .find(|email_auth_token| {
                 email_auth_token.email == email
                     && email_auth_token.token == token
-                    && email_auth_token.expired_at < Utc::now()
+                    && email_auth_token.expired_at > Utc::now()
             })
             .cloned())
     }

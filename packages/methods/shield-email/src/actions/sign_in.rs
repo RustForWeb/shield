@@ -97,24 +97,19 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInAction<U> {
             .map_err(|err| ShieldError::Validation(err.to_string()))?;
 
         let token = Alphanumeric.sample_string(&mut rand::rng(), 32);
-        let expires_at = Utc::now() + self.options.expires_in;
 
         let email_auth_token = self
             .storage
             .create_email_auth_token(CreateEmailAuthToken {
                 email: data.email.to_lowercase(),
                 token: hash_token(&token, &self.options.secret),
-                expired_at: expires_at.into(),
+                expired_at: (Utc::now() + self.options.expires_in).into(),
             })
             .await?;
 
         self.options
             .sender
-            .send(
-                &email_auth_token.email,
-                &email_auth_token.token,
-                email_auth_token.expired_at,
-            )
+            .send(&email_auth_token.email, &token, email_auth_token.expired_at)
             .await?;
 
         Ok(Response::new(ResponseType::Default).session_action(SessionAction::unauthenticate()))

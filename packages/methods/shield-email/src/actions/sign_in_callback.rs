@@ -5,8 +5,8 @@ use chrono::Utc;
 use serde::Deserialize;
 use shield::{
     Action, ActionMethod, CreateEmailAddress, CreateUser, Form, Input, InputType, InputTypeEmail,
-    InputTypeSubmit, InputValue, MethodSession, Request, Response, ResponseType, SessionAction,
-    ShieldError, SignInCallbackAction, User, erased_action,
+    InputTypeSubmit, InputTypeText, InputValue, MethodSession, Request, Response, ResponseType,
+    SessionAction, ShieldError, SignInCallbackAction, User, erased_action,
 };
 
 use crate::{
@@ -51,7 +51,7 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
     }
 
     fn method(&self) -> ActionMethod {
-        ActionMethod::Get
+        ActionMethod::Post
     }
 
     fn condition(
@@ -74,19 +74,23 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
                         required: Some(true),
                         ..Default::default()
                     }),
-                    value: None,
+                    value: Some(InputValue::Query {
+                        key: "email".to_owned(),
+                    }),
                     addon_start: None,
                     addon_end: None,
                 },
                 Input {
                     name: "token".to_owned(),
                     label: Some("Token".to_owned()),
-                    r#type: InputType::Email(InputTypeEmail {
+                    r#type: InputType::Text(InputTypeText {
                         placeholder: Some("Token".to_owned()),
                         required: Some(true),
                         ..Default::default()
                     }),
-                    value: None,
+                    value: Some(InputValue::Query {
+                        key: "token".to_owned(),
+                    }),
                     addon_start: None,
                     addon_end: None,
                 },
@@ -147,7 +151,10 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
             }
         };
 
-        Ok(Response::new(ResponseType::Default).session_action(SessionAction::authenticate(user)))
+        Ok(Response::new(ResponseType::Redirect(
+            self.options.sign_in_redirect.clone(),
+        ))
+        .session_action(SessionAction::authenticate(user)))
     }
 }
 

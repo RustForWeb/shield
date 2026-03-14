@@ -44,18 +44,24 @@ pub fn Form(props: FormProps) -> Element {
                         ).expect("TODO: handle error");
 
                         let result = call(action_id, method_id, provider_id, data).await;
-                        info!("{:?}", result);
 
-                        // TODO: Handle error.
-                        if let Ok(response) = result {
-                            match response {
-                                ResponseType::Default => {},
-                                ResponseType::Redirect(to) => {
-                                    navigator.push(to);
-                                },
-                                ResponseType::RedirectToAction { action_id } => {
-                                    navigator.push(ShieldRouter::Action { action_id });
+                        match result {
+                            Ok(response) => {
+                                info!("{:?}", response);
+
+                                match response {
+                                    ResponseType::Default => {},
+                                    ResponseType::Redirect(to) => {
+                                        navigator.push(to);
+                                    },
+                                    ResponseType::RedirectToAction { action_id } => {
+                                        navigator.push(ShieldRouter::Action { action_id, query: "".to_owned() });
+                                    }
                                 }
+                            }
+                            Err(err) => {
+                                // TODO: Handle error.
+                                error!("{err}");
                             }
                         }
                     }
@@ -64,7 +70,7 @@ pub fn Form(props: FormProps) -> Element {
 
             for input in props.form.inputs {
                 FormInput {
-                    input: input
+                    input: input,
                 }
             }
         }
