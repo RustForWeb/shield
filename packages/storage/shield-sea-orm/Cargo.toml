@@ -12,16 +12,12 @@ version.workspace = true
 default = []
 entity = []
 all-methods = [
-    # "method-credentials",
     "method-email",
     "method-oauth",
     # "method-webauthn",
     "method-oidc",
 ]
-# method-credentials = ["dep:shield-credentials"]
-# method-email = ["dep:shield-email"]
-# method-credentials = []
-method-email = []
+method-email = ["dep:shield-email"]
 method-oauth = ["dep:shield-oauth"]
 method-oidc = ["dep:shield-oidc"]
 # method-webauthn = ["dep:shield-webauthn"]
@@ -36,8 +32,7 @@ secrecy.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 shield.workspace = true
-# shield-credentials = { workspace = true, optional = true }
-# shield-email = { workspace = true, optional = true }
+shield-email = { workspace = true, optional = true }
 shield-oauth = { workspace = true, optional = true }
 shield-oidc = { workspace = true, optional = true }
 # shield-webauthn = { workspace = true, optional = true }

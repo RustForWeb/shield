@@ -8,6 +8,7 @@ async fn main() {
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
     use shield_bootstrap::BootstrapLeptosStyle;
+    use shield_email::{EmailMethod, EmailOptions, TracingSender};
     use shield_examples_leptos_axum::app::*;
     use shield_leptos_axum::{AuthRoutes, ShieldLayer, auth_required, provide_axum_integration};
     use shield_memory::{MemoryStorage, User};
@@ -38,19 +39,28 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![Arc::new(
-            OidcMethod::new(storage).with_providers([Keycloak::builder(
-                "keycloak",
-                "http://localhost:18080/realms/Shield",
-                "client1",
-            )
-            .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-            .redirect_url(format!(
-                "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                addr.port()
-            ))
-            .build()]),
-        )],
+        vec![
+            Arc::new(EmailMethod::new(
+                EmailOptions::builder()
+                    .secret("secret")
+                    .sender(TracingSender)
+                    .build(),
+                storage.clone(),
+            )),
+            Arc::new(
+                OidcMethod::new(storage).with_providers([Keycloak::builder(
+                    "keycloak",
+                    "http://localhost:18080/realms/Shield",
+                    "client1",
+                )
+                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                .redirect_url(format!(
+                    "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                    addr.port()
+                ))
+                .build()]),
+            ),
+        ],
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());

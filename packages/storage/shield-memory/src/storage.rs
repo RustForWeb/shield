@@ -13,10 +13,12 @@ pub const MEMORY_STORAGE_ID: &str = "memory";
 #[derive(Clone, Debug, Default)]
 pub struct MemoryStorage {
     pub(crate) users: Arc<Mutex<Vec<User>>>,
+    #[cfg(feature = "method-email")]
+    pub(crate) email: crate::methods::email::EmailMemoryStorage,
     #[cfg(feature = "method-oauth")]
-    pub(crate) oauth: crate::providers::oauth::OauthMemoryStorage,
+    pub(crate) oauth: crate::methods::oauth::OauthMemoryStorage,
     #[cfg(feature = "method-oidc")]
-    pub(crate) oidc: crate::providers::oidc::OidcMemoryStorage,
+    pub(crate) oidc: crate::methods::oidc::OidcMemoryStorage,
 }
 
 impl MemoryStorage {

@@ -4,6 +4,7 @@ use std::sync::Arc;
 use axum::{Json, middleware::from_fn, routing::get};
 use shield::{Shield, ShieldOptions};
 use shield_axum::{AuthRoutes, ShieldLayer, auth_required};
+use shield_email::{EmailMethod, EmailOptions, TracingSender};
 use shield_memory::{MemoryStorage, User};
 use shield_oidc::{Keycloak, OidcMethod, OidcOptions};
 use time::Duration;
@@ -34,28 +35,37 @@ async fn main() {
     let storage = MemoryStorage::new();
     let shield = Shield::new(
         storage.clone(),
-        vec![Arc::new(
-            OidcMethod::new(storage)
-                .with_providers([Keycloak::builder(
-                    "keycloak",
-                    "http://localhost:18080/realms/Shield",
-                    "client1",
-                )
-                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-                .redirect_url(format!(
-                    "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
-                    addr.port()
-                ))
-                .build()])
-                .with_options(
-                    OidcOptions::builder()
-                        .redirect_origins([
-                            Url::parse(&format!("http://localhost:{}", addr.port())).unwrap(),
-                            Url::parse("http://localhost:5173").unwrap(),
-                        ])
-                        .build(),
-                ),
-        )],
+        vec![
+            Arc::new(EmailMethod::new(
+                EmailOptions::builder()
+                    .secret("secret")
+                    .sender(TracingSender)
+                    .build(),
+                storage.clone(),
+            )),
+            Arc::new(
+                OidcMethod::new(storage)
+                    .with_providers([Keycloak::builder(
+                        "keycloak",
+                        "http://localhost:18080/realms/Shield",
+                        "client1",
+                    )
+                    .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                    .redirect_url(format!(
+                        "http://localhost:{}/api/auth/oidc/sign-in-callback/keycloak",
+                        addr.port()
+                    ))
+                    .build()])
+                    .with_options(
+                        OidcOptions::builder()
+                            .redirect_origins([
+                                Url::parse(&format!("http://localhost:{}", addr.port())).unwrap(),
+                                Url::parse("http://localhost:5173").unwrap(),
+                            ])
+                            .build(),
+                    ),
+            ),
+        ],
         ShieldOptions::default(),
     );
     let shield_layer = ShieldLayer::new(shield.clone());

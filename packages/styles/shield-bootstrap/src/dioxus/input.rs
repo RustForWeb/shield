@@ -27,8 +27,8 @@ pub fn FormInput(props: FormInputProps) -> Element {
                 name: props.input.name,
                 type: props.input.r#type.as_str(),
                 value: props.input.value.map(|value| match value {
-                    InputValue::Origin => todo!("origin"),
-                    InputValue::Query {key} => todo!("query parameter `{key}`"),
+                    InputValue::Origin => "TODO: origin".to_owned(),
+                    InputValue::Query {key} => format!("TODO: query param {key}"),
                     InputValue::String { value } => value.clone(),
                 }),
                 placeholder: props.input.label,

@@ -13,7 +13,8 @@ version.workspace = true
 axum.workspace = true
 shield.workspace = true
 shield-axum = { workspace = true, features = ["utoipa"] }
-shield-memory = { workspace = true, features = ["method-oidc"] }
+shield-email = { workspace = true, features = ["sender-tracing"] }
+shield-memory = { workspace = true, features = ["method-email", "method-oidc"] }
 shield-oidc = { workspace = true, features = ["native-tls"] }
 time = "0.3.47"
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

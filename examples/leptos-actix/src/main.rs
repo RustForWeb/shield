@@ -9,6 +9,7 @@ async fn main() -> std::io::Result<()> {
     use leptos::config::get_configuration;
     use leptos_actix::{LeptosRoutes, generate_route_list};
     use shield::{Shield, ShieldOptions};
+    use shield_email::{EmailMethod, EmailOptions, TracingSender};
     use shield_examples_leptos_actix::app::*;
     use shield_leptos_actix::{ShieldMiddleware, provide_actix_integration};
     use shield_memory::{MemoryStorage, User};
@@ -40,18 +41,27 @@ async fn main() -> std::io::Result<()> {
             SessionMiddleware::new(CookieSessionStore::default(), session_secret_key.clone());
 
         // Initialize Shield
-        let shield_storage = MemoryStorage::new();
+        let storage = MemoryStorage::new();
         let shield = Shield::new(
-            shield_storage.clone(),
-            vec![Arc::new(
-                OidcMethod::new(shield_storage).with_providers([Keycloak::builder(
-                    "keycloak",
-                    "http://localhost:18080/realms/Shield",
-                    "client1",
-                )
-                .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
-                .build()]),
-            )],
+            storage.clone(),
+            vec![
+                Arc::new(EmailMethod::new(
+                    EmailOptions::builder()
+                        .secret("secret")
+                        .sender(TracingSender)
+                        .build(),
+                    storage.clone(),
+                )),
+                Arc::new(
+                    OidcMethod::new(storage).with_providers([Keycloak::builder(
+                        "keycloak",
+                        "http://localhost:18080/realms/Shield",
+                        "client1",
+                    )
+                    .client_secret("xcpQsaGbRILTljPtX4npjmYMBjKrariJ")
+                    .build()]),
+                ),
+            ],
             ShieldOptions::default(),
         );
         let shield_middleware = ShieldMiddleware::new(shield.clone());

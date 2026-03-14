@@ -27,6 +27,7 @@ hydrate = ["leptos/hydrate"]
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
+    "dep:shield-email",
     "dep:shield-leptos-axum",
     "dep:shield-memory",
     "dep:shield-oidc",
@@ -35,6 +36,7 @@ ssr = [
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+    "shield-memory/method-email",
     "shield-memory/method-oidc",
 ]
 
@@ -47,6 +49,9 @@ leptos_meta.workspace = true
 leptos_router.workspace = true
 shield.workspace = true
 shield-bootstrap = { workspace = true, features = ["leptos"] }
+shield-email = { workspace = true, features = [
+    "sender-tracing",
+], optional = true }
 shield-leptos.workspace = true
 shield-leptos-axum = { workspace = true, optional = true }
 shield-memory = { workspace = true, optional = true }

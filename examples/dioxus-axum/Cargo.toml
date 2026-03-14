@@ -16,12 +16,14 @@ version.workspace = true
 server = [
     "dep:axum",
     "dep:shield-dioxus-axum",
+    "dep:shield-email",
     "dep:shield-memory",
     "dep:shield-oidc",
     "dep:tokio",
     "dep:tower-sessions",
     "dioxus/server",
     "shield-dioxus/server",
+    "shield-memory/method-email",
     "shield-memory/method-oidc",
 ]
 web = ["dioxus/web"]
@@ -33,6 +35,9 @@ shield.workspace = true
 shield-bootstrap = { workspace = true, features = ["dioxus"] }
 shield-dioxus.workspace = true
 shield-dioxus-axum = { workspace = true, optional = true }
+shield-email = { workspace = true, features = [
+    "sender-tracing",
+], optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
 tokio = { workspace = true, features = [
