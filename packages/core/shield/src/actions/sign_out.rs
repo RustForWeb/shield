@@ -1,53 +1,61 @@
+use async_trait::async_trait;
+
 use crate::{
+    action::Action,
     error::ShieldError,
     form::{Form, Input, InputType, InputTypeSubmit, InputValue},
-    provider::Provider,
-    session::MethodSession,
+    request::{Request, RequestMethod},
+    response::{Response, ResponseType},
+    session::{BaseSession, SessionAction},
 };
 
 const ACTION_ID: &str = "sign-out";
 const ACTION_NAME: &str = "Sign out";
 
-// TODO: Sign out should be a global action that is independent of the method.
-// TODO: Add hooks, so the method can still perform custom sign out.
-
 pub struct SignOutAction;
 
-impl SignOutAction {
-    pub fn id() -> String {
-        ACTION_ID.to_owned()
+#[async_trait]
+impl Action for SignOutAction {
+    fn id(&self) -> &'static str {
+        ACTION_ID
     }
 
-    pub fn name() -> String {
-        ACTION_NAME.to_owned()
+    fn name(&self) -> &'static str {
+        ACTION_NAME
     }
 
-    pub fn condition<P: Provider, S>(
-        provider: &P,
-        session: &MethodSession<S>,
-    ) -> Result<bool, ShieldError> {
-        Ok(session
-            .base
-            .authentication
-            .as_ref()
-            .is_some_and(|authentication| {
-                authentication.method_id == provider.method_id()
-                    && authentication.provider_id == provider.id()
-            }))
+    fn openapi_summary(&self) -> &'static str {
+        "Sign out"
     }
 
-    pub async fn forms<P: Provider>(_provider: P) -> Result<Vec<Form>, ShieldError> {
+    fn openapi_description(&self) -> &'static str {
+        "Sign out."
+    }
+
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
+    }
+
+    async fn forms(&self) -> Result<Vec<Form>, ShieldError> {
         Ok(vec![Form {
             inputs: vec![Input {
                 name: "submit".to_owned(),
                 label: None,
                 r#type: InputType::Submit(InputTypeSubmit {}),
                 value: Some(InputValue::String {
-                    value: Self::name(),
+                    value: self.name().to_owned(),
                 }),
                 addon_start: None,
                 addon_end: None,
             }],
         }])
+    }
+
+    async fn call(
+        &self,
+        _session: &BaseSession,
+        _request: Request,
+    ) -> Result<Response, ShieldError> {
+        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
     }
 }

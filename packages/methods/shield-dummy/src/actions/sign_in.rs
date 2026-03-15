@@ -3,9 +3,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeSubmit, InputTypeText, InputValue,
-    MethodSession, Request, Response, ResponseType, SessionAction, ShieldError, SignInAction,
-    Storage, User, erased_action,
+    Form, Input, InputType, InputTypeSubmit, InputTypeText, InputValue, MethodAction,
+    MethodSession, Request, RequestMethod, Response, ResponseType, SessionAction, ShieldError,
+    SignInAction, Storage, User, erased_method_action,
 };
 
 use crate::provider::DummyProvider;
@@ -27,7 +27,7 @@ impl<U: User> DummySignInAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<DummyProvider, ()> for DummySignInAction<U> {
+impl<U: User + 'static> MethodAction<DummyProvider, ()> for DummySignInAction<U> {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -44,8 +44,8 @@ impl<U: User + 'static> Action<DummyProvider, ()> for DummySignInAction<U> {
         "Sign in with dummy."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, _provider: DummyProvider) -> Result<Vec<Form>, ShieldError> {
@@ -79,7 +79,7 @@ impl<U: User + 'static> Action<DummyProvider, ()> for DummySignInAction<U> {
 
     async fn call(
         &self,
-        _provider: DummyProvider,
+        provider: DummyProvider,
         _session: &MethodSession<()>,
         request: Request,
     ) -> Result<Response, ShieldError> {
@@ -92,8 +92,9 @@ impl<U: User + 'static> Action<DummyProvider, ()> for DummySignInAction<U> {
             .await?
             .ok_or_else(|| ShieldError::Validation("User not found.".to_owned()))?;
 
-        Ok(Response::new(ResponseType::Default).session_action(SessionAction::authenticate(user)))
+        Ok(Response::new(ResponseType::Default)
+            .session_action(SessionAction::authenticate(&provider, user)))
     }
 }
 
-erased_action!(DummySignInAction, <U: User>);
+erased_method_action!(DummySignInAction, <U: User>);

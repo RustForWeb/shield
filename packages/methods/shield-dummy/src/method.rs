@@ -1,12 +1,9 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Method, ShieldError, Storage, User, erased_method};
+use shield::{Method, MethodAction, ShieldError, Storage, User, erased_method};
 
-use crate::{
-    actions::{DummySignInAction, DummySignOutAction},
-    provider::DummyProvider,
-};
+use crate::{actions::DummySignInAction, provider::DummyProvider};
 
 pub const DUMMY_METHOD_ID: &str = "dummy";
 
@@ -31,11 +28,8 @@ impl<U: User + 'static> Method for DummyMethod<U> {
         DUMMY_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
-        vec![
-            Box::new(DummySignInAction::new(self.storage.clone())),
-            Box::new(DummySignOutAction),
-        ]
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
+        vec![Box::new(DummySignInAction::new(self.storage.clone()))]
     }
 
     async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {

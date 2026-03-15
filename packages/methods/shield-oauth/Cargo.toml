@@ -12,9 +12,9 @@ version.workspace = true
 ignored = ["serde_json"]
 
 [features]
-default = []
+default = ["rustls"]
 native-tls = ["oauth2/native-tls"]
-rustls-tls = ["oauth2/rustls-tls"]
+rustls = ["oauth2/rustls-tls"]
 
 [dependencies]
 async-trait.workspace = true

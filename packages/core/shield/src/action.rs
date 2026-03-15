@@ -4,41 +4,28 @@ use crate::{
     error::ShieldError,
     form::Form,
     provider::Provider,
-    request::Request,
+    request::{Request, RequestMethod},
     response::Response,
     session::{BaseSession, MethodSession},
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "utoipa")]
-use utoipa::openapi::HttpMethod;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum ActionMethod {
-    Get,
-    Post,
-    Put,
-    Delete,
-    Options,
-    Head,
-    Patch,
-    Trace,
-}
+#[async_trait]
+pub trait Action: Send + Sync {
+    fn id(&self) -> &'static str;
 
-#[cfg(feature = "utoipa")]
-impl From<ActionMethod> for HttpMethod {
-    fn from(value: ActionMethod) -> Self {
-        match value {
-            ActionMethod::Get => Self::Get,
-            ActionMethod::Post => Self::Post,
-            ActionMethod::Put => Self::Put,
-            ActionMethod::Delete => Self::Delete,
-            ActionMethod::Options => Self::Options,
-            ActionMethod::Head => Self::Head,
-            ActionMethod::Patch => Self::Patch,
-            ActionMethod::Trace => Self::Trace,
-        }
-    }
+    fn name(&self) -> &'static str;
+
+    fn openapi_summary(&self) -> &'static str;
+
+    fn openapi_description(&self) -> &'static str;
+
+    fn method(&self) -> RequestMethod;
+
+    async fn forms(&self) -> Result<Vec<Form>, ShieldError>;
+
+    async fn call(&self, session: &BaseSession, request: Request) -> Result<Response, ShieldError>;
 }
 
 // TODO: Think of a better name.
@@ -48,6 +35,7 @@ impl From<ActionMethod> for HttpMethod {
 pub struct ActionForms {
     pub id: String,
     pub name: String,
+    pub forms: Vec<Form>,
     pub method_forms: Vec<ActionMethodForm>,
 }
 
@@ -70,7 +58,7 @@ pub struct ActionProviderForm {
 }
 
 #[async_trait]
-pub trait Action<P: Provider, S>: ErasedAction + Send + Sync {
+pub trait MethodAction<P: Provider, S>: ErasedMethodAction + Send + Sync {
     fn id(&self) -> String;
 
     fn name(&self) -> String;
@@ -79,7 +67,7 @@ pub trait Action<P: Provider, S>: ErasedAction + Send + Sync {
 
     fn openapi_description(&self) -> &'static str;
 
-    fn method(&self) -> ActionMethod;
+    fn method(&self) -> RequestMethod;
 
     fn condition(&self, _provider: &P, _session: &MethodSession<S>) -> Result<bool, ShieldError> {
         Ok(true)
@@ -96,7 +84,7 @@ pub trait Action<P: Provider, S>: ErasedAction + Send + Sync {
 }
 
 #[async_trait]
-pub trait ErasedAction: Send + Sync {
+pub trait ErasedMethodAction: Send + Sync {
     fn erased_id(&self) -> String;
 
     fn erased_name(&self) -> String;
@@ -105,7 +93,7 @@ pub trait ErasedAction: Send + Sync {
 
     fn erased_openapi_description(&self) -> &'static str;
 
-    fn erased_method(&self) -> ActionMethod;
+    fn erased_method(&self) -> RequestMethod;
 
     fn erased_condition(
         &self,
@@ -129,10 +117,10 @@ pub trait ErasedAction: Send + Sync {
 }
 
 #[macro_export]
-macro_rules! erased_action {
+macro_rules! erased_method_action {
     ($action:ident $(, < $( $generic_name:ident : $generic_type:ident ),+ > )*) => {
         #[async_trait]
-        impl $( < $( $generic_name: $generic_type + 'static ),+ > )* $crate::ErasedAction for $action $( < $( $generic_name ),+ > )* {
+        impl $( < $( $generic_name: $generic_type + 'static ),+ > )* $crate::ErasedMethodAction for $action $( < $( $generic_name ),+ > )* {
             fn erased_id(&self) -> String {
                 self.id()
             }
@@ -149,7 +137,7 @@ macro_rules! erased_action {
                 self.openapi_description()
             }
 
-            fn erased_method(&self) -> $crate::ActionMethod {
+            fn erased_method(&self) -> $crate::RequestMethod {
                 self.method()
             }
 

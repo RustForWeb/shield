@@ -39,7 +39,7 @@ shield-email = { workspace = true, features = [
     "sender-tracing",
 ], optional = true }
 shield-memory = { workspace = true, optional = true }
-shield-oidc = { workspace = true, features = ["native-tls"], optional = true }
+shield-oidc = { workspace = true, optional = true }
 tokio = { workspace = true, features = [
     "macros",
     "rt-multi-thread",

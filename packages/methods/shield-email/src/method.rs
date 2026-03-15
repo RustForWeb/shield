@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Method, ShieldError, User, erased_method};
+use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
-    actions::{EmailSignInAction, EmailSignInCallbackAction, EmailSignOutAction},
+    actions::{EmailSignInAction, EmailSignInCallbackAction},
     options::EmailOptions,
     provider::EmailProvider,
     storage::EmailStorage,
@@ -35,7 +35,7 @@ impl<U: User + 'static> Method for EmailMethod<U> {
         EMAIL_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
         vec![
             Box::new(EmailSignInAction::new(
                 self.options.clone(),
@@ -45,7 +45,6 @@ impl<U: User + 'static> Method for EmailMethod<U> {
                 self.options.clone(),
                 self.storage.clone(),
             )),
-            Box::new(EmailSignOutAction),
         ]
     }
 

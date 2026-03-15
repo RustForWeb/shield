@@ -8,9 +8,9 @@ use oauth2::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, ActionMethod, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession,
-    Request, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser,
-    User, erased_action,
+    ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodAction, MethodSession, Request,
+    RequestMethod, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction,
+    UpdateUser, User, erased_method_action,
 };
 
 use crate::{
@@ -129,7 +129,7 @@ impl<U: User> OauthSignInCallbackAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallbackAction<U> {
+impl<U: User + 'static> MethodAction<OauthProvider, OauthSession> for OauthSignInCallbackAction<U> {
     fn id(&self) -> String {
         SignInCallbackAction::id()
     }
@@ -146,8 +146,8 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
         "Sign in callback for OAuth."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Get
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Get
     }
 
     fn condition(
@@ -205,7 +205,7 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
 
-        if let Some(token_url_params) = provider.token_url_params {
+        if let Some(token_url_params) = &provider.token_url_params {
             let params = parse(token_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -264,17 +264,20 @@ impl<U: User + 'static> Action<OauthProvider, OauthSession> for OauthSignInCallb
                 .map(ToString::to_string)
                 .unwrap_or_else(|| self.options.sign_in_redirect.clone()),
         ))
-        .session_action(SessionAction::authenticate(user))
-        .session_action(SessionAction::data(OauthSession {
-            redirect_url: None,
-            csrf: None,
-            pkce_verifier: None,
-            oauth_connection_id: Some(connection.id),
-        })?))
+        .session_action(SessionAction::authenticate(&provider, user))
+        .session_action(SessionAction::method_data(
+            &provider,
+            OauthSession {
+                redirect_url: None,
+                csrf: None,
+                pkce_verifier: None,
+                oauth_connection_id: Some(connection.id),
+            },
+        )?))
     }
 }
 
-erased_action!(OauthSignInCallbackAction, <U: User>);
+erased_method_action!(OauthSignInCallbackAction, <U: User>);
 
 type ParsedTokenResponse = (
     String,

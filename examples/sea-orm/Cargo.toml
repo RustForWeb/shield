@@ -12,13 +12,13 @@ version.workspace = true
 [dependencies]
 sea-orm = { workspace = true, features = [
     "macros",
-    "runtime-tokio-native-tls",
+    "runtime-tokio-rustls",
     "sqlx-mysql",
     "sqlx-postgres",
     "sqlx-sqlite",
 ] }
 sea-orm-migration = { workspace = true, features = [
-    "runtime-tokio-native-tls",
+    "runtime-tokio-rustls",
     "sqlx-mysql",
     "sqlx-postgres",
     "sqlx-sqlite",

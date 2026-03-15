@@ -6,7 +6,7 @@ use std::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
-use crate::{error::SessionError, user::User};
+use crate::{error::SessionError, provider::Provider, user::User};
 
 #[async_trait]
 pub trait SessionStorage: Send + Sync {
@@ -105,35 +105,51 @@ pub struct Authentication {
 
 #[derive(Clone, Debug)]
 pub enum SessionAction {
-    Authenticate { user_id: String },
+    Authenticate {
+        method_id: String,
+        provider_id: Option<String>,
+        user_id: String,
+    },
     Unauthenticate,
-    Data(String),
+    MethodData {
+        method_id: String,
+        value: String,
+    },
 }
 
 impl SessionAction {
-    pub fn authenticate<U: User>(user: U) -> Self {
-        Self::Authenticate { user_id: user.id() }
+    pub fn authenticate<U: User>(provider: &dyn Provider, user: U) -> Self {
+        Self::Authenticate {
+            method_id: provider.method_id(),
+            provider_id: provider.id(),
+            user_id: user.id(),
+        }
     }
 
     pub fn unauthenticate() -> Self {
         Self::Unauthenticate
     }
 
-    pub fn data<T: Serialize>(value: T) -> Result<Self, SessionError> {
+    pub fn method_data<T: Serialize>(
+        provider: &dyn Provider,
+        value: T,
+    ) -> Result<Self, SessionError> {
         let value = serde_json::to_string(&value)
             .map_err(|err| SessionError::Serialization(err.to_string()))?;
 
-        Ok(Self::Data(value))
+        Ok(Self::MethodData {
+            method_id: provider.method_id(),
+            value,
+        })
     }
 
-    pub(crate) async fn call(
-        &self,
-        method_id: &str,
-        provider_id: Option<&str>,
-        session: &Session,
-    ) -> Result<(), SessionError> {
+    pub(crate) async fn call(&self, session: &Session) -> Result<(), SessionError> {
         match self {
-            Self::Authenticate { user_id } => {
+            Self::Authenticate {
+                method_id,
+                provider_id,
+                user_id,
+            } => {
                 session.renew().await?;
 
                 {
@@ -143,8 +159,8 @@ impl SessionAction {
                         .map_err(|err| SessionError::Lock(err.to_string()))?;
 
                     session_data.base.authentication = Some(Authentication {
-                        method_id: method_id.to_owned(),
-                        provider_id: provider_id.map(ToOwned::to_owned),
+                        method_id: method_id.clone(),
+                        provider_id: provider_id.clone(),
                         user_id: user_id.clone(),
                     });
                 }
@@ -154,7 +170,7 @@ impl SessionAction {
             Self::Unauthenticate => {
                 session.purge().await?;
             }
-            Self::Data(value) => {
+            Self::MethodData { method_id, value } => {
                 {
                     let session_data = session.data();
                     let mut session_data = session_data

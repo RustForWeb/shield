@@ -2,18 +2,20 @@ use std::collections::HashMap;
 
 use dioxus::{logger::tracing::info, prelude::*};
 use shield::ResponseType;
-use shield_dioxus::{ShieldRouter, call};
+use shield_dioxus::{ShieldRouter, call_method};
 
 use crate::dioxus::input::FormInput;
 
 #[derive(Clone, PartialEq, Props)]
-pub struct FormProps {
+pub struct MethodFormProps {
     action_id: String,
+    method_id: String,
+    provider_id: Option<String>,
     form: shield::Form,
 }
 
 #[component]
-pub fn Form(props: FormProps) -> Element {
+pub fn MethodForm(props: MethodFormProps) -> Element {
     let navigator = navigator();
 
     rsx! {
@@ -21,6 +23,8 @@ pub fn Form(props: FormProps) -> Element {
             onsubmit: {
                 move |event| {
                     let action_id = props.action_id.clone();
+                    let method_id = props.method_id.clone();
+                    let provider_id = props.provider_id.clone();
 
                     event.prevent_default();
 
@@ -39,7 +43,7 @@ pub fn Form(props: FormProps) -> Element {
                                 .collect::<HashMap<String, String>>()
                         ).expect("TODO: handle error");
 
-                        let result = call(action_id, data).await;
+                        let result = call_method(action_id, method_id, provider_id, data).await;
 
                         match result {
                             Ok(response) => {

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Method, ShieldError, User, erased_method};
+use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
-    actions::{OidcSignInAction, OidcSignInCallbackAction, OidcSignOutAction},
+    actions::{OidcSignInAction, OidcSignInCallbackAction},
     options::OidcOptions,
     provider::OidcProvider,
     session::OidcSession,
@@ -71,14 +71,13 @@ impl<U: User + 'static> Method for OidcMethod<U> {
         OIDC_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
         vec![
             Box::new(OidcSignInAction::new(self.options.clone())),
             Box::new(OidcSignInCallbackAction::new(
                 self.options.clone(),
                 self.storage.clone(),
             )),
-            Box::new(OidcSignOutAction),
         ]
     }
 

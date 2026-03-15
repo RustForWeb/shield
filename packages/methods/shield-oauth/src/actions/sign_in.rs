@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope, url::form_urlencoded::parse};
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, ConfigurationError, Form, Input, InputAddon, InputType, InputTypeHidden,
-    InputTypeSubmit, InputValue, MethodSession, Provider, Request, Response, ResponseType,
-    SessionAction, ShieldError, SignInAction, erased_action,
+    ConfigurationError, Form, Input, InputAddon, InputType, InputTypeHidden, InputTypeSubmit,
+    InputValue, MethodAction, MethodSession, Provider, Request, RequestMethod, Response,
+    ResponseType, SessionAction, ShieldError, SignInAction, erased_method_action,
 };
 use url::Url;
 
@@ -32,7 +32,7 @@ impl OauthSignInAction {
 }
 
 #[async_trait]
-impl Action<OauthProvider, OauthSession> for OauthSignInAction {
+impl MethodAction<OauthProvider, OauthSession> for OauthSignInAction {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -49,8 +49,8 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
         "Sign in with OAuth."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, provider: OauthProvider) -> Result<Vec<Form>, ShieldError> {
@@ -151,12 +151,12 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
                 authorization_request.set_pkce_challenge(pkce_code_challenge.clone());
         }
 
-        if let Some(scopes) = provider.scopes {
+        if let Some(scopes) = &provider.scopes {
             authorization_request =
-                authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
+                authorization_request.add_scopes(scopes.iter().cloned().map(Scope::new));
         }
 
-        if let Some(authorization_url_params) = provider.authorization_url_params {
+        if let Some(authorization_url_params) = &provider.authorization_url_params {
             let params = parse(authorization_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -169,14 +169,17 @@ impl Action<OauthProvider, OauthSession> for OauthSignInAction {
 
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::Unauthenticate)
-            .session_action(SessionAction::data(OauthSession {
-                redirect_url: Some(redirect_url),
-                csrf: Some(csrf_token.secret().clone()),
-                pkce_verifier: pkce_code_challenge
-                    .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
-                oauth_connection_id: None,
-            })?))
+            .session_action(SessionAction::method_data(
+                &provider,
+                OauthSession {
+                    redirect_url: Some(redirect_url),
+                    csrf: Some(csrf_token.secret().clone()),
+                    pkce_verifier: pkce_code_challenge
+                        .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
+                    oauth_connection_id: None,
+                },
+            )?))
     }
 }
 
-erased_action!(OauthSignInAction);
+erased_method_action!(OauthSignInAction);

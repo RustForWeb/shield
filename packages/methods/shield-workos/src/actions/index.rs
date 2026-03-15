@@ -3,9 +3,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit,
-    InputValue, MethodSession, Request, Response, ResponseType, ShieldError, SignInAction,
-    SignUpAction, erased_action,
+    Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypeSubmit, InputValue,
+    MethodAction, MethodSession, Request, RequestMethod, Response, ResponseType, ShieldError,
+    SignInAction, SignUpAction, erased_method_action,
 };
 use workos::{
     PaginationParams,
@@ -41,7 +41,7 @@ impl WorkosIndexAction {
 }
 
 #[async_trait]
-impl Action<WorkosProvider, ()> for WorkosIndexAction {
+impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
     fn id(&self) -> String {
         ACTION_ID.to_owned()
     }
@@ -58,8 +58,8 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
         "Index with WorkOS."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, _provider: WorkosProvider) -> Result<Vec<Form>, ShieldError> {
@@ -260,4 +260,4 @@ impl Action<WorkosProvider, ()> for WorkosIndexAction {
     }
 }
 
-erased_action!(WorkosIndexAction);
+erased_method_action!(WorkosIndexAction);

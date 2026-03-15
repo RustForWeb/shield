@@ -2,7 +2,7 @@ use std::{any::Any, collections::HashMap, sync::Arc};
 
 #[cfg(feature = "utoipa")]
 use convert_case::{Case, Casing};
-use futures::future::try_join_all;
+use ordered_hash_map::OrderedHashMap;
 use tracing::warn;
 #[cfg(feature = "utoipa")]
 use utoipa::{
@@ -14,9 +14,10 @@ use utoipa::{
 };
 
 #[cfg(feature = "utoipa")]
-use crate::path::ActionPathParams;
+use crate::path::{ActionPathParams, MethodActionPathParams};
 use crate::{
-    action::{ActionForms, ActionMethodForm, ActionProviderForm},
+    SignOutAction,
+    action::{Action, ActionForms, ActionMethodForm, ActionProviderForm},
     error::{ActionError, MethodError, ProviderError, SessionError, ShieldError},
     method::ErasedMethod,
     options::ShieldOptions,
@@ -30,7 +31,8 @@ use crate::{
 #[derive(Clone)]
 pub struct Shield<U: User> {
     storage: Arc<dyn Storage<U>>,
-    methods: Arc<HashMap<String, Arc<dyn ErasedMethod>>>,
+    actions: Arc<HashMap<String, Arc<dyn Action>>>,
+    methods: Arc<OrderedHashMap<String, Arc<dyn ErasedMethod>>>,
     options: ShieldOptions,
 }
 
@@ -39,10 +41,18 @@ impl<U: User> Shield<U> {
     where
         S: Storage<U> + 'static,
     {
-        // TOOD: Check for duplicate method IDs.
+        let actions: [Arc<dyn Action>; 1] = [Arc::new(SignOutAction)];
+
+        // TOOD: Check for duplicate action and method IDs.
 
         Self {
             storage: Arc::new(storage),
+            actions: Arc::new(
+                actions
+                    .into_iter()
+                    .map(|action| (action.id().to_owned(), action))
+                    .collect(),
+            ),
             methods: Arc::new(
                 methods
                     .into_iter()
@@ -61,23 +71,12 @@ impl<U: User> Shield<U> {
         &self.options
     }
 
-    pub fn method_by_id(&self, method_id: &str) -> Option<&dyn ErasedMethod> {
-        self.methods.get(method_id).map(|v| &**v)
+    pub fn action_by_id(&self, action_id: &str) -> Option<&dyn Action> {
+        self.actions.get(action_id).map(|v| &**v)
     }
 
-    pub async fn providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError> {
-        try_join_all(
-            self.methods
-                .values()
-                .map(|provider| provider.erased_providers()),
-        )
-        .await
-        .map(|providers| {
-            providers
-                .into_iter()
-                .flat_map(|providers| providers.into_iter().map(|(_, provider)| provider))
-                .collect::<Vec<_>>()
-        })
+    pub fn method_by_id(&self, method_id: &str) -> Option<&dyn ErasedMethod> {
+        self.methods.get(method_id).map(|v| &**v)
     }
 
     pub async fn provider_by_id(
@@ -97,7 +96,13 @@ impl<U: User> Shield<U> {
         session: Session,
     ) -> Result<ActionForms, ShieldError> {
         let mut action_name = None::<String>;
+        let mut forms = vec![];
         let mut method_forms = vec![];
+
+        if let Some(action) = self.actions.get(action_id) {
+            action_name = Some(action.name().to_owned());
+            forms = action.forms().await?;
+        }
 
         for (method_id, method) in self.methods.iter() {
             let Some(action) = method.erased_action_by_id(action_id) else {
@@ -147,16 +152,45 @@ impl<U: User> Shield<U> {
             });
         }
 
-        method_forms.sort_by(|a, b| a.id.cmp(&b.id));
-
         Ok(ActionForms {
             id: action_id.to_owned(),
             name: action_name.unwrap_or(action_id.to_owned()),
+            forms,
             method_forms,
         })
     }
 
     pub async fn call(
+        &self,
+        action_id: &str,
+        session: Session,
+        request: Request,
+    ) -> Result<ResponseType, ShieldError> {
+        let action =
+            self.action_by_id(action_id)
+                .ok_or(ShieldError::Action(ActionError::NotFound(
+                    action_id.to_owned(),
+                )))?;
+
+        let base_session = {
+            let session_data = session.data();
+            let session_data = session_data
+                .lock()
+                .map_err(|err| SessionError::Lock(err.to_string()))?;
+
+            session_data.base.clone()
+        };
+
+        let response = action.call(&base_session, request).await?;
+
+        for session_action in &response.session_actions {
+            session_action.call(&session).await?;
+        }
+
+        Ok(response.r#type)
+    }
+
+    pub async fn call_method(
         &self,
         action_id: &str,
         method_id: &str,
@@ -201,9 +235,7 @@ impl<U: User> Shield<U> {
             .await?;
 
         for session_action in &response.session_actions {
-            session_action
-                .call(method_id, provider_id, &session)
-                .await?;
+            session_action.call(&session).await?;
         }
 
         Ok(response.r#type)
@@ -247,19 +279,46 @@ impl<U: User> Shield<U> {
 
     #[cfg(feature = "utoipa")]
     pub fn openapi(&self) -> OpenApi {
+        use utoipa::openapi::Response;
+
         let mut paths = Paths::builder();
+
+        for action in self.actions.values() {
+            let action_id = action.id();
+
+            // TODO: Query, request body, responses.
+
+            paths = paths.path(
+                format!("/{action_id}"),
+                PathItem::builder()
+                    .operation(
+                        action.method().into(),
+                        Operation::builder()
+                            .operation_id(Some(action_id.to_case(Case::Camel)))
+                            .summary(Some(action.openapi_summary()))
+                            .description(Some(action.openapi_description()))
+                            .tag("auth")
+                            .parameters(Some(ActionPathParams::into_params(|| {
+                                Some(ParameterIn::Path)
+                            })))
+                            .response(
+                                "500",
+                                Response::builder().description("Internal server error."),
+                            ),
+                    )
+                    .build(),
+            );
+        }
 
         for method in self.methods.values() {
             for action in method.erased_actions() {
-                use utoipa::openapi::Response;
-
                 let method_id = method.erased_id();
                 let action_id = action.erased_id();
 
                 // TODO: Query, request body, responses.
 
                 paths = paths.path(
-                    format!("/{}/{}/{{providerId}}", method_id, action_id),
+                    format!("/{action_id}/{method_id}/{{providerId}}"),
                     PathItem::builder()
                         .operation(
                             action.erased_method().into(),
@@ -272,7 +331,7 @@ impl<U: User> Shield<U> {
                                 .summary(Some(action.erased_openapi_summary()))
                                 .description(Some(action.erased_openapi_description()))
                                 .tag("auth")
-                                .parameters(Some(ActionPathParams::into_params(|| {
+                                .parameters(Some(MethodActionPathParams::into_params(|| {
                                     Some(ParameterIn::Path)
                                 })))
                                 .response(

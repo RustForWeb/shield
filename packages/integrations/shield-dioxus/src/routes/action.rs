@@ -55,8 +55,6 @@ async fn forms(action_id: String) -> Result<ActionForms> {
 #[post("/api/auth/call", parts: dioxus::fullstack::http::request::Parts)]
 pub async fn call(
     action_id: String,
-    method_id: String,
-    provider_id: Option<String>,
     // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
     data: Value,
 ) -> Result<ResponseType> {
@@ -78,6 +76,44 @@ pub async fn call(
     let response = shield
         .call(
             &action_id,
+            session,
+            Request {
+                query: Value::Null,
+                form_data: data,
+            },
+        )
+        .await
+        .context("Failed to call Shield action.")?;
+
+    Ok(response)
+}
+
+#[post("/api/auth/call-method", parts: dioxus::fullstack::http::request::Parts)]
+pub async fn call_method(
+    action_id: String,
+    method_id: String,
+    provider_id: Option<String>,
+    // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
+    data: Value,
+) -> Result<ResponseType> {
+    use anyhow::anyhow;
+    use serde_json::Value;
+    use shield::Request;
+
+    use crate::integration::DioxusIntegrationDyn;
+
+    tracing::info!("call method data {data:#?}");
+
+    let integration = parts
+        .extensions
+        .get::<DioxusIntegrationDyn>()
+        .ok_or_else(|| anyhow!("Dioxus Shield integration should be extracted."))?;
+    let shield = integration.extract_shield(&parts.extensions)?;
+    let session = integration.extract_session(&parts.extensions)?;
+
+    let response = shield
+        .call_method(
+            &action_id,
             &method_id,
             provider_id.as_deref(),
             session,
@@ -87,7 +123,7 @@ pub async fn call(
             },
         )
         .await
-        .context("Failed to call Shield action.")?;
+        .context("Failed to call Shield method action.")?;
 
     Ok(response)
 }

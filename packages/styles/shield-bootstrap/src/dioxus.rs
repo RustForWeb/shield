@@ -1,11 +1,12 @@
 mod form;
 mod input;
+mod method_form;
 
 use dioxus::prelude::*;
 use shield::ActionForms;
 use shield_dioxus::{DioxusStyle, ErasedDioxusStyle};
 
-use crate::dioxus::form::Form;
+use crate::dioxus::{form::Form, method_form::MethodForm};
 
 #[derive(Default)]
 pub struct BootstrapDioxusStyle {}
@@ -26,9 +27,16 @@ impl DioxusStyle for BootstrapDioxusStyle {
                     "{action.name}"
                 }
 
+                for form in &action.forms {
+                    Form {
+                        action_id: action.id.clone(),
+                        form: form.clone()
+                    }
+                }
+
                 for method_form in &action.method_forms {
                     for provider_form in &method_form.provider_forms {
-                        Form {
+                        MethodForm {
                             action_id: action.id.clone(),
                             method_id: method_form.id.clone(),
                             provider_id: provider_form.id.clone(),

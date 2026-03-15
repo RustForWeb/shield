@@ -4,8 +4,8 @@ use async_trait::async_trait;
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    ErasedAction,
-    action::Action,
+    ErasedMethodAction,
+    action::MethodAction,
     error::{SessionError, ShieldError},
     provider::Provider,
 };
@@ -17,12 +17,12 @@ pub trait Method: Send + Sync {
 
     fn id(&self) -> String;
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>>;
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>>;
 
     fn action_by_id(
         &self,
         action_id: &str,
-    ) -> Option<Box<dyn Action<Self::Provider, Self::Session>>> {
+    ) -> Option<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
         self.actions()
             .into_iter()
             .find(|action| action.id() == action_id)
@@ -46,9 +46,9 @@ pub trait Method: Send + Sync {
 pub trait ErasedMethod: Send + Sync {
     fn erased_id(&self) -> String;
 
-    fn erased_actions(&self) -> Vec<Box<dyn ErasedAction>>;
+    fn erased_actions(&self) -> Vec<Box<dyn ErasedMethodAction>>;
 
-    fn erased_action_by_id(&self, action_id: &str) -> Option<Box<dyn ErasedAction>>;
+    fn erased_action_by_id(&self, action_id: &str) -> Option<Box<dyn ErasedMethodAction>>;
 
     async fn erased_providers(
         &self,
@@ -74,19 +74,19 @@ macro_rules! erased_method {
                 self.id()
             }
 
-            fn erased_actions(&self) -> Vec<Box<dyn $crate::ErasedAction>> {
+            fn erased_actions(&self) -> Vec<Box<dyn $crate::ErasedMethodAction>> {
                 self.actions()
                     .into_iter()
-                    .map(|action| action as Box<dyn $crate::ErasedAction>)
+                    .map(|action| action as Box<dyn $crate::ErasedMethodAction>)
                     .collect()
             }
 
             fn erased_action_by_id(
                 &self,
                 action_id: &str,
-            ) -> Option<Box<dyn $crate::ErasedAction>> {
+            ) -> Option<Box<dyn $crate::ErasedMethodAction>> {
                 self.action_by_id(action_id)
-                    .map(|action| action as Box<dyn $crate::ErasedAction>)
+                    .map(|action| action as Box<dyn $crate::ErasedMethodAction>)
             }
 
             async fn erased_providers(

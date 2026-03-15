@@ -5,9 +5,9 @@ use openidconnect::{
 };
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputAddon, InputType, InputTypeHidden, InputTypeSubmit,
-    InputValue, MethodSession, Provider, Request, Response, ResponseType, SessionAction,
-    ShieldError, SignInAction, erased_action,
+    Form, Input, InputAddon, InputType, InputTypeHidden, InputTypeSubmit, InputValue, MethodAction,
+    MethodSession, Provider, Request, RequestMethod, Response, ResponseType, SessionAction,
+    ShieldError, SignInAction, erased_method_action,
 };
 use url::Url;
 
@@ -35,7 +35,7 @@ impl OidcSignInAction {
 }
 
 #[async_trait]
-impl Action<OidcProvider, OidcSession> for OidcSignInAction {
+impl MethodAction<OidcProvider, OidcSession> for OidcSignInAction {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -52,8 +52,8 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
         "Sign in with OpenID Connect."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {
@@ -156,12 +156,12 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
                 authorization_request.set_pkce_challenge(pkce_code_challenge.clone());
         }
 
-        if let Some(scopes) = provider.scopes {
+        if let Some(scopes) = &provider.scopes {
             authorization_request =
-                authorization_request.add_scopes(scopes.into_iter().map(Scope::new));
+                authorization_request.add_scopes(scopes.iter().cloned().map(Scope::new));
         }
 
-        if let Some(authorization_url_params) = provider.authorization_url_params {
+        if let Some(authorization_url_params) = &provider.authorization_url_params {
             let params = parse(authorization_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -174,15 +174,18 @@ impl Action<OidcProvider, OidcSession> for OidcSignInAction {
 
         Ok(Response::new(ResponseType::Redirect(auth_url.to_string()))
             .session_action(SessionAction::unauthenticate())
-            .session_action(SessionAction::data(OidcSession {
-                redirect_url: Some(redirect_url),
-                csrf: Some(csrf_token.secret().clone()),
-                nonce: Some(nonce.secret().clone()),
-                pkce_verifier: pkce_code_challenge
-                    .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
-                oidc_connection_id: None,
-            })?))
+            .session_action(SessionAction::method_data(
+                &provider,
+                OidcSession {
+                    redirect_url: Some(redirect_url),
+                    csrf: Some(csrf_token.secret().clone()),
+                    nonce: Some(nonce.secret().clone()),
+                    pkce_verifier: pkce_code_challenge
+                        .map(|(_, pkce_code_verifier)| pkce_code_verifier.secret().clone()),
+                    oidc_connection_id: None,
+                },
+            )?))
     }
 }
 
-erased_action!(OidcSignInAction);
+erased_method_action!(OidcSignInAction);

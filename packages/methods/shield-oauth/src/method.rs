@@ -1,15 +1,17 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Method, ShieldError, User, erased_method};
+use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
-    actions::{OauthSignInAction, OauthSignInCallbackAction, OauthSignOutAction},
+    actions::{OauthSignInAction, OauthSignInCallbackAction},
     options::OauthOptions,
     provider::OauthProvider,
     session::OauthSession,
     storage::OauthStorage,
 };
+
+// TODO: Add sign out hook.
 
 pub const OAUTH_METHOD_ID: &str = "oauth";
 
@@ -71,14 +73,13 @@ impl<U: User + 'static> Method for OauthMethod<U> {
         OAUTH_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
         vec![
             Box::new(OauthSignInAction::new(self.options.clone())),
             Box::new(OauthSignInCallbackAction::new(
                 self.options.clone(),
                 self.storage.clone(),
             )),
-            Box::new(OauthSignOutAction),
         ]
     }
 

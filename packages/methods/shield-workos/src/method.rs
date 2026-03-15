@@ -1,15 +1,17 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use shield::{Action, Method, ShieldError, erased_method};
+use shield::{Method, MethodAction, ShieldError, erased_method};
 use workos::{ApiKey, WorkOs};
 
 use crate::{
-    actions::{WorkosIndexAction, WorkosSignInAction, WorkosSignOutAction, WorkosSignUpAction},
+    actions::{WorkosIndexAction, WorkosSignInAction, WorkosSignUpAction},
     client::WorkosClient,
     options::WorkosOptions,
     provider::WorkosProvider,
 };
+
+// TODO: Add hook for WorkOS sign out.
 
 pub const WORKOS_METHOD_ID: &str = "workos";
 
@@ -45,7 +47,7 @@ impl Method for WorkosMethod {
         WORKOS_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
         vec![
             Box::new(WorkosIndexAction::new(
                 self.options.clone(),
@@ -53,7 +55,6 @@ impl Method for WorkosMethod {
             )),
             Box::new(WorkosSignInAction::new(self.client.clone())),
             Box::new(WorkosSignUpAction::new(self.client.clone())),
-            Box::new(WorkosSignOutAction::new(self.client.clone())),
         ]
     }
 
