@@ -17,7 +17,7 @@ async-trait.workspace = true
 bon.workspace = true
 chrono = { workspace = true, features = ["serde"] }
 convert_case = "0.11.0"
-futures.workspace = true
+ordered_hash_map = "0.5.0"
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

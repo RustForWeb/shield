@@ -3,8 +3,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use shield::{
-    Action, ActionMethod, Form, MethodSession, Request, Response, ResponseType, SessionAction,
-    ShieldError, SignInAction, User, erased_action,
+    Form, MethodAction, MethodSession, Request, RequestMethod, Response, ResponseType,
+    SessionAction, ShieldError, SignInAction, User, erased_method_action,
 };
 
 use crate::{credentials::Credentials, provider::CredentialsProvider};
@@ -20,7 +20,7 @@ impl<U: User, D: DeserializeOwned> CredentialsSignInAction<U, D> {
 }
 
 #[async_trait]
-impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvider, ()>
+impl<U: User + 'static, D: DeserializeOwned + 'static> MethodAction<CredentialsProvider, ()>
     for CredentialsSignInAction<U, D>
 {
     fn id(&self) -> String {
@@ -39,8 +39,8 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
         "Sign in with credentials."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, _provider: CredentialsProvider) -> Result<Vec<Form>, ShieldError> {
@@ -49,7 +49,7 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
 
     async fn call(
         &self,
-        _provider: CredentialsProvider,
+        provider: CredentialsProvider,
         _session: &MethodSession<()>,
         request: Request,
     ) -> Result<Response, ShieldError> {
@@ -58,8 +58,9 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Action<CredentialsProvide
 
         let user = self.credentials.sign_in(data).await?;
 
-        Ok(Response::new(ResponseType::Default).session_action(SessionAction::authenticate(user)))
+        Ok(Response::new(ResponseType::Default)
+            .session_action(SessionAction::authenticate(&provider, user)))
     }
 }
 
-erased_action!(CredentialsSignInAction, <U: User, D: DeserializeOwned>);
+erased_method_action!(CredentialsSignInAction, <U: User, D: DeserializeOwned>);

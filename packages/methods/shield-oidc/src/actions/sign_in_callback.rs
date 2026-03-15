@@ -10,9 +10,9 @@ use openidconnect::{
 };
 use secrecy::SecretString;
 use shield::{
-    Action, ActionMethod, ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodSession,
-    Request, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction, UpdateUser,
-    User, erased_action,
+    ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodAction, MethodSession, Request,
+    RequestMethod, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction,
+    UpdateUser, User, erased_method_action,
 };
 use tracing::debug;
 
@@ -140,7 +140,7 @@ impl<U: User> OidcSignInCallbackAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallbackAction<U> {
+impl<U: User + 'static> MethodAction<OidcProvider, OidcSession> for OidcSignInCallbackAction<U> {
     fn id(&self) -> String {
         SignInCallbackAction::id()
     }
@@ -157,8 +157,8 @@ impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallback
         "Sign in callback for OpenID Connect."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Get
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Get
     }
 
     fn condition(
@@ -217,7 +217,7 @@ impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallback
             return Err(ShieldError::Validation("Missing PKCE verifier.".to_owned()));
         }
 
-        if let Some(token_url_params) = provider.token_url_params {
+        if let Some(token_url_params) = &provider.token_url_params {
             let params = parse(token_url_params.trim_start_matches('?').as_bytes());
 
             for (name, value) in params {
@@ -298,18 +298,21 @@ impl<U: User + 'static> Action<OidcProvider, OidcSession> for OidcSignInCallback
                 .map(ToString::to_string)
                 .unwrap_or_else(|| self.options.sign_in_redirect.clone()),
         ))
-        .session_action(SessionAction::authenticate(user))
-        .session_action(SessionAction::data(OidcSession {
-            redirect_url: None,
-            csrf: None,
-            nonce: None,
-            pkce_verifier: None,
-            oidc_connection_id: Some(connection.id),
-        })?))
+        .session_action(SessionAction::authenticate(&provider, user))
+        .session_action(SessionAction::method_data(
+            &provider,
+            OidcSession {
+                redirect_url: None,
+                csrf: None,
+                nonce: None,
+                pkce_verifier: None,
+                oidc_connection_id: Some(connection.id),
+            },
+        )?))
     }
 }
 
-erased_action!(OidcSignInCallbackAction, <U: User>);
+erased_method_action!(OidcSignInCallbackAction, <U: User>);
 
 type ParsedTokenResponse = (
     String,

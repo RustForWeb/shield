@@ -1,11 +1,9 @@
 mod index;
 mod sign_in;
-mod sign_out;
 mod sign_up;
 
 pub use index::*;
 pub use sign_in::*;
-pub use sign_out::*;
 pub use sign_up::*;
 
 // TODO:

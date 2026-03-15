@@ -4,9 +4,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, CreateEmailAddress, CreateUser, Form, Input, InputType, InputTypeEmail,
-    InputTypeSubmit, InputTypeText, InputValue, MethodSession, Request, Response, ResponseType,
-    SessionAction, ShieldError, SignInCallbackAction, User, erased_action,
+    CreateEmailAddress, CreateUser, Form, Input, InputType, InputTypeEmail, InputTypeSubmit,
+    InputTypeText, InputValue, MethodAction, MethodSession, Request, RequestMethod, Response,
+    ResponseType, SessionAction, ShieldError, SignInCallbackAction, User, erased_method_action,
 };
 
 use crate::{
@@ -33,7 +33,7 @@ impl<U: User> EmailSignInCallbackAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<U> {
+impl<U: User + 'static> MethodAction<EmailProvider, ()> for EmailSignInCallbackAction<U> {
     fn id(&self) -> String {
         SignInCallbackAction::id()
     }
@@ -50,8 +50,8 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
         "Sign in callback for email."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     fn condition(
@@ -110,7 +110,7 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
 
     async fn call(
         &self,
-        _provider: EmailProvider,
+        provider: EmailProvider,
         _session: &MethodSession<()>,
         request: Request,
     ) -> Result<Response, ShieldError> {
@@ -154,8 +154,8 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInCallbackAction<
         Ok(Response::new(ResponseType::Redirect(
             self.options.sign_in_redirect.clone(),
         ))
-        .session_action(SessionAction::authenticate(user)))
+        .session_action(SessionAction::authenticate(&provider, user)))
     }
 }
 
-erased_action!(EmailSignInCallbackAction, <U: User>);
+erased_method_action!(EmailSignInCallbackAction, <U: User>);

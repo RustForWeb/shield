@@ -1,4 +1,4 @@
-use std::{any::Any, sync::Arc};
+use std::sync::Arc;
 
 use async_trait::async_trait;
 
@@ -9,8 +9,6 @@ use crate::{
 
 #[async_trait]
 pub trait DynShield: Send + Sync {
-    async fn providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError>;
-
     async fn action_forms(
         &self,
         action_id: &str,
@@ -18,6 +16,13 @@ pub trait DynShield: Send + Sync {
     ) -> Result<ActionForms, ShieldError>;
 
     async fn call(
+        &self,
+        action_id: &str,
+        session: Session,
+        request: Request,
+    ) -> Result<ResponseType, ShieldError>;
+
+    async fn call_method(
         &self,
         action_id: &str,
         method_id: &str,
@@ -29,10 +34,6 @@ pub trait DynShield: Send + Sync {
 
 #[async_trait]
 impl<U: User> DynShield for Shield<U> {
-    async fn providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError> {
-        self.providers().await
-    }
-
     async fn action_forms(
         &self,
         action_id: &str,
@@ -44,12 +45,21 @@ impl<U: User> DynShield for Shield<U> {
     async fn call(
         &self,
         action_id: &str,
+        session: Session,
+        request: Request,
+    ) -> Result<ResponseType, ShieldError> {
+        self.call(action_id, session, request).await
+    }
+
+    async fn call_method(
+        &self,
+        action_id: &str,
         method_id: &str,
         provider_id: Option<&str>,
         session: Session,
         request: Request,
     ) -> Result<ResponseType, ShieldError> {
-        self.call(action_id, method_id, provider_id, session, request)
+        self.call_method(action_id, method_id, provider_id, session, request)
             .await
     }
 }
@@ -59,10 +69,6 @@ pub struct ShieldDyn(Arc<dyn DynShield>);
 impl ShieldDyn {
     pub fn new(shield: Shield<impl User + 'static>) -> Self {
         Self(Arc::new(shield))
-    }
-
-    pub async fn providers(&self) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError> {
-        self.0.providers().await
     }
 
     pub async fn action_forms(
@@ -76,13 +82,22 @@ impl ShieldDyn {
     pub async fn call(
         &self,
         action_id: &str,
+        session: Session,
+        request: Request,
+    ) -> Result<ResponseType, ShieldError> {
+        self.0.call(action_id, session, request).await
+    }
+
+    pub async fn call_method(
+        &self,
+        action_id: &str,
         method_id: &str,
         provider_id: Option<&str>,
         session: Session,
         request: Request,
     ) -> Result<ResponseType, ShieldError> {
         self.0
-            .call(action_id, method_id, provider_id, session, request)
+            .call_method(action_id, method_id, provider_id, session, request)
             .await
     }
 }

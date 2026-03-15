@@ -31,8 +31,12 @@ impl<U: Clone + User + 'static> AuthRoutes<U> {
         Router::new()
             .route("/user", get(user::<U>))
             .route("/forms/{actionId}", get(forms::<U>))
-            .route("/{methodId}/{actionId}", any(action::<U>))
-            .route("/{methodId}/{actionId}/{providerId}", any(action::<U>))
+            .route("/{actionId}", any(action::<U>))
+            .route("/{actionId}/{methodId}", any(method_action::<U>))
+            .route(
+                "/{actionId}/{methodId}/{providerId}",
+                any(method_action::<U>),
+            )
     }
 
     #[cfg(feature = "utoipa")]
@@ -40,9 +44,17 @@ impl<U: Clone + User + 'static> AuthRoutes<U> {
         OpenApiRouter::with_openapi(BaseOpenApi::openapi().merge_from(self.shield.openapi()))
             .route("/user", get(user::<U>))
             .route("/forms/{actionId}", get(forms::<U>))
-            .route("/{methodId}/{actionId}", get(action::<U>))
-            .route("/{methodId}/{actionId}", post(action::<U>))
-            .route("/{methodId}/{actionId}/{providerId}", get(action::<U>))
-            .route("/{methodId}/{actionId}/{providerId}", post(action::<U>))
+            .route("/{actionId}", get(action::<U>))
+            .route("/{actionId}", post(action::<U>))
+            .route("/{actionId}/{methodId}", get(method_action::<U>))
+            .route("/{actionId}/{methodId}", post(method_action::<U>))
+            .route(
+                "/{actionId}/{methodId}/{providerId}",
+                get(method_action::<U>),
+            )
+            .route(
+                "/{actionId}/{methodId}/{providerId}",
+                post(method_action::<U>),
+            )
     }
 }

@@ -51,8 +51,6 @@ async fn forms(action_id: String) -> Result<ActionForms, ServerFnError> {
 #[server]
 pub async fn call(
     action_id: String,
-    method_id: String,
-    provider_id: Option<String>,
     // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
     data: Value,
 ) -> Result<(), ServerFnError> {
@@ -69,6 +67,50 @@ pub async fn call(
 
     let response = shield
         .call(
+            &action_id,
+            session,
+            Request {
+                query: Value::Null,
+                form_data: data,
+            },
+        )
+        .await?;
+
+    match response {
+        ResponseType::Default => todo!("default reponse"),
+        ResponseType::Redirect(to) => {
+            integration.redirect(&to);
+        }
+        ResponseType::RedirectToAction { action_id } => {
+            // TODO: Use actual router prefix instead of hardcoded `/auth`.
+            integration.redirect(&format!("/auth/{action_id}"));
+        }
+    }
+
+    Ok(())
+}
+
+#[server]
+pub async fn call_method(
+    action_id: String,
+    method_id: String,
+    provider_id: Option<String>,
+    // TODO: Would be nice if this argument could fill up with all unknown keys instead of setting name to `data[...]`.
+    data: Value,
+) -> Result<(), ServerFnError> {
+    use serde_json::Value;
+    use shield::{Request, ResponseType};
+
+    use crate::expect_server_integration;
+
+    let integration = expect_server_integration();
+    let shield = integration.extract_shield().await;
+    let session = integration.extract_session().await;
+
+    tracing::info!("call method data {data:#?}");
+
+    let response = shield
+        .call_method(
             &action_id,
             &method_id,
             provider_id.as_deref(),

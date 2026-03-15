@@ -5,9 +5,9 @@ use chrono::Utc;
 use rand::distr::{Alphanumeric, SampleString};
 use serde::Deserialize;
 use shield::{
-    Action, ActionMethod, Form, Input, InputType, InputTypeEmail, InputTypeSubmit, InputValue,
-    MethodSession, Request, Response, ResponseType, SessionAction, ShieldError, SignInAction, User,
-    erased_action,
+    Form, Input, InputType, InputTypeEmail, InputTypeSubmit, InputValue, MethodAction,
+    MethodSession, Request, RequestMethod, Response, ResponseType, SessionAction, ShieldError,
+    SignInAction, User, erased_method_action,
 };
 
 use crate::{
@@ -36,7 +36,7 @@ impl<U: User> EmailSignInAction<U> {
 }
 
 #[async_trait]
-impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInAction<U> {
+impl<U: User + 'static> MethodAction<EmailProvider, ()> for EmailSignInAction<U> {
     fn id(&self) -> String {
         SignInAction::id()
     }
@@ -53,8 +53,8 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInAction<U> {
         "Sign in with email."
     }
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
+    fn method(&self) -> RequestMethod {
+        RequestMethod::Post
     }
 
     async fn forms(&self, _provider: EmailProvider) -> Result<Vec<Form>, ShieldError> {
@@ -116,4 +116,4 @@ impl<U: User + 'static> Action<EmailProvider, ()> for EmailSignInAction<U> {
     }
 }
 
-erased_action!(EmailSignInAction, <U: User>);
+erased_method_action!(EmailSignInAction, <U: User>);

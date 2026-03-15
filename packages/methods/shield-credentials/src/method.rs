@@ -2,12 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
-use shield::{Action, Method, ShieldError, User, erased_method};
+use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
-    actions::{CredentialsSignInAction, CredentialsSignOutAction},
-    credentials::Credentials,
-    provider::CredentialsProvider,
+    actions::CredentialsSignInAction, credentials::Credentials, provider::CredentialsProvider,
 };
 
 pub const CREDENTIALS_METHOD_ID: &str = "credentials";
@@ -33,11 +31,10 @@ impl<U: User + 'static, D: DeserializeOwned + 'static> Method for CredentialsMet
         CREDENTIALS_METHOD_ID.to_owned()
     }
 
-    fn actions(&self) -> Vec<Box<dyn Action<Self::Provider, Self::Session>>> {
-        vec![
-            Box::new(CredentialsSignInAction::new(self.credentials.clone())),
-            Box::new(CredentialsSignOutAction),
-        ]
+    fn actions(&self) -> Vec<Box<dyn MethodAction<Self::Provider, Self::Session>>> {
+        vec![Box::new(CredentialsSignInAction::new(
+            self.credentials.clone(),
+        ))]
     }
 
     async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {

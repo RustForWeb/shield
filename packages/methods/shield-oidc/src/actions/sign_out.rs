@@ -1,106 +1,52 @@
-use async_trait::async_trait;
-use shield::{
-    Action, ActionMethod, Form, MethodSession, Request, Response, ResponseType, SessionAction,
-    ShieldError, SignOutAction, erased_action,
-};
+// TODO: Add hooks to perform the logic below.
 
-use crate::{provider::OidcProvider, session::OidcSession};
+// TODO: See [`OidcProvider::oidc_client`].
 
-pub struct OidcSignOutAction;
+// let provider = match request.provider_id {
+//     Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
+//     None => return Err(ProviderError::ProviderMissing.into()),
+// };
 
-#[async_trait]
-impl Action<OidcProvider, OidcSession> for OidcSignOutAction {
-    fn id(&self) -> String {
-        SignOutAction::id()
-    }
+// let connection_id = {
+//     let session_data = session.data();
+//     let session_data = session_data
+//         .lock()
+//         .map_err(|err| SessionError::Lock(err.to_string()))?;
 
-    fn name(&self) -> String {
-        SignOutAction::name()
-    }
+//     session_data.oidc_connection_id.clone()
+// };
 
-    fn openapi_summary(&self) -> &'static str {
-        "Sign out with OpenID Connect"
-    }
+// if let Some(connection_id) = connection_id {
+//     if let Some(connection) = self.storage.oidc_connection_by_id(&connection_id).await? {
+//         debug!("revoking access token {:?}", connection.access_token);
 
-    fn openapi_description(&self) -> &'static str {
-        "Sign out with OpenID Connect."
-    }
+//         let token = AccessToken::new(connection.access_token);
 
-    fn method(&self) -> ActionMethod {
-        ActionMethod::Post
-    }
+//         let client = subprovider.oidc_client().await?;
 
-    fn condition(
-        &self,
-        provider: &OidcProvider,
-        session: &MethodSession<OidcSession>,
-    ) -> Result<bool, ShieldError> {
-        SignOutAction::condition(provider, session)
-    }
+//         let revocation_request = match client.revoke_token(token.into()) {
+//             Ok(revocation_request) => Some(revocation_request),
+//             Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
+//             Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
+//         };
 
-    async fn forms(&self, provider: OidcProvider) -> Result<Vec<Form>, ShieldError> {
-        SignOutAction::forms(provider).await
-    }
+//         if let Some(revocation_request) = revocation_request {
+//             let mut revocation_request = revocation_request;
 
-    async fn call(
-        &self,
-        _provider: OidcProvider,
-        _session: &MethodSession<OidcSession>,
-        _request: Request,
-    ) -> Result<Response, ShieldError> {
-        // TODO: See [`OidcProvider::oidc_client`].
+//             if let Some(revocation_url_params) = subprovider.revocation_url_params {
+//                 let params =
+//                     parse(revocation_url_params.trim_start_matches('?').as_bytes());
 
-        // let provider = match request.provider_id {
-        //     Some(provider_id) => self.oidc_provider_by_id_or_slug(&provider_id).await?,
-        //     None => return Err(ProviderError::ProviderMissing.into()),
-        // };
+//                 for (name, value) in params {
+//                     revocation_request = revocation_request
+//                         .add_extra_param(name.into_owned(), value.into_owned());
+//                 }
+//             }
 
-        // let connection_id = {
-        //     let session_data = session.data();
-        //     let session_data = session_data
-        //         .lock()
-        //         .map_err(|err| SessionError::Lock(err.to_string()))?;
-
-        //     session_data.oidc_connection_id.clone()
-        // };
-
-        // if let Some(connection_id) = connection_id {
-        //     if let Some(connection) = self.storage.oidc_connection_by_id(&connection_id).await? {
-        //         debug!("revoking access token {:?}", connection.access_token);
-
-        //         let token = AccessToken::new(connection.access_token);
-
-        //         let client = subprovider.oidc_client().await?;
-
-        //         let revocation_request = match client.revoke_token(token.into()) {
-        //             Ok(revocation_request) => Some(revocation_request),
-        //             Err(openidconnect::ConfigurationError::MissingUrl("revocation")) => None,
-        //             Err(err) => return Err(ConfigurationError::Invalid(err.to_string()).into()),
-        //         };
-
-        //         if let Some(revocation_request) = revocation_request {
-        //             let mut revocation_request = revocation_request;
-
-        //             if let Some(revocation_url_params) = subprovider.revocation_url_params {
-        //                 let params =
-        //                     parse(revocation_url_params.trim_start_matches('?').as_bytes());
-
-        //                 for (name, value) in params {
-        //                     revocation_request = revocation_request
-        //                         .add_extra_param(name.into_owned(), value.into_owned());
-        //                 }
-        //             }
-
-        //             revocation_request
-        //                 .request_async(async_http_client)
-        //                 .await
-        //                 .map_err(|err| ShieldError::Request(err.to_string()))?;
-        //         }
-        //     }
-        // }
-
-        Ok(Response::new(ResponseType::Default).session_action(SessionAction::Unauthenticate))
-    }
-}
-
-erased_action!(OidcSignOutAction);
+//             revocation_request
+//                 .request_async(async_http_client)
+//                 .await
+//                 .map_err(|err| ShieldError::Request(err.to_string()))?;
+//         }
+//     }
+// }
