@@ -3591,9 +3591,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_router"
-version = "0.8.12"
+version = "0.8.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35058d4096407b8369843b5b5d227588dfd57ecc9e9bda0567523f084dce69e8"
+checksum = "c15158449162e099e2273442f7fd9b924f5cefd935d52af5755ec62aa819fa52"
 dependencies = [
  "any_spawner",
  "either_of",
@@ -4085,7 +4085,7 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51e219e79014df21a225b1860a479e2dcd7cbd9130f4defd4bd0e191ea31d67d"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.21.7",
  "chrono",
  "getrandom 0.2.16",
  "http 1.4.0",
@@ -7738,7 +7738,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
