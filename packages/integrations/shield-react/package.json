@@ -17,7 +17,7 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "@hey-api/openapi-ts": "^0.94.0"
+        "@hey-api/openapi-ts": "^0.95.0"
     },
     "peerDependencies": {
         "@tanstack/react-query": "5.x",
