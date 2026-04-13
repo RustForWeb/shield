@@ -63,7 +63,7 @@ jobs:
               run: git reset --hard && git pull
 
             - name: Tag
-              uses: actions/github-script@v8
+              uses: actions/github-script@v9
               env:
                   GIT_TAG: ${{ steps.extract-version.outputs.VERSION }}
                   GIT_SHA: ${{ steps.commit.outputs.sha }}
