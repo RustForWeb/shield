@@ -19,6 +19,6 @@
     },
     "peerDependencies": {
         "@tanstack/react-query": "5.x",
-        "react-router": "7.x"
+        "react-router": "^7.15.0"
     }
 }
