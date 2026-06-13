@@ -194,6 +194,11 @@ impl TryFrom<oauth_provider::Model> for OauthProvider {
             revocation_url: value.revocation_url,
             revocation_url_params: value.revocation_url_params,
             pkce_code_challenge: value.pkce_code_challenge.into(),
+            user_url: value.user_url,
+            user_path: value.user_path,
+            user_id_path: value.user_id_path.unwrap_or("id".to_owned()),
+            user_email_path: value.user_email_path.unwrap_or("email".to_owned()),
+            user_name_path: value.user_name_path.unwrap_or("name".to_owned()),
         })
     }
 }
