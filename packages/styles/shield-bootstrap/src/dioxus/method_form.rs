@@ -37,7 +37,7 @@ pub fn MethodForm(props: MethodFormProps) -> Element {
                                 .values()
                                 .into_iter()
                                 .filter_map(|(key, value)| match value {
-                                    FormValue::Text(value) => Some((key, value)),
+                                    FormValue::Text(value) => if value.is_empty() { None } else { Some((key, value)) },
                                     FormValue::File(_) => None,
                                 })
                                 .collect::<HashMap<String, String>>()

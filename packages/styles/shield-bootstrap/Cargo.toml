@@ -23,3 +23,4 @@ serde_json = { workspace = true, optional = true }
 shield.workspace = true
 shield-dioxus = { workspace = true, optional = true }
 shield-leptos = { workspace = true, optional = true }
+web-sys = { workspace = true, features = ["Window", "Location"] }
