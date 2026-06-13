@@ -84,6 +84,16 @@ pub struct Model {
     pub pkce_code_challenge: OauthProviderPkceCodeChallenge,
     #[sea_orm(column_type = "Text", nullable)]
     pub icon_url: Option<String>,
+    #[sea_orm(column_type = "Text")]
+    pub user_url: String,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub user_path: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub user_id_path: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub user_email_path: Option<String>,
+    #[sea_orm(column_type = "Text", nullable)]
+    pub user_name_path: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -7,6 +7,7 @@ use oauth2::{
     url::form_urlencoded::parse,
 };
 use secrecy::SecretString;
+use serde_json::Value;
 use shield::{
     ConfigurationError, CreateEmailAddress, CreateUser, Form, MethodAction, MethodSession, Request,
     RequestMethod, Response, ResponseType, SessionAction, ShieldError, SignInCallbackAction,
@@ -221,14 +222,46 @@ impl<U: User + 'static> MethodAction<OauthProvider, OauthSession> for OauthSignI
             .await
             .map_err(|err| ShieldError::Request(err.to_string()))?;
 
-        // TODO: user info
-        let identifier = "";
-        let email = Some("");
-        let name = Some("");
+        let user_response = async_http_client
+            .get(&provider.user_url)
+            .bearer_auth(token_response.access_token().secret())
+            .send()
+            .await
+            .map_err(|err| ShieldError::Request(err.to_string()))?;
+
+        let user = user_response
+            .json::<Value>()
+            .await
+            .map_err(|err| ShieldError::Request(err.to_string()))?;
+
+        let user = if let Some(user_path) = &provider.user_path {
+            value_by_path(&user, user_path)?
+        } else {
+            &user
+        };
+
+        let identifier = value_by_path(user, &provider.user_id_path)?;
+        let identifier = identifier
+            .as_str()
+            .map(ToOwned::to_owned)
+            .or_else(|| identifier.as_number().map(|number| number.to_string()))
+            .ok_or_else(|| ShieldError::Request("Missing or invalid user ID.".to_owned()))?;
+
+        let email = if let Ok(email) = value_by_path(user, &provider.user_email_path) {
+            email.as_str()
+        } else {
+            None
+        };
+
+        let name = if let Ok(name) = value_by_path(user, &provider.user_name_path) {
+            name.as_str()
+        } else {
+            None
+        };
 
         let (connection, user) = match self
             .storage
-            .oauth_connection_by_identifier(&provider.id, identifier)
+            .oauth_connection_by_identifier(&provider.id, &identifier)
             .await?
         {
             Some(connection) => {
@@ -309,4 +342,20 @@ fn parse_token_response(
             .scopes()
             .map(|scopes| scopes.iter().map(|scope| scope.to_string()).collect()),
     ))
+}
+
+fn value_by_path<'a>(data: &'a Value, path: &str) -> Result<&'a Value, ShieldError> {
+    let mut data = data;
+
+    for key in path.split(".") {
+        if let Some(value) = data.get(key) {
+            data = value;
+        } else {
+            return Err(ShieldError::Request(format!(
+                "Path `{path}` not found in JSON response."
+            )));
+        }
+    }
+
+    Ok(data)
 }

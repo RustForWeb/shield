@@ -66,6 +66,14 @@ pub struct OauthProvider {
     #[builder(default = OauthProviderPkceCodeChallenge::S256)]
     pub pkce_code_challenge: OauthProviderPkceCodeChallenge,
     pub icon_url: Option<String>,
+    pub user_url: String,
+    pub user_path: Option<String>,
+    #[builder(default = "id")]
+    pub user_id_path: String,
+    #[builder(default = "email")]
+    pub user_email_path: String,
+    #[builder(default = "name")]
+    pub user_name_path: String,
 }
 
 impl OauthProvider {
