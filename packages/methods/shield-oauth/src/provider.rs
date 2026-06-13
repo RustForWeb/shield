@@ -1,3 +1,4 @@
+use bon::Builder;
 use oauth2::{
     AuthUrl, Client, ClientId, ClientSecret, EndpointMaybeSet, EndpointNotSet, IntrospectionUrl,
     RedirectUrl, RevocationUrl, StandardRevocableToken, TokenUrl,
@@ -37,11 +38,18 @@ pub enum OauthProviderPkceCodeChallenge {
     S256,
 }
 
-#[derive(Clone, Debug)]
+#[expect(clippy::duplicated_attributes)]
+#[derive(Builder, Clone, Debug)]
+#[builder(
+    on(String, into),
+    on(SecretString, into),
+    state_mod(vis = "pub(crate)")
+)]
 pub struct OauthProvider {
     pub id: String,
     pub name: String,
     pub slug: Option<String>,
+    #[builder(default = OauthProviderVisibility::Public)]
     pub visibility: OauthProviderVisibility,
     pub client_id: String,
     pub client_secret: Option<SecretString>,
@@ -55,6 +63,7 @@ pub struct OauthProvider {
     pub introspection_url_params: Option<String>,
     pub revocation_url: Option<String>,
     pub revocation_url_params: Option<String>,
+    #[builder(default = OauthProviderPkceCodeChallenge::S256)]
     pub pkce_code_challenge: OauthProviderPkceCodeChallenge,
     pub icon_url: Option<String>,
 }
