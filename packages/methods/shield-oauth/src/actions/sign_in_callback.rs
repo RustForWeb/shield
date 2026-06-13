@@ -225,6 +225,7 @@ impl<U: User + 'static> MethodAction<OauthProvider, OauthSession> for OauthSignI
         let user_response = async_http_client
             .get(&provider.user_url)
             .bearer_auth(token_response.access_token().secret())
+            .header("Accept", "application/json")
             .send()
             .await
             .map_err(|err| ShieldError::Request(err.to_string()))?;
