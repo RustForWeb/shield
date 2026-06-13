@@ -11,6 +11,14 @@ pub struct FormInputProps {
 pub fn FormInput(props: FormInputProps) -> Element {
     let query = use_context::<Query>();
 
+    #[cfg_attr(not(target_arch = "wasm32"), expect(unused_mut))]
+    let mut origin = use_signal(|| None::<String>);
+
+    use_effect(move || {
+        #[cfg(target_arch = "wasm32")]
+        origin.set(web_sys::window().and_then(|window| window.location().origin().ok()))
+    });
+
     rsx! {
         div {
             class: "mb-3",
@@ -30,11 +38,11 @@ pub fn FormInput(props: FormInputProps) -> Element {
                 name: props.input.name,
                 type: props.input.r#type.as_str(),
                 value: props.input.value.map(|value| match value {
-                    InputValue::Origin => "TODO: origin".to_owned(),
+                    InputValue::Origin => origin(),
                     InputValue::Query { key } => {
-                        query.get(&key).cloned().unwrap_or_default()
+                        query.get(&key).cloned()
                     },
-                    InputValue::String { value } => value.clone(),
+                    InputValue::String { value } => Some(value.clone()),
                 }),
                 placeholder: props.input.label,
             }
