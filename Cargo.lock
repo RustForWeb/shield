@@ -5023,8 +5023,10 @@ dependencies = [
  "bytes",
  "cookie 0.18.1",
  "cookie_store",
+ "encoding_rs",
  "futures-core",
  "futures-util",
+ "h2 0.4.10",
  "http 1.4.1",
  "http-body",
  "http-body-util",
@@ -5034,6 +5036,7 @@ dependencies = [
  "hyper-util",
  "js-sys",
  "log",
+ "mime",
  "mime_guess",
  "native-tls",
  "percent-encoding",
@@ -5062,9 +5065,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.13.1"
+version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04e9018c9d814e5f30cc16a0f03271aeab3571e609612d9fe78c1aa8d11c2f62"
+checksum = "219c5811de6525e5416c7d5d53bb656d3afdbc6c5af816e0802bcfa42dbdc1c3"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -6201,6 +6204,7 @@ dependencies = [
  "chrono",
  "oauth2",
  "regex",
+ "reqwest 0.12.28",
  "secrecy",
  "serde",
  "serde_json",
@@ -8323,7 +8327,7 @@ dependencies = [
  "derive_more",
  "jsonwebtoken",
  "querystring",
- "reqwest 0.13.1",
+ "reqwest 0.13.4",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

@@ -1,4 +1,4 @@
-use oauth2::reqwest::{self, redirect::Policy};
+use reqwest::{self, redirect::Policy};
 use shield::ConfigurationError;
 
 pub fn async_http_client() -> Result<reqwest::Client, ConfigurationError> {
