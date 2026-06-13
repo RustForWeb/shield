@@ -22,7 +22,7 @@ jobs:
         with:
             bump: ${{ inputs.bump }}
             bump-rust: true
-            bump-tyepscript: false
+            bump-typescript: false
             extract-version: rust
         secrets:
             app-client-id: ${{ secrets.APP_ID }}
