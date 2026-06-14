@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use serde::Deserialize;
 use shield::{
@@ -8,15 +6,12 @@ use shield::{
     SignInAction, SignUpAction, erased_method_action,
 };
 use workos::{
-    PaginationParams,
-    sso::{ConnectionId, ListConnections, ListConnectionsParams},
-    user_management::{
-        ConnectionSelector, GetAuthorizationUrl, GetAuthorizationUrlParams, ListUsers,
-        ListUsersParams, OauthProvider, Provider,
-    },
+    Client, UserManagementAuthenticationProvider,
+    sso::ListConnectionsParams,
+    user_management::{GetAuthorizationUrlParams, ListUsersParams},
 };
 
-use crate::{client::WorkosClient, options::WorkosOptions, provider::WorkosProvider};
+use crate::{options::WorkosOptions, provider::WorkosProvider};
 
 const ACTION_ID: &str = "index";
 const ACTION_NAME: &str = "Welcome";
@@ -24,18 +19,24 @@ const ACTION_NAME: &str = "Welcome";
 #[derive(Debug, Deserialize)]
 #[serde(untagged, rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum IndexData {
-    Email { email: String },
-    Oauth { oauth_provider: OauthProvider },
-    Sso { connection_id: ConnectionId },
+    Email {
+        email: String,
+    },
+    Oauth {
+        oauth_provider: UserManagementAuthenticationProvider,
+    },
+    Sso {
+        connection_id: String,
+    },
 }
 
 pub struct WorkosIndexAction {
     options: WorkosOptions,
-    client: Arc<WorkosClient>,
+    client: Client,
 }
 
 impl WorkosIndexAction {
-    pub fn new(options: WorkosOptions, client: Arc<WorkosClient>) -> Self {
+    pub fn new(options: WorkosOptions, client: Client) -> Self {
         Self { options, client }
     }
 }
@@ -66,11 +67,8 @@ impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
         let connections = self
             .client
             .sso()
-            .list_connections(&ListConnectionsParams {
-                pagination: PaginationParams {
-                    limit: Some(100),
-                    ..Default::default()
-                },
+            .list_connections(ListConnectionsParams {
+                limit: Some(100),
                 ..Default::default()
             })
             .await
@@ -131,10 +129,22 @@ impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
                                 value: format!(
                                     "Continue with {}",
                                     match oauth_provider {
-                                        OauthProvider::AppleOAuth => "Apple",
-                                        OauthProvider::GithubOAuth => "GitHub",
-                                        OauthProvider::GoogleOAuth => "Google",
-                                        OauthProvider::MicrosoftOAuth => "Microsoft",
+                                        UserManagementAuthenticationProvider::Authkit => "Authkit".to_owned(),
+                                        UserManagementAuthenticationProvider::AppleOAuth => "Apple".to_owned(),
+                                        UserManagementAuthenticationProvider::BitbucketOAuth => "Bitbucket".to_owned(),
+                                        UserManagementAuthenticationProvider::GitHubOAuth => "GitHub".to_owned(),
+                                        UserManagementAuthenticationProvider::GitLabOAuth => "GitLab".to_owned(),
+                                        UserManagementAuthenticationProvider::GoogleOAuth => "Google".to_owned(),
+                                        UserManagementAuthenticationProvider::IntuitOAuth => "Intuit".to_owned(),
+                                        UserManagementAuthenticationProvider::LinkedInOAuth => "LinkedIn".to_owned(),
+                                        UserManagementAuthenticationProvider::MicrosoftOAuth => "Microsoft".to_owned(),
+                                        UserManagementAuthenticationProvider::SalesforceOAuth => "Salesforce".to_owned(),
+                                        UserManagementAuthenticationProvider::SlackOAuth => "Slack".to_owned(),
+                                        UserManagementAuthenticationProvider::VercelMarketplaceOAuth => "Vercel Marketplace".to_owned(),
+                                        UserManagementAuthenticationProvider::VercelOAuth => "Vercel".to_owned(),
+                                        UserManagementAuthenticationProvider::XeroOAuth => "Xero".to_owned(),
+                                        UserManagementAuthenticationProvider::Unknown(value) => value.replace("OAuth", ""),
+                                        _ => "Unknown".to_owned()
                                     }
                                 )
                                 .to_owned(),
@@ -192,12 +202,9 @@ impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
                 let users = self
                     .client
                     .user_management()
-                    .list_users(&ListUsersParams {
-                        pagination: PaginationParams {
-                            limit: Some(1),
-                            ..Default::default()
-                        },
-                        email: Some(&email),
+                    .list_users(ListUsersParams {
+                        limit: Some(1),
+                        email: Some(email),
                         ..Default::default()
                     })
                     .await
@@ -218,17 +225,10 @@ impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
                 let authorization_url = self
                     .client
                     .user_management()
-                    .get_authorization_url(&GetAuthorizationUrlParams {
-                        client_id: &self.client.client_id(),
-                        redirect_uri: &self.options.redirect_url,
-                        connection_selector: ConnectionSelector::Provider(&Provider::Oauth(
-                            oauth_provider,
-                        )),
+                    .get_authorization_url(GetAuthorizationUrlParams {
+                        provider: Some(oauth_provider),
                         // TODO: State and code challenge.
-                        state: None,
-                        code_challenge: None,
-                        login_hint: None,
-                        domain_hint: None,
+                        ..GetAuthorizationUrlParams::new(&self.options.redirect_url)
                     })
                     .expect("TODO: handle error");
 
@@ -240,15 +240,10 @@ impl MethodAction<WorkosProvider, ()> for WorkosIndexAction {
                 let authorization_url = self
                     .client
                     .user_management()
-                    .get_authorization_url(&GetAuthorizationUrlParams {
-                        client_id: &self.client.client_id(),
-                        redirect_uri: &self.options.redirect_url,
-                        connection_selector: ConnectionSelector::Connection(&connection_id),
+                    .get_authorization_url(GetAuthorizationUrlParams {
+                        connection_id: Some(connection_id),
                         // TODO: State and code challenge.
-                        state: None,
-                        code_challenge: None,
-                        login_hint: None,
-                        domain_hint: None,
+                        ..GetAuthorizationUrlParams::new(&self.options.redirect_url)
                     })
                     .expect("TODO: handle error");
 

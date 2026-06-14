@@ -1,5 +1,4 @@
 mod actions;
-mod client;
 mod method;
 mod options;
 mod provider;
@@ -8,9 +7,6 @@ pub use method::*;
 pub use options::*;
 
 #[doc(no_inline)]
-pub use workos::{
-    ApiKey as WorkosApiKey, WorkOs as Workos, WorkOsBuilder as WorkosBuilder,
-    user_management::OauthProvider as WorkosOauthProvider,
-};
+pub use workos::{Client as Workos, UserManagementAuthenticationProvider as WorkosOauthProvider};
 
 // TODO: Support both AuthKit method and self hosted method.
