@@ -5868,6 +5868,7 @@ version = "0.3.0"
 dependencies = [
  "axum",
  "dioxus",
+ "serde",
  "shield",
  "shield-bootstrap",
  "shield-dioxus",
@@ -5875,9 +5876,7 @@ dependencies = [
  "shield-email",
  "shield-memory",
  "shield-oidc",
- "tokio",
  "tower-sessions",
- "tracing",
 ]
 
 [[package]]

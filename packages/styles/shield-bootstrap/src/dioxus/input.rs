@@ -31,7 +31,7 @@ pub fn FormInput(props: FormInputProps) -> Element {
         InputType::Button(_) | InputType::Reset(_) | InputType::Submit(_) => {
             return rsx! {
                 button {
-                    class: "btn btn-outline-primary d-flex align-items-center justify-content-center gap-1",
+                    class: "btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2",
                     name: props.input.name,
                     type: match props.input.r#type {
                         InputType::Reset(_) => "reset",

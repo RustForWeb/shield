@@ -19,7 +19,6 @@ server = [
     "dep:shield-email",
     "dep:shield-memory",
     "dep:shield-oidc",
-    "dep:tokio",
     "dep:tower-sessions",
     "dioxus/server",
     "shield-dioxus/server",
@@ -31,6 +30,7 @@ web = ["dioxus/web"]
 [dependencies]
 axum = { workspace = true, optional = true }
 dioxus = { workspace = true, features = ["fullstack", "router"] }
+serde.workspace = true
 shield.workspace = true
 shield-bootstrap = { workspace = true, features = ["dioxus"] }
 shield-dioxus.workspace = true
@@ -40,9 +40,4 @@ shield-email = { workspace = true, features = [
 ], optional = true }
 shield-memory = { workspace = true, optional = true }
 shield-oidc = { workspace = true, optional = true }
-tokio = { workspace = true, features = [
-    "macros",
-    "rt-multi-thread",
-], optional = true }
 tower-sessions = { workspace = true, optional = true }
-tracing.workspace = true
