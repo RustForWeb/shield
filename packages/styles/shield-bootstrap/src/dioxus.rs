@@ -1,5 +1,6 @@
 mod form;
 mod input;
+mod input_addon;
 mod method_form;
 
 use dioxus::prelude::*;
