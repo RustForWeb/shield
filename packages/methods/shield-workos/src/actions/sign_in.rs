@@ -1,22 +1,21 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use shield::{
     Form, Input, InputType, InputTypeEmail, InputTypeHidden, InputTypePassword, InputTypeSubmit,
     InputValue, MethodAction, MethodSession, Request, RequestMethod, Response, ResponseType,
     ShieldError, SignInAction, erased_method_action,
 };
+use workos::Client;
 
-use crate::{client::WorkosClient, provider::WorkosProvider};
+use crate::provider::WorkosProvider;
 
 pub struct WorkosSignInAction {
     // TODO: Remove expect.
     #[expect(unused)]
-    client: Arc<WorkosClient>,
+    client: Client,
 }
 
 impl WorkosSignInAction {
-    pub fn new(client: Arc<WorkosClient>) -> Self {
+    pub fn new(client: Client) -> Self {
         Self { client }
     }
 }

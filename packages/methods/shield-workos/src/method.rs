@@ -1,12 +1,9 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use shield::{Method, MethodAction, ShieldError, erased_method};
-use workos::{ApiKey, WorkOs};
+use workos::Client;
 
 use crate::{
     actions::{WorkosIndexAction, WorkosSignInAction, WorkosSignUpAction},
-    client::WorkosClient,
     options::WorkosOptions,
     provider::WorkosProvider,
 };
@@ -17,19 +14,22 @@ pub const WORKOS_METHOD_ID: &str = "workos";
 
 pub struct WorkosMethod {
     options: WorkosOptions,
-    client: Arc<WorkosClient>,
+    client: Client,
 }
 
 impl WorkosMethod {
-    pub fn new(client: WorkOs, client_id: &str, options: WorkosOptions) -> Self {
-        Self {
-            options,
-            client: Arc::new(WorkosClient::new(client, client_id)),
-        }
+    pub fn new(client: Client, options: WorkosOptions) -> Self {
+        Self { options, client }
     }
 
     pub fn from_api_key(api_key: &str, client_id: &str, options: WorkosOptions) -> Self {
-        Self::new(WorkOs::new(&ApiKey::from(api_key)), client_id, options)
+        Self::new(
+            Client::builder()
+                .api_key(api_key)
+                .client_id(client_id)
+                .build(),
+            options,
+        )
     }
 
     pub fn with_options(mut self, options: WorkosOptions) -> Self {
