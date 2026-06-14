@@ -126,4 +126,23 @@ impl OauthStorage<User> for MemoryStorage {
 
         Ok(())
     }
+
+    async fn user_oauth_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<OauthConnection>, StorageError> {
+        Ok(self
+            .oauth
+            .connections
+            .lock()
+            .map_err(|err| StorageError::Engine(err.to_string()))?
+            .iter()
+            .filter(|connection| {
+                connection.user_id == user_id
+                    && provider_id.is_none_or(|provider_id| connection.provider_id == provider_id)
+            })
+            .cloned()
+            .collect())
+    }
 }

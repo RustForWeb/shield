@@ -16,8 +16,8 @@ use utoipa::{
 #[cfg(feature = "utoipa")]
 use crate::path::{ActionPathParams, MethodActionPathParams};
 use crate::{
-    SignOutAction,
     action::{Action, ActionForms, ActionMethodForm, ActionProviderForm},
+    actions::SignOutAction,
     error::{ActionError, MethodError, ProviderError, SessionError, ShieldError},
     method::ErasedMethod,
     options::ShieldOptions,
@@ -275,6 +275,32 @@ impl<U: User> Shield<U> {
             }
             None => Ok(None),
         }
+    }
+
+    pub async fn user_connections<C: 'static>(
+        &self,
+        user: &U,
+        method_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<C>, ShieldError> {
+        let method =
+            self.method_by_id(method_id)
+                .ok_or(ShieldError::Method(MethodError::NotFound(
+                    method_id.to_owned(),
+                )))?;
+
+        let connections = method
+            .erased_user_connections(&user.id(), provider_id)
+            .await?;
+
+        Ok(connections
+            .into_iter()
+            .map(|connection| {
+                *connection
+                    .downcast::<C>()
+                    .expect("Connection should be downcast")
+            })
+            .collect())
     }
 
     #[cfg(feature = "utoipa")]

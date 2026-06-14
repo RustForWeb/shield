@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
+    OidcConnection,
     actions::{OidcSignInAction, OidcSignInCallbackAction},
     options::OidcOptions,
     provider::OidcProvider,
@@ -65,6 +66,7 @@ impl<U: User> OidcMethod<U> {
 #[async_trait]
 impl<U: User + 'static> Method for OidcMethod<U> {
     type Provider = OidcProvider;
+    type Connection = OidcConnection;
     type Session = OidcSession;
 
     fn id(&self) -> String {
@@ -99,6 +101,17 @@ impl<U: User + 'static> Method for OidcMethod<U> {
         } else {
             Ok(None)
         }
+    }
+
+    async fn user_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError> {
+        Ok(self
+            .storage
+            .user_oidc_connections(user_id, provider_id)
+            .await?)
     }
 }
 

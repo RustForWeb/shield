@@ -29,6 +29,7 @@ impl<U: User> EmailMethod<U> {
 #[async_trait]
 impl<U: User + 'static> Method for EmailMethod<U> {
     type Provider = EmailProvider;
+    type Connection = ();
     type Session = ();
 
     fn id(&self) -> String {
@@ -50,6 +51,14 @@ impl<U: User + 'static> Method for EmailMethod<U> {
 
     async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(vec![EmailProvider])
+    }
+
+    async fn user_connections(
+        &self,
+        _user_id: &str,
+        _provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError> {
+        Ok(vec![])
     }
 }
 

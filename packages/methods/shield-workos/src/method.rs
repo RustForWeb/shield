@@ -41,6 +41,7 @@ impl WorkosMethod {
 #[async_trait]
 impl Method for WorkosMethod {
     type Provider = WorkosProvider;
+    type Connection = ();
     type Session = ();
 
     fn id(&self) -> String {
@@ -60,6 +61,15 @@ impl Method for WorkosMethod {
 
     async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(vec![WorkosProvider])
+    }
+
+    async fn user_connections(
+        &self,
+        _user_id: &str,
+        _provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError> {
+        // TODO
+        Ok(vec![])
     }
 }
 
