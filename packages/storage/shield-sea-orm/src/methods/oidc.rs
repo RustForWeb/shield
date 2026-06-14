@@ -149,6 +149,25 @@ impl OidcStorage<User> for SeaOrmStorage {
             .map_err(|err| StorageError::Engine(err.to_string()))
             .map(|_| ())
     }
+
+    async fn user_oidc_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<OidcConnection>, StorageError> {
+        let mut query = oidc_provider_connection::Entity::find()
+            .filter(oidc_provider_connection::Column::UserId.eq(Self::parse_uuid(user_id)?));
+
+        if let Some(provider_id) = provider_id {
+            query = query.filter(oidc_provider_connection::Column::ProviderId.eq(provider_id));
+        }
+
+        query
+            .all(&self.database)
+            .await
+            .map_err(|err| StorageError::Engine(err.to_string()))
+            .map(|connections| connections.into_iter().map(OidcConnection::from).collect())
+    }
 }
 
 impl From<oidc_provider::OidcProviderVisibility> for OidcProviderVisibility {

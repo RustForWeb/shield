@@ -4,8 +4,7 @@ use async_trait::async_trait;
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    ErasedMethodAction,
-    action::MethodAction,
+    action::{ErasedMethodAction, MethodAction},
     error::{SessionError, ShieldError},
     provider::Provider,
 };
@@ -13,6 +12,7 @@ use crate::{
 #[async_trait]
 pub trait Method: Send + Sync {
     type Provider: Provider;
+    type Connection;
     type Session: DeserializeOwned + Serialize;
 
     fn id(&self) -> String;
@@ -40,6 +40,12 @@ pub trait Method: Send + Sync {
             .into_iter()
             .find(|provider| provider.id().as_deref() == provider_id))
     }
+
+    async fn user_connections(
+        &self,
+        user: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError>;
 }
 
 #[async_trait]
@@ -58,6 +64,12 @@ pub trait ErasedMethod: Send + Sync {
         &self,
         provider_id: Option<&str>,
     ) -> Result<Option<Box<dyn Any + Send + Sync>>, ShieldError>;
+
+    async fn erased_user_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<Box<dyn Any + Send + Sync>>, ShieldError>;
 
     fn erased_deserialize_session(
         &self,
@@ -108,6 +120,18 @@ macro_rules! erased_method {
                     provider
                         .map(|provider| Box::new(provider) as Box<dyn std::any::Any + Send + Sync>)
                 })
+            }
+
+            async fn erased_user_connections(
+                &self,
+                user_id: &str,
+                provider_id: Option<&str>,
+            ) -> Result<Vec<Box<dyn std::any::Any + Send + Sync>>, $crate::ShieldError> {
+                Ok(self.user_connections(user_id, provider_id)
+                    .await?
+                    .into_iter()
+                    .map(|connection| Box::new(connection) as Box<dyn std::any::Any + Send + Sync>)
+                    .collect())
             }
 
             fn erased_deserialize_session(

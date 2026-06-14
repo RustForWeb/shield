@@ -22,6 +22,7 @@ impl<U: User> DummyMethod<U> {
 #[async_trait]
 impl<U: User + 'static> Method for DummyMethod<U> {
     type Provider = DummyProvider;
+    type Connection = ();
     type Session = ();
 
     fn id(&self) -> String {
@@ -34,6 +35,14 @@ impl<U: User + 'static> Method for DummyMethod<U> {
 
     async fn providers(&self) -> Result<Vec<Self::Provider>, ShieldError> {
         Ok(vec![DummyProvider])
+    }
+
+    async fn user_connections(
+        &self,
+        _user_id: &str,
+        _provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError> {
+        Ok(vec![])
     }
 }
 

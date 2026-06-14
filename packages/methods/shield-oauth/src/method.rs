@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use shield::{Method, MethodAction, ShieldError, User, erased_method};
 
 use crate::{
+    OauthConnection,
     actions::{OauthSignInAction, OauthSignInCallbackAction},
     options::OauthOptions,
     provider::OauthProvider,
@@ -67,6 +68,7 @@ impl<U: User> OauthMethod<U> {
 #[async_trait]
 impl<U: User + 'static> Method for OauthMethod<U> {
     type Provider = OauthProvider;
+    type Connection = OauthConnection;
     type Session = OauthSession;
 
     fn id(&self) -> String {
@@ -101,6 +103,17 @@ impl<U: User + 'static> Method for OauthMethod<U> {
         } else {
             Ok(None)
         }
+    }
+
+    async fn user_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<Self::Connection>, ShieldError> {
+        Ok(self
+            .storage
+            .user_oauth_connections(user_id, provider_id)
+            .await?)
     }
 }
 

@@ -38,4 +38,10 @@ pub trait OidcStorage<U: User>: Storage<U> + Sync {
     ) -> Result<OidcConnection, StorageError>;
 
     async fn delete_oidc_connection(&self, connection_id: &str) -> Result<(), StorageError>;
+
+    async fn user_oidc_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<OidcConnection>, StorageError>;
 }

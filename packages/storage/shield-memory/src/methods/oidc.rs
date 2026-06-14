@@ -130,4 +130,23 @@ impl OidcStorage<User> for MemoryStorage {
 
         Ok(())
     }
+
+    async fn user_oidc_connections(
+        &self,
+        user_id: &str,
+        provider_id: Option<&str>,
+    ) -> Result<Vec<OidcConnection>, StorageError> {
+        Ok(self
+            .oidc
+            .connections
+            .lock()
+            .map_err(|err| StorageError::Engine(err.to_string()))?
+            .iter()
+            .filter(|connection| {
+                connection.user_id == user_id
+                    && provider_id.is_none_or(|provider_id| connection.provider_id == provider_id)
+            })
+            .cloned()
+            .collect())
+    }
 }
