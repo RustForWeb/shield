@@ -5727,7 +5727,7 @@ dependencies = [
 
 [[package]]
 name = "shield"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "bon",
@@ -5743,7 +5743,7 @@ dependencies = [
 
 [[package]]
 name = "shield-actix"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "actix-utils",
  "actix-web",
@@ -5752,7 +5752,7 @@ dependencies = [
 
 [[package]]
 name = "shield-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "serde",
@@ -5765,7 +5765,7 @@ dependencies = [
 
 [[package]]
 name = "shield-bootstrap"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "dioxus",
  "dioxus-html",
@@ -5779,7 +5779,7 @@ dependencies = [
 
 [[package]]
 name = "shield-credentials"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "serde",
@@ -5790,11 +5790,11 @@ dependencies = [
 
 [[package]]
 name = "shield-diesel"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "shield-dioxus"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "dioxus",
@@ -5806,7 +5806,7 @@ dependencies = [
 
 [[package]]
 name = "shield-dioxus-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "dioxus-server",
@@ -5817,7 +5817,7 @@ dependencies = [
 
 [[package]]
 name = "shield-dummy"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "serde",
@@ -5827,7 +5827,7 @@ dependencies = [
 
 [[package]]
 name = "shield-email"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "bon",
@@ -5844,7 +5844,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "shield",
@@ -5864,7 +5864,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-diouxs-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "dioxus",
@@ -5881,7 +5881,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-leptos-actix"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "actix-files",
  "actix-session",
@@ -5905,7 +5905,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-leptos-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "console_error_panic_hook",
@@ -5931,7 +5931,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-seaorm"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "sea-orm",
  "sea-orm-migration",
@@ -5941,7 +5941,7 @@ dependencies = [
 
 [[package]]
 name = "shield-examples-workos"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "axum",
  "dioxus",
@@ -5958,7 +5958,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "leptos",
@@ -5971,7 +5971,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos-actix"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "leptos",
@@ -5983,7 +5983,7 @@ dependencies = [
 
 [[package]]
 name = "shield-leptos-axum"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "leptos",
@@ -5995,7 +5995,7 @@ dependencies = [
 
 [[package]]
 name = "shield-memory"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -6009,7 +6009,7 @@ dependencies = [
 
 [[package]]
 name = "shield-oauth"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "bon",
@@ -6026,7 +6026,7 @@ dependencies = [
 
 [[package]]
 name = "shield-oidc"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "bon",
@@ -6044,7 +6044,7 @@ dependencies = [
 
 [[package]]
 name = "shield-sea-orm"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -6063,11 +6063,11 @@ dependencies = [
 
 [[package]]
 name = "shield-sqlx"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "shield-tower"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "http 1.4.2",
@@ -6079,11 +6079,11 @@ dependencies = [
 
 [[package]]
 name = "shield-webauthn"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "shield-workos"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "bon",
