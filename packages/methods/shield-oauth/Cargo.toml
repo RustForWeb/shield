@@ -13,8 +13,8 @@ ignored = ["serde_json"]
 
 [features]
 default = ["rustls"]
-native-tls = ["oauth2/native-tls"]
-rustls = ["oauth2/rustls-tls"]
+native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
+rustls = ["oauth2/rustls-tls", "reqwest/rustls-tls"]
 
 [dependencies]
 async-trait.workspace = true
@@ -25,7 +25,12 @@ oauth2 = { version = "5.0.0", default-features = false, features = [
     "reqwest",
 ] }
 regex.workspace = true
-reqwest = { version = "0.12.28", features = ["json"] }
+reqwest = { version = "0.12.28", default-features = false, features = [
+    "charset",
+    "http2",
+    "json",
+    "system-proxy",
+] }
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
