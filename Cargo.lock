@@ -8096,9 +8096,9 @@ dependencies = [
 
 [[package]]
 name = "workos"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba5938cd40832fb8b93a87c2a3e85784bc9be117c707b7c4f7a9ab6f7bcecb9f"
+checksum = "2173e35d6536d55599fc92642389d85c09d2eaf8b0d1977606c89ea02a8c44c1"
 dependencies = [
  "aes-gcm",
  "async-trait",
