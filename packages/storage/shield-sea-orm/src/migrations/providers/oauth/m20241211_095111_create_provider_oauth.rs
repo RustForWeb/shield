@@ -40,6 +40,7 @@ impl MigrationTrait for Migration {
                     )
                     .await?;
             }
+            backend => unimplemented!("unsupported database backend `{backend:?}`"),
         }
 
         manager
@@ -66,6 +67,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => {
                                 column.custom(OauthProviderType::Table).into_column_def()
                             }
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .col({
@@ -83,6 +85,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => column
                                 .custom(OauthProviderVisibility::Table)
                                 .into_column_def(),
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .col(ColumnDef::new(OauthProvider::ClientId).text().not_null())
@@ -112,6 +115,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => column
                                 .custom(OauthProviderPkceCodeChallenge::Table)
                                 .into_column_def(),
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .to_owned(),
@@ -227,6 +231,7 @@ impl MigrationTrait for Migration {
                     .drop_type(Type::drop().name(OauthProviderType::Table).to_owned())
                     .await?;
             }
+            backend => unimplemented!("unsupported database backend `{backend:?}`"),
         }
 
         Ok(())

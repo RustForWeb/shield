@@ -22,6 +22,7 @@ impl BaseTable {
                     .default(match manager.get_database_backend() {
                         DatabaseBackend::MySql | DatabaseBackend::Sqlite => Expr::cust("(uuid())"),
                         DatabaseBackend::Postgres => PgFunc::gen_random_uuid().into(),
+                        backend => unimplemented!("unsupported database backend `{backend:?}`"),
                     }),
             )
             .col(
