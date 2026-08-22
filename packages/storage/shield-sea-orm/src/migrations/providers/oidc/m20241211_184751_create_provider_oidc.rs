@@ -40,6 +40,7 @@ impl MigrationTrait for Migration {
                     )
                     .await?;
             }
+            backend => unimplemented!("unsupported database backend `{backend:?}`"),
         }
 
         manager
@@ -63,6 +64,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => {
                                 column.custom(OidcProviderType::Table).into_column_def()
                             }
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .col({
@@ -80,6 +82,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => column
                                 .custom(OidcProviderVisibility::Table)
                                 .into_column_def(),
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .col(ColumnDef::new(OidcProvider::ClientId).text().not_null())
@@ -114,6 +117,7 @@ impl MigrationTrait for Migration {
                             DatabaseBackend::Postgres => column
                                 .custom(OidcProviderPkceCodeChallenge::Table)
                                 .into_column_def(),
+                            backend => unimplemented!("unsupported database backend `{backend:?}`"),
                         }
                     })
                     .to_owned(),
@@ -226,6 +230,7 @@ impl MigrationTrait for Migration {
                     .drop_type(Type::drop().name(OidcProviderType::Table).to_owned())
                     .await?;
             }
+            backend => unimplemented!("unsupported database backend `{backend:?}`"),
         }
 
         Ok(())
