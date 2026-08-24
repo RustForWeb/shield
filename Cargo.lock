@@ -4425,7 +4425,7 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51e219e79014df21a225b1860a479e2dcd7cbd9130f4defd4bd0e191ea31d67d"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.21.7",
  "chrono",
  "getrandom 0.2.16",
  "http 1.5.0",
@@ -8392,9 +8392,9 @@ dependencies = [
 
 [[package]]
 name = "workos"
-version = "3.1.0"
+version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f5dc32aae3cc627ec05958339aafd37cdfaf110122cc207f6ea19024fbe61c9"
+checksum = "c3ae653d785fcbe7ddbe6a7cbdfd7f174df36074d5c289e5e151a87ae93f4d96"
 dependencies = [
  "aes-gcm",
  "async-trait",
