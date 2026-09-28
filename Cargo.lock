@@ -6223,7 +6223,6 @@ dependencies = [
 name = "shield-actix"
 version = "0.4.0"
 dependencies = [
- "actix-utils",
  "actix-web",
  "shield",
 ]
