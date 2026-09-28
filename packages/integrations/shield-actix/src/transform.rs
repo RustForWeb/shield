@@ -1,4 +1,5 @@
-use actix_utils::future::{Ready, ready};
+use std::future::{Ready, ready};
+
 use actix_web::{
     Error,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},

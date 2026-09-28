@@ -10,6 +10,5 @@ version.workspace = true
 
 [dependencies]
 # actix-session.workspace = true
-actix-utils.workspace = true
 actix-web.workspace = true
 shield.workspace = true
