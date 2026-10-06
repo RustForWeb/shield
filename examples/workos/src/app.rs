@@ -1,3 +1,5 @@
+#![expect(clippy::redundant_field_names)]
+
 use dioxus::{document::Stylesheet, prelude::*};
 use shield_dioxus::ShieldRouter;
 
