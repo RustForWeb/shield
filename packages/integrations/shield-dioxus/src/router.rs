@@ -1,3 +1,5 @@
+#![expect(unreachable_code)]
+
 use dioxus::prelude::*;
 
 use crate::routes::Action;
